@@ -41,6 +41,14 @@ por **CDN jsDelivr** com **versões fixas** (sufixo `/+esm`), sem dependência d
 `node_modules`. O processamento pesado roda em um **Web Worker** (com fallback
 para a thread principal), com pausar / retomar / parar.
 
+A interface tem layout **responsivo** com tema **claro/escuro** (alternância
+manual persistida em `localStorage` e respeito a `prefers-color-scheme`, sem flash
+ao carregar). O header traz navegação, link para o GitHub e botão de apoio; a
+primeira dobra tem um hero e a ferramenta em um card único com 3 etapas (modos,
+upload e ajustes). Modos e presets menos usados ficam em **Configurações
+avançadas**. O apoio via Pix fica centralizado em um modal (QR Code, chave e
+copiar), acessível por qualquer botão "Apoiar".
+
 > Se o CDN (jsDelivr) for bloqueado por rede ou proxy, as bibliotecas externas
 > podem não carregar.
 

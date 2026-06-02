@@ -32,6 +32,17 @@
     <link rel="icon" href="./src/assets/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="./src/assets/apple-touch-icon.png" />
 
+    <!-- Define o tema antes do CSS para evitar flash (FOUC). -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("comprimirpdf-theme");
+          if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+
     <link rel="stylesheet" href="./src/css/style.css" />
 
     <!-- ===================== Dados estruturados ====================== -->
@@ -120,76 +131,145 @@
     </script>
   </head>
   <body>
-    <div class="app">
-      <!-- ============================ CABECALHO ============================ -->
-      <header class="app-header">
-        <div class="brand">
+    <!-- ============================ HEADER ============================ -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="./" aria-label="Comprimir PDFs — início">
           <span class="brand__logo" aria-hidden="true">PDF</span>
-          <div class="brand__text">
-            <h1>Comprimir PDF Online Grátis</h1>
-            <p>Reduza o tamanho dos seus PDFs e junte vários arquivos diretamente no navegador, com privacidade.</p>
-          </div>
-        </div>
+          <span class="brand__name">Comprimir PDFs</span>
+        </a>
+
+        <nav class="site-nav" id="siteNav" aria-label="Navegação principal">
+          <a href="#como-usar">Como usar</a>
+          <a href="#privacidade">Privacidade</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+
         <div class="header-actions">
-          <div class="privacy-pill" title="Processamento local">
-            <span aria-hidden="true">🔒</span>
-            <span><strong>100% local no navegador</strong><small>Nenhum arquivo enviado</small></span>
-          </div>
+          <a class="btn btn--ghost btn--sm header-github" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">
+            <svg class="ico" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            Ver no GitHub
+          </a>
+          <button class="btn btn--coffee btn--sm header-support" type="button" data-open-pix>
+            <span aria-hidden="true">❤</span> <span class="hide-sm">Apoiar projeto</span><span class="only-sm">Apoiar</span>
+          </button>
           <button id="themeToggle" class="icon-btn" type="button" aria-label="Alternar tema">
             <span class="theme-icon theme-icon--dark">🌙</span>
             <span class="theme-icon theme-icon--light">☀️</span>
           </button>
+          <button id="navToggle" class="icon-btn nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">☰</button>
         </div>
-      </header>
+      </div>
+    </header>
 
+    <main class="app">
       <div id="banner" class="banner" role="alert" hidden></div>
 
-      <!-- aviso de privacidade -->
-      <section class="notice notice--privacy">
-        <span class="notice__icon" aria-hidden="true">🔒</span>
-        <div>
-          <strong>Privacidade garantida no navegador</strong>
-          <p>O <b>Comprimir PDF</b> processa os arquivos diretamente no seu navegador. Nenhum PDF é enviado para servidores, nenhuma cópia é armazenada e o conteúdo dos documentos não é acessado por terceiros.</p>
-          <div class="badges">
-            <span class="badge badge--green">100% local no navegador</span>
-            <span class="badge badge--blue">Nenhum arquivo enviado</span>
+      <!-- ============================== HERO ============================== -->
+      <section class="hero">
+        <div class="hero__text">
+          <h1>Comprimir PDF<br />Online Grátis</h1>
+          <p class="hero__lead">Reduza o tamanho dos seus PDFs e junte vários arquivos em um só. Tudo acontece localmente no seu navegador, com total privacidade.</p>
+          <div class="hero__badges">
+            <span class="hero-badge hero-badge--green">🔒 100% local no navegador</span>
+            <span class="hero-badge hero-badge--green">🛡️ Nenhum arquivo enviado</span>
+          </div>
+          <div class="hero__actions">
+            <button class="btn btn--primary btn--lg" type="button" data-pick-files><span class="btn__icon">⬆️</span> Selecionar PDFs</button>
+            <a class="btn btn--ghost btn--lg header-github" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">
+              <svg class="ico" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              Ver código no GitHub
+            </a>
+          </div>
+        </div>
+        <div class="hero__art" aria-hidden="true">
+          <div class="hero-illustration">
+            <div class="pdf-card pdf-card--big">
+              <span class="pdf-card__tag">PDF</span>
+              <span class="pdf-card__lines"></span>
+              <span class="pdf-card__size">25.4 MB</span>
+            </div>
+            <span class="hero-arrow">→</span>
+            <div class="pdf-card pdf-card--small">
+              <span class="pdf-card__tag">PDF</span>
+              <span class="pdf-card__lines"></span>
+              <span class="pdf-card__size pdf-card__size--green">5.1 MB</span>
+            </div>
+            <span class="spark spark--1">✦</span>
+            <span class="spark spark--2">✦</span>
+            <span class="spark spark--3">✦</span>
           </div>
         </div>
       </section>
 
-      <!-- ============= APOIO PIX + GITHUB (primeira dobra) ============= -->
-      <div class="fold-extras">
-        <section class="card support-card" aria-labelledby="support-title">
-          <div class="support-content">
-            <span class="support-badge">Projeto gratuito</span>
-            <h2 id="support-title">Este site te ajudou?</h2>
-            <p>Se quiser apoiar o desenvolvimento e a manutenção do projeto, qualquer valor é bem-vindo. Até R$ 1 já ajuda simbolicamente a manter a ferramenta online.</p>
-            <button type="button" class="btn btn--coffee support-button" data-open-pix>☕ Apoiar com Pix</button>
-            <p class="support-note">Antes de concluir o Pix, confira se os dados exibidos são de Marcos Guimarães Duailibi Filho.</p>
+      <!-- ===================== FERRAMENTA (card único) ===================== -->
+      <section class="card tool-card">
+        <!-- Etapa 1 -->
+        <div class="step-block">
+          <h2 class="step-title"><span class="step-num">1</span> Escolha o que deseja fazer</h2>
+          <div class="modes" id="modes" role="radiogroup" aria-label="Modo de operação"></div>
+        </div>
+
+        <!-- Etapa 2 -->
+        <div class="step-block">
+          <h2 class="step-title"><span class="step-num">2</span> Adicione seus PDFs</h2>
+          <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Arraste seus PDFs aqui ou clique para selecionar">
+            <div class="dropzone__icon" aria-hidden="true">☁️</div>
+            <p class="dropzone__title" id="dropTitle">Arraste seus PDFs aqui ou clique para selecionar</p>
+            <p class="dropzone__hint">Seus arquivos nunca saem do seu navegador.</p>
+            <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden multiple />
           </div>
-        </section>
+        </div>
 
-        <section class="card trust-card" aria-labelledby="trust-title">
-          <h2 id="trust-title">Código aberto para verificação</h2>
-          <p>Este projeto é aberto para consulta. Você pode verificar o código no GitHub e conferir como os PDFs são processados localmente no navegador.</p>
-          <a class="btn btn--ghost" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Ver código no GitHub ↗</a>
-        </section>
-      </div>
+        <!-- Etapa 3 -->
+        <div class="step-block" id="configCard">
+          <h2 class="step-title"><span class="step-num">3</span> Ajustes de compressão</h2>
+          <span class="field-label">Nível de compressão</span>
+          <div class="presets" id="presets" role="radiogroup" aria-label="Preset de compressão"></div>
 
-      <!-- ===================== MODOS ===================== -->
-      <section class="card" id="modeCard">
-        <h2 class="card__title">O que você deseja fazer?</h2>
-        <div class="modes" id="modes" role="radiogroup" aria-label="Modo de operação"></div>
-        <p class="mode-help" id="modeHelp">Juntar e depois comprimir costuma ser mais simples e recomendado para a maioria dos casos. Comprimir cada PDF antes de juntar pode ser útil quando os arquivos são muito diferentes, mas pode demorar mais.</p>
-      </section>
+          <div class="quality">
+            <div class="control__head">
+              <label for="qualityRange">Qualidade das imagens <span class="info" title="A qualidade das imagens é o ajuste que mais influencia o tamanho final do PDF.">ⓘ</span></label>
+              <strong id="qualityValue">50%</strong>
+            </div>
+            <input type="range" id="qualityRange" min="1" max="100" value="50" />
+            <div class="control__scale"><span>Menor qualidade</span><span>Maior qualidade</span></div>
+            <p class="control__hint" id="qualityHint">Equilíbrio entre tamanho menor e qualidade aceitável.</p>
+            <p class="control__warn" id="qualityWarn" hidden></p>
+          </div>
 
-      <!-- ===================== UPLOAD ===================== -->
-      <section class="card" id="uploadCard">
-        <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Arraste seus PDFs aqui ou clique para escolher">
-          <div class="dropzone__icon" aria-hidden="true">📄⬆️</div>
-          <p class="dropzone__title" id="dropTitle">Arraste seus PDFs aqui ou clique para escolher</p>
-          <p class="dropzone__hint">🔒 Os arquivos serão processados somente no seu navegador. Nenhum PDF será enviado para servidores.</p>
-          <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden multiple />
+          <details class="advanced">
+            <summary>Configurações avançadas</summary>
+            <div class="advanced__body">
+              <div class="field">
+                <span class="field-label">Modo avançado</span>
+                <div class="modes modes--adv" id="modesAdvanced" role="radiogroup" aria-label="Modos avançados"></div>
+              </div>
+              <div class="field">
+                <span class="field-label">Preset avançado</span>
+                <div class="presets" id="presetsAdvanced" role="radiogroup" aria-label="Presets avançados"></div>
+              </div>
+              <div class="field control control--passes">
+                <label for="passesValue">Passadas <span class="info" title="Cada passada é uma nova tentativa de compressão aplicada ao PDF. Mais passadas podem reduzir um pouco mais o tamanho, mas aumentam o tempo de processamento.">ⓘ</span></label>
+                <div class="stepper">
+                  <button id="passesMinus" class="stepper__btn" type="button" aria-label="Diminuir passadas">−</button>
+                  <input type="number" id="passesValue" min="1" max="5" value="2" inputmode="numeric" />
+                  <button id="passesPlus" class="stepper__btn" type="button" aria-label="Aumentar passadas">+</button>
+                </div>
+                <p class="control__hint" id="passesHint">Recomendada — equilíbrio.</p>
+                <p class="control__warn" id="passesWarn" hidden></p>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Acao -->
+        <div class="tool-action">
+          <button id="startBtn" class="btn btn--primary btn--lg" type="button" disabled>
+            <span class="btn__icon">⚡</span><span id="startBtnLabel">Selecione PDFs para continuar</span>
+          </button>
+          <p class="tool-micro">🔒 O processamento é feito somente no seu dispositivo. Nenhum PDF será enviado para servidores.</p>
         </div>
       </section>
 
@@ -208,39 +288,6 @@
         <ul class="file-list" id="fileList"></ul>
       </section>
 
-      <!-- ===================== CONFIGURACOES ===================== -->
-      <section class="card" id="configCard" hidden>
-        <h2 class="card__title">Configurações de compressão</h2>
-        <div class="presets" id="presets" role="radiogroup" aria-label="Preset de compressão"></div>
-
-        <div class="controls-grid">
-          <div class="control">
-            <div class="control__head">
-              <label for="qualityRange">Qualidade das imagens: <strong id="qualityValue">50%</strong></label>
-            </div>
-            <input type="range" id="qualityRange" min="1" max="100" value="50" />
-            <div class="control__scale"><span>Baixa</span><span>Alta</span></div>
-            <p class="control__micro">A qualidade das imagens é o ajuste que mais influencia o tamanho final do PDF.</p>
-            <p class="control__hint" id="qualityHint">Equilíbrio entre tamanho menor e qualidade aceitável.</p>
-            <p class="control__warn" id="qualityWarn" hidden></p>
-          </div>
-
-          <div class="control control--passes">
-            <label for="passesValue">Passadas
-              <span class="info" id="passesTip" title="Cada passada é uma nova tentativa de compressão aplicada ao PDF. Mais passadas podem reduzir um pouco mais o tamanho, mas aumentam o tempo de processamento. O ganho costuma ser menor a cada nova passada.">ⓘ</span>
-            </label>
-            <div class="stepper">
-              <button id="passesMinus" class="stepper__btn" type="button" aria-label="Diminuir passadas">−</button>
-              <input type="number" id="passesValue" min="1" max="5" value="2" inputmode="numeric" />
-              <button id="passesPlus" class="stepper__btn" type="button" aria-label="Aumentar passadas">+</button>
-            </div>
-            <p class="control__micro">Passadas ajudam em alguns PDFs, mas normalmente comprimem menos do que reduzir a qualidade das imagens.</p>
-            <p class="control__hint" id="passesHint">Recomendada — equilíbrio.</p>
-            <p class="control__warn" id="passesWarn" hidden></p>
-          </div>
-        </div>
-      </section>
-
       <!-- ===================== RESUMO ===================== -->
       <section class="card notice notice--info" id="summaryCard" hidden>
         <span class="notice__icon" aria-hidden="true">📋</span>
@@ -249,14 +296,6 @@
           <div class="summary-grid" id="summaryGrid"></div>
           <p class="muted small">A redução final depende da quantidade de imagens existentes nos PDFs.</p>
         </div>
-      </section>
-
-      <!-- ===================== ACAO ===================== -->
-      <section class="card action-card" id="actionCard">
-        <button id="startBtn" class="btn btn--primary btn--lg" type="button" disabled>
-          <span class="btn__icon">⚡</span><span id="startBtnLabel">Selecione PDFs para continuar</span>
-        </button>
-        <p class="control__microcopy">Ao clicar, o processamento será feito somente no navegador.</p>
       </section>
 
       <!-- ===================== PROGRESSO ===================== -->
@@ -298,48 +337,44 @@
           <a id="downloadBtn" class="btn btn--primary btn--lg" download><span class="btn__icon">⬇️</span> Baixar PDF final</a>
           <button id="processAgainBtn" class="btn btn--ghost" type="button">Processar novamente</button>
           <button id="changeOrderBtn" class="btn btn--ghost" type="button" hidden>Alterar ordem dos PDFs</button>
-          <button class="btn btn--ghost" type="button" data-donate>Apoiar o projeto ☕</button>
-        </div>
-        <div class="result__support">
-          <p>Se esta ferramenta te ajudou, considere contribuir com qualquer valor para manter o projeto ativo.</p>
-          <button class="btn btn--coffee" type="button" data-donate>Apoiar com Pix</button>
+          <button class="btn btn--ghost" type="button" data-open-pix>Apoiar o projeto ☕</button>
         </div>
       </section>
 
-      <!-- ===================== DOACAO (secao) ===================== -->
-      <section class="card donation" id="donationCard">
-        <h2 class="card__title">☕ Apoie o projeto</h2>
-        <p>O <b>Comprimir PDF</b> é gratuito, funciona direto no navegador e é mantido de forma independente.</p>
-        <p class="muted">Se a ferramenta te ajudou, você pode contribuir com qualquer valor via Pix. A doação é voluntária e simbólica — pode ser até <b>R$ 1</b> para ajudar no cafezinho e incentivar a continuidade do desenvolvimento.</p>
-
-        <div class="donation-grid">
-          <div class="donation-qr">
-            <p class="small">Escaneie o QR Code no app do seu banco e escolha o valor que deseja contribuir.</p>
-            <img id="pixQr" class="qr-img" alt="QR Code Pix para apoiar o projeto Comprimir PDF" />
-            <p id="pixQrError" class="control__warn" hidden>Não foi possível carregar a imagem do QR Code. Use a chave Pix ou o Pix Copia e Cola exibidos abaixo.</p>
-            <p class="small muted">Por segurança, antes de confirmar, verifique se o recebedor é <b id="pixNameInline">Marcos Guimarães Duailibi Filho</b> e se a chave Pix é a chave aleatória <code data-pix-key></code>.</p>
-          </div>
-
-          <div class="donation-data">
-            <div class="confere">
-              <strong>Confira antes de doar</strong>
-              <ul>
-                <li>Nome do recebedor: <b id="pixName"></b></li>
-                <li>Instituição: <b id="pixBank"></b></li>
-                <li>Tipo de chave: <b id="pixKeyType"></b></li>
-                <li>Chave Pix: <code data-pix-key></code></li>
-              </ul>
-              <p class="small">Se o app do banco mostrar dados diferentes, não confirme o pagamento.</p>
-            </div>
-            <div class="donation-buttons">
-              <button class="btn btn--ghost" id="copyPixKeyBtn" type="button">Copiar chave Pix</button>
-              <button class="btn btn--coffee" id="copyPixPayloadBtn" type="button">Copiar Pix Copia e Cola</button>
-            </div>
-            <label class="check-visual"><input type="checkbox" /> Entendi que devo conferir os dados no app do banco antes de confirmar.</label>
-          </div>
+      <!-- ============= CARDS: CÓDIGO ABERTO + APOIO PIX ============= -->
+      <section class="info-cards">
+        <div class="card trust-card">
+          <div class="info-card__icon info-card__icon--blue">&lt;/&gt;</div>
+          <h2>Código aberto para verificação</h2>
+          <p>Este projeto é aberto para consulta. Você pode verificar o código no GitHub e conferir como os PDFs são processados localmente.</p>
+          <a class="btn btn--ghost" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Ver no GitHub ↗</a>
         </div>
+        <div class="card support-card">
+          <div class="info-card__icon info-card__icon--coffee">❤</div>
+          <h2>Apoie o projeto</h2>
+          <p>Se esta ferramenta te ajuda, considere apoiar com qualquer valor via Pix. Sua doação ajuda a manter e melhorar o projeto.</p>
+          <button class="btn btn--coffee" type="button" data-open-pix><span aria-hidden="true">❤</span> Apoiar com Pix</button>
+        </div>
+      </section>
 
-        <p class="notice notice--warn small">⚠️ Antes de confirmar a doação, confira no aplicativo do banco se o recebedor aparece como <b>Marcos Guimarães Duailibi Filho</b> e se a chave Pix corresponde à chave aleatória informada no site. Use apenas os dados exibidos nesta página. Não envie Pix para nomes, chaves ou contas diferentes.</p>
+      <!-- ===================== BENEFÍCIOS ===================== -->
+      <section class="benefits" aria-label="Benefícios">
+        <div class="benefit benefit--optional">
+          <div class="benefit__icon">🚀</div>
+          <div><b>Como funciona</b><p>Selecione, ajuste e processe. Em segundos, baixe seu PDF comprimido ou unido.</p></div>
+        </div>
+        <div class="benefit">
+          <div class="benefit__icon">🛡️</div>
+          <div><b>Privacidade</b><p>Todo o processamento é feito 100% localmente. Seus PDFs não são enviados a servidores.</p></div>
+        </div>
+        <div class="benefit">
+          <div class="benefit__icon">💻</div>
+          <div><b>Sem instalação</b><p>Funciona direto no navegador, em qualquer dispositivo. Sem instalar nada.</p></div>
+        </div>
+        <div class="benefit">
+          <div class="benefit__icon">⚡</div>
+          <div><b>Grátis e rápido</b><p>Ferramenta gratuita, simples e leve para o dia a dia.</p></div>
+        </div>
       </section>
 
       <!-- ===================== SOBRE / SEO ===================== -->
@@ -360,8 +395,6 @@
         </ol>
         <h3 class="subhead">Como juntar PDFs</h3>
         <p>Selecione vários arquivos, organize a ordem desejada arrastando ou usando as setas e gere um único PDF unido. Você também pode unir e comprimir na mesma operação.</p>
-        <h3 class="subhead">Por que usar este compressor de PDF</h3>
-        <p>É grátis, não exige instalação nem cadastro, funciona no computador e no celular e processa tudo localmente — seus PDFs não saem do navegador.</p>
       </section>
 
       <!-- ===================== PRIVACIDADE ===================== -->
@@ -377,21 +410,14 @@
       <section class="card verification-section" id="como-verificar">
         <h2 class="card__title">Como verificar o código que roda no seu navegador</h2>
         <p>Este site foi criado para funcionar diretamente no navegador. Os arquivos PDF não são enviados para servidor. Quem quiser conferir pode verificar o código público no GitHub e também inspecionar os arquivos carregados pelo navegador.</p>
-
         <h3 class="subhead">1. Ver o código no GitHub</h3>
         <p>Acesse o repositório público e confira os arquivos HTML, CSS e JavaScript usados no projeto.</p>
         <a class="btn btn--ghost" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Abrir repositório no GitHub ↗</a>
-
         <h3 class="subhead">2. Conferir os arquivos carregados no navegador</h3>
         <p>No computador, pressione F12 ou clique com o botão direito na página e escolha “Inspecionar”. Depois, abra a aba “Network” ou “Rede” e recarregue a página para ver quais arquivos foram carregados.</p>
-
         <h3 class="subhead">3. Verificar se há envio de arquivos</h3>
         <p>Na aba “Network/Rede”, selecione um PDF e use a ferramenta. Observe se existe alguma requisição enviando seu arquivo para servidor. A proposta do projeto é processar tudo localmente no navegador.</p>
-
-        <h3 class="subhead">4. Conferir os scripts</h3>
-        <p>Na aba “Sources” ou “Fontes”, é possível visualizar os arquivos JavaScript carregados pela página e comparar com os arquivos publicados no GitHub.</p>
-
-        <h3 class="subhead">5. Bibliotecas externas</h3>
+        <h3 class="subhead">4. Bibliotecas externas</h3>
         <p>Algumas bibliotecas abertas são carregadas por CDN com versões fixas, como pdf-lib e pako. Elas são usadas para manipular PDFs diretamente no navegador.</p>
       </section>
 
@@ -399,37 +425,19 @@
       <section class="card" id="faq">
         <h2 class="card__title">Perguntas frequentes</h2>
         <div class="faq">
-          <details><summary>Como comprimir PDF online grátis?</summary><p>Selecione um ou mais PDFs, escolha comprimir, juntar ou as duas ações, aguarde o processamento no navegador e baixe o arquivo final. É gratuito e sem cadastro.</p></details>
           <details><summary>Meus arquivos PDF são enviados para algum servidor?</summary><p>Não. Todo o processamento é local, no seu navegador. Nenhum PDF é enviado, armazenado ou acessado por servidores do projeto.</p></details>
           <details><summary>Dá para juntar vários PDFs em um só?</summary><p>Sim. Selecione vários arquivos, ordene como quiser e gere um único PDF unido.</p></details>
           <details><summary>Posso comprimir e juntar PDFs ao mesmo tempo?</summary><p>Sim. Há modos para juntar e depois comprimir, ou comprimir cada PDF e depois juntar.</p></details>
           <details><summary>O compressor de PDF funciona no celular?</summary><p>Sim. Funciona em navegadores de celular. Para arquivos muito grandes, prefira um aparelho com mais memória e mantenha a aba aberta até concluir.</p></details>
-          <details><summary>Preciso instalar algum programa?</summary><p>Não. É um site que roda direto no navegador, sem instalação.</p></details>
           <details><summary>O site é gratuito?</summary><p>Sim, totalmente gratuito. Existe apenas uma opção voluntária de apoio via Pix, que nunca bloqueia nenhuma função.</p></details>
-          <details><summary>Posso sair da aba enquanto o PDF está comprimindo?</summary><p>Para arquivos grandes, recomenda-se manter a aba aberta até o fim. Alguns navegadores reduzem ou pausam tarefas pesadas quando a aba fica em segundo plano.</p></details>
-          <details><summary>Por que a compressão pode parar quando mudo de aba?</summary><p>Alguns navegadores reduzem ou pausam tarefas pesadas quando a aba fica em segundo plano, para economizar bateria e memória. Para arquivos grandes, mantenha a aba aberta até a conclusão.</p></details>
-          <details><summary>Como sei que meus PDFs não estão sendo enviados?</summary><p>Abra as ferramentas de desenvolvedor (F12), vá na aba Rede/Network e verifique que os arquivos PDF não são enviados para nenhum servidor durante a compressão ou junção.</p></details>
-          <details><summary>Posso verificar o código do projeto?</summary><p>Sim. O código é público no GitHub e pode ser consultado, junto com os arquivos carregados pelo navegador na aba Sources/Fontes.</p></details>
+          <details class="faq--rest" hidden><summary>Como comprimir PDF online grátis?</summary><p>Selecione um ou mais PDFs, escolha comprimir, juntar ou as duas ações, aguarde o processamento no navegador e baixe o arquivo final. É gratuito e sem cadastro.</p></details>
+          <details class="faq--rest" hidden><summary>Preciso instalar algum programa?</summary><p>Não. É um site que roda direto no navegador, sem instalação.</p></details>
+          <details class="faq--rest" hidden><summary>Posso sair da aba enquanto o PDF está comprimindo?</summary><p>Para arquivos grandes, recomenda-se manter a aba aberta até o fim. Alguns navegadores reduzem ou pausam tarefas pesadas quando a aba fica em segundo plano.</p></details>
+          <details class="faq--rest" hidden><summary>Por que a compressão pode parar quando mudo de aba?</summary><p>Alguns navegadores reduzem ou pausam tarefas pesadas quando a aba fica em segundo plano, para economizar bateria e memória. Para arquivos grandes, mantenha a aba aberta até a conclusão.</p></details>
+          <details class="faq--rest" hidden><summary>Como sei que meus PDFs não estão sendo enviados?</summary><p>Abra as ferramentas de desenvolvedor (F12), vá na aba Rede/Network e verifique que os arquivos PDF não são enviados para nenhum servidor durante a compressão ou junção.</p></details>
+          <details class="faq--rest" hidden><summary>Posso verificar o código do projeto?</summary><p>Sim. O código é público no GitHub e pode ser consultado, junto com os arquivos carregados pelo navegador na aba Sources/Fontes.</p></details>
         </div>
-      </section>
-
-      <!-- ===================== DICAS ===================== -->
-      <section class="card">
-        <h2 class="card__title">Dicas para comprimir melhor</h2>
-        <div class="tips">
-          <div class="tip"><b>Quer reduzir mais?</b><p>Diminua a qualidade das imagens. Esse é o ajuste que mais influencia o tamanho final.</p></div>
-          <div class="tip"><b>Passadas ajudam, mas têm limite</b><p>Mais passadas podem reduzir um pouco mais, porém demoram mais e o ganho costuma diminuir.</p></div>
-          <div class="tip"><b>PDFs escaneados reduzem mais</b><p>Arquivos com muitas imagens ou páginas escaneadas costumam ter maior redução.</p></div>
-          <div class="tip"><b>PDFs só com texto reduzem menos</b><p>Se o PDF já for leve ou tiver pouco conteúdo de imagem, a compressão pode ser pequena.</p></div>
-          <div class="tip"><b>Muitos PDFs podem pesar</b><p>Para juntar e comprimir vários PDFs, prefira começar com até 10 arquivos ou até 200 MB no total.</p></div>
-          <div class="tip"><b>Confira o resultado final</b><p>Depois de baixar, abra o PDF final e veja se a qualidade ficou adequada.</p></div>
-        </div>
-        <details class="why">
-          <summary>Por que o tamanho final pode variar?</summary>
-          <p>O tamanho final depende da estrutura interna do PDF. Dois compressores podem gerar resultados diferentes mesmo usando níveis parecidos de qualidade, porque cada ferramenta pode tratar imagens, fontes, metadados e objetos internos de forma diferente.</p>
-          <p>No Comprimir PDF, o processamento acontece diretamente no navegador, priorizando privacidade. Ferramentas online que processam arquivos em servidores podem usar otimizações adicionais. Ainda assim, ao reduzir mais a qualidade das imagens, é possível alcançar compressões semelhantes em muitos PDFs.</p>
-          <p>A maior diferença normalmente vem da qualidade e da resolução das imagens internas.</p>
-        </details>
+        <button class="btn btn--ghost btn--sm faq-more" id="faqMore" type="button">Ver todas as perguntas</button>
       </section>
 
       <!-- ===================== DETALHES TECNICOS ===================== -->
@@ -442,39 +450,42 @@
         <div id="techBody" class="tech__body" hidden>
           <div class="verify-block">
             <strong>Como verificar?</strong>
-            <p class="small">Você pode verificar que os PDFs não são enviados para servidores usando as ferramentas de desenvolvedor do navegador.</p>
-            <ol class="verify">
-              <li>Abra as Ferramentas de Desenvolvedor.</li>
-              <li>Acesse a aba Rede ou Network.</li>
-              <li>Selecione os PDFs.</li>
-              <li>Inicie a compressão ou junção.</li>
-              <li>Verifique que não há upload dos arquivos PDF.</li>
-              <li>O processamento ocorre localmente por JavaScript no navegador.</li>
-            </ol>
-            <p class="small muted">Se a aplicação carregar arquivos externos, como bibliotecas, fontes ou a imagem do QR Code Pix, essas requisições podem aparecer na aba Rede/Network. Isso não significa que seus PDFs foram enviados. O que deve ser verificado é que os arquivos PDF selecionados não aparecem como upload ou envio para servidor.
+            <p class="small">Você pode verificar que os PDFs não são enviados para servidores usando as ferramentas de desenvolvedor do navegador (aba Rede/Network), durante a compressão ou junção.
               <button class="link-btn" type="button" data-modal="modalTransparencia">Transparência técnica</button>
             </p>
           </div>
           <div id="log" class="log"></div>
         </div>
       </section>
+    </main>
 
-      <!-- ===================== RODAPE ===================== -->
-      <footer class="app-footer">
-        <p class="app-footer__support">☕ Este projeto te ajudou? <button class="link-btn" type="button" data-open-pix>Apoiar com Pix</button> com qualquer valor.</p>
-        <p class="app-footer__brand"><strong>Comprimir PDF</strong> — ferramenta gratuita para comprimir e juntar PDFs direto no navegador. Desenvolvido por <strong>Marcos Duailibi</strong>.</p>
-        <nav class="footer-links" aria-label="Links">
-          <a class="link-btn" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Ver código no GitHub ↗</a>
-          <span class="footer-sep" aria-hidden="true">|</span>
-          <button class="link-btn" type="button" data-modal="modalPrivacidade">Política de Privacidade</button>
-          <span class="footer-sep" aria-hidden="true">|</span>
-          <button class="link-btn" type="button" data-modal="modalTermos">Termos de Uso</button>
-          <span class="footer-sep" aria-hidden="true">|</span>
-          <button class="link-btn" type="button" data-modal="modalVerificar">Como verificar o processamento local</button>
+    <!-- ===================== RODAPE ===================== -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <a class="brand" href="./" aria-label="Comprimir PDFs">
+            <span class="brand__logo" aria-hidden="true">PDF</span>
+            <span class="brand__name">Comprimir PDFs</span>
+          </a>
+          <p>Comprimir e juntar PDFs de forma privada, local e gratuita.</p>
+        </div>
+        <nav class="site-footer__links" aria-label="Links do rodapé">
+          <a href="#como-usar">Como usar</a>
+          <a href="#privacidade">Privacidade</a>
+          <a href="#faq">FAQ</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <button class="link-btn" type="button" data-open-pix><span aria-hidden="true">❤</span> Apoiar projeto</button>
         </nav>
-        <p class="app-footer__local">🔒 Nenhum PDF é enviado para servidores.</p>
-      </footer>
-    </div>
+      </div>
+      <p class="site-footer__copy">© 2024 Comprimir PDFs • Feito com <span aria-hidden="true">❤️</span> para ser útil e privado</p>
+      <nav class="site-footer__legal" aria-label="Links legais">
+        <button class="link-btn" type="button" data-modal="modalPrivacidade">Política de Privacidade</button>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <button class="link-btn" type="button" data-modal="modalTermos">Termos de Uso</button>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <button class="link-btn" type="button" data-modal="modalVerificar">Como verificar</button>
+      </nav>
+    </footer>
 
     <!-- =============================== MODAIS =============================== -->
     <div class="modal-overlay" id="modalStopConfirm" hidden>
@@ -510,17 +521,25 @@
           <button class="modal__close" type="button" aria-label="Fechar">✕</button>
         </div>
         <div class="modal__body">
-          <p>Doação voluntária via Pix. Qualquer valor ajuda — até R$ 1 no cafezinho.</p>
+          <p>Este compressor de PDF é gratuito e funciona direto no navegador. Se ele foi útil para você, qualquer contribuição via Pix ajuda na manutenção e evolução da ferramenta.</p>
           <div class="modal-qr">
             <img id="pixQrModal" class="qr-img" width="200" height="200" alt="QR Code Pix para apoiar o projeto Comprimir PDF" />
             <p id="pixQrModalError" class="control__warn small" hidden>Não foi possível carregar a imagem do QR Code. Use a chave Pix ou o Pix Copia e Cola abaixo.</p>
             <p class="small muted">Escaneie o QR Code no app do seu banco e escolha o valor.</p>
           </div>
-          <p class="small">Recebedor: <b>Marcos Guimarães Duailibi Filho</b> · Nubank · Chave aleatória <code data-pix-key></code></p>
-          <p class="small muted">Confira no app do banco se o recebedor corresponde antes de confirmar.</p>
+          <div class="confere">
+            <strong>Confira antes de doar</strong>
+            <ul>
+              <li>Nome: <b id="pixName">Marcos Guimarães Duailibi Filho</b></li>
+              <li>Instituição: <b id="pixBank">Nubank</b></li>
+              <li>Tipo de chave: <b id="pixKeyType">Chave aleatória</b></li>
+              <li>Chave Pix: <code data-pix-key></code></li>
+            </ul>
+            <p class="small">Antes de concluir o Pix, confira se o nome e a chave estão corretos no app do banco.</p>
+          </div>
           <div class="result__actions">
-            <button class="btn btn--ghost" type="button" onclick="document.getElementById('copyPixKeyBtn').click()">Copiar chave Pix</button>
-            <button class="btn btn--coffee" type="button" onclick="document.getElementById('copyPixPayloadBtn').click()">Copiar Pix Copia e Cola</button>
+            <button class="btn btn--ghost" id="copyPixKeyBtn" type="button">Copiar chave Pix</button>
+            <button class="btn btn--coffee" id="copyPixPayloadBtn" type="button">Copiar Pix Copia e Cola</button>
           </div>
         </div>
       </div>

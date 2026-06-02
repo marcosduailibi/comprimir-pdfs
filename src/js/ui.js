@@ -14,7 +14,9 @@ let H = {}; // handlers
 // --------------------------- render: modos ---------------------------
 export function renderModes() {
   const box = $("modes");
+  const adv = $("modesAdvanced");
   box.innerHTML = "";
+  if (adv) adv.innerHTML = "";
   const multi = appState.files.length > 1;
   for (const m of MODES) {
     const b = document.createElement("button");
@@ -24,32 +26,35 @@ export function renderModes() {
     b.setAttribute("aria-checked", String(appState.mode === m.id));
     const recommended = m.recommended && multi;
     b.innerHTML =
-      `<span class="mode__icon">${m.icon}</span>` +
+      `<span class="mode__icon" aria-hidden="true">${m.icon}</span>` +
       `<span class="mode__title">${m.title}</span>` +
       `<span class="mode__text">${m.text}</span>` +
       (recommended ? `<span class="mode__tag">Recomendado</span>` : "");
     b.addEventListener("click", () => H.onModeSelect(m.id));
-    box.appendChild(b);
+    // Modos nao-primarios vao para "Configuracoes avancadas" (se o container existir).
+    (m.primary === false && adv ? adv : box).appendChild(b);
   }
 }
 
 // --------------------------- render: presets ---------------------------
 export function renderPresets() {
   const box = $("presets");
+  const adv = $("presetsAdvanced");
   box.innerHTML = "";
+  if (adv) adv.innerHTML = "";
   for (const [key, p] of Object.entries(PRESETS)) {
+    if (key === "custom") continue; // "Personalizado" e detectado pelo slider, sem chip.
     const b = document.createElement("button");
     b.type = "button";
+    b.dataset.key = key;
     b.className = "preset" + (appState.preset === key ? " is-active" : "");
     b.setAttribute("role", "radio");
     b.setAttribute("aria-checked", String(appState.preset === key));
-    const spec = key === "custom" ? "Manual" : `Qualidade ${p.quality}% · ${p.passes} passada(s)`;
     b.innerHTML =
       `<span class="preset__name">${p.label}</span>` +
-      `<span class="preset__desc">${p.description}</span>` +
-      `<span class="preset__spec">${spec}</span>`;
+      `<span class="preset__desc">${p.description}</span>`;
     b.addEventListener("click", () => H.onPresetSelect(key));
-    box.appendChild(b);
+    (p.primary === false && adv ? adv : box).appendChild(b);
   }
 }
 
@@ -116,10 +121,9 @@ export function updateConfigUI() {
   const pw = $("passesWarn");
   if (pi.warn) { pw.textContent = pi.warn; pw.hidden = false; } else pw.hidden = true;
 
-  // realca preset
-  document.querySelectorAll("#presets .preset").forEach((el, idx) => {
-    const key = Object.keys(PRESETS)[idx];
-    const active = key === appState.preset;
+  // realca preset (por data-key, pois os chips sao um subconjunto dos PRESETS)
+  document.querySelectorAll(".preset[data-key]").forEach((el) => {
+    const active = el.dataset.key === appState.preset;
     el.classList.toggle("is-active", active);
     el.setAttribute("aria-checked", String(active));
   });
@@ -345,6 +349,30 @@ export function initUI(handlers) {
   bindModals();
 
   $("themeToggle").addEventListener("click", toggleTheme);
+
+  // navegacao mobile (hamburger)
+  const navToggle = $("navToggle");
+  const siteNav = $("siteNav");
+  if (navToggle && siteNav) {
+    const setNav = (open) => {
+      siteNav.classList.toggle("is-open", open);
+      navToggle.setAttribute("aria-expanded", String(open));
+      document.body.classList.toggle("nav-open", open);
+    };
+    navToggle.addEventListener("click", () => setNav(!siteNav.classList.contains("is-open")));
+    siteNav.querySelectorAll("a, button").forEach((el) => el.addEventListener("click", () => setNav(false)));
+  }
+
+  // botoes "Selecionar PDFs" do hero abrem o seletor de arquivos
+  document.querySelectorAll("[data-pick-files]").forEach((b) =>
+    b.addEventListener("click", () => $("fileInput").click()));
+
+  // FAQ: "Ver todas as perguntas" revela as demais
+  const faqMore = $("faqMore");
+  if (faqMore) faqMore.addEventListener("click", () => {
+    document.querySelectorAll(".faq--rest").forEach((el) => (el.hidden = false));
+    faqMore.hidden = true;
+  });
 
   // upload
   const dz = $("dropzone"), fi = $("fileInput");

@@ -42,23 +42,23 @@ export const taskState = {
 
 // ------------------------------ Presets ------------------------------
 export const PRESETS = {
-  light:    { label: "Leve", quality: 75, passes: 1, description: "Menor compressão, melhor qualidade visual." },
-  balanced: { label: "Equilibrado", quality: 50, passes: 2, description: "Boa redução mantendo qualidade aceitável." },
-  strong:   { label: "Forte", quality: 30, passes: 3, description: "Redução maior com possível perda de nitidez." },
-  max:      { label: "Máxima compressão", quality: 15, passes: 3, description: "Menor tamanho possível, qualidade mais baixa." },
-  custom:   { label: "Personalizado", quality: null, passes: null, description: "Controle manual da qualidade e das passadas." },
+  light:    { label: "Leve", quality: 75, passes: 1, description: "Menor redução", primary: true },
+  balanced: { label: "Equilibrado", quality: 50, passes: 2, description: "Boa redução", primary: true },
+  strong:   { label: "Forte", quality: 30, passes: 3, description: "Maior redução", primary: true },
+  max:      { label: "Máxima compressão", quality: 15, passes: 3, description: "Menor tamanho possível, qualidade mais baixa.", primary: false },
+  custom:   { label: "Personalizado", quality: null, passes: null, description: "Controle manual da qualidade e das passadas.", primary: false },
 };
 
 // ------------------------------- Modos -------------------------------
 export const MODES = [
-  { id: "compress", icon: "🗜️", title: "Comprimir um PDF",
-    text: "Reduza o tamanho de um único arquivo PDF ajustando a qualidade das imagens.", multi: false },
-  { id: "merge", icon: "🔗", title: "Juntar vários PDFs",
-    text: "Organize vários PDFs na ordem desejada e gere um único arquivo final.", multi: true },
-  { id: "merge_then_compress", icon: "🧩", title: "Juntar e depois comprimir",
-    text: "Una todos os PDFs primeiro e aplique a compressão no arquivo final.", multi: true, recommended: true },
+  { id: "compress", icon: "🗜️", title: "Comprimir",
+    text: "Reduzir o tamanho do PDF", multi: false, primary: true },
+  { id: "merge", icon: "🔗", title: "Juntar PDFs",
+    text: "Unir vários PDFs em um só", multi: true, primary: true },
+  { id: "merge_then_compress", icon: "🧩", title: "Juntar e comprimir",
+    text: "Unir e reduzir o tamanho", multi: true, recommended: true, primary: true },
   { id: "compress_then_merge", icon: "📚", title: "Comprimir cada PDF e depois juntar",
-    text: "Comprime cada arquivo individualmente e depois junta todos em um único PDF.", multi: true },
+    text: "Comprime cada arquivo individualmente e depois junta todos em um único PDF.", multi: true, primary: false },
 ];
 
 export const modeAllowsMultiple = (mode) => MODES.find((m) => m.id === mode)?.multi ?? false;
