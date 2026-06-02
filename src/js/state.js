@@ -2,7 +2,7 @@
 // Estado global da aplicacao + dados fixos (presets, limites, modos, etapas) e
 // helpers de validacao. Sem dependencias de DOM ou de PDF.
 
-import { detectDevice } from "./utils.js?v=4";
+import { detectDevice } from "./utils.js?v=5";
 
 const MB = 1024 * 1024;
 
@@ -89,42 +89,57 @@ export const STEPS = {
 };
 
 // ------------------------------ Limites ------------------------------
-export const LIMITS = {
-  desktop: {
-    recommended: { files: 10, total: 200 * MB, perFile: 80 * MB, pages: 800 },
-    absolute:    { files: 20, total: 300 * MB, perFile: 120 * MB, pages: 1500 },
-  },
-  mobile: {
-    recommended: { files: 5, total: 80 * MB, perFile: 30 * MB, pages: 300 },
-    absolute:    { files: 10, total: 150 * MB, perFile: 80 * MB, pages: 800 },
-  },
+const GB = 1024 * MB;
+
+// Pista de memória do dispositivo (em GB). Não existe em todos os navegadores;
+// usada apenas como dica para apertar a "zona confortável".
+export const DEVICE_MEMORY = (typeof navigator !== "undefined" && navigator.deviceMemory) || null;
+const lowMemory = DEVICE_MEMORY != null && DEVICE_MEMORY <= 2;
+
+// Limites RÍGIDOS de entrada (rejeição). O processamento é local; acima disso
+// recusamos de forma controlada — sem tentar (e travar) o navegador.
+export const MAX = { perFile: 1 * GB, total: 1 * GB, files: 500 };
+
+// Zona "confortável" para a engine atual (carrega o PDF em memória). Acima
+// disso a operação é permitida, mas avisamos que pode demorar/usar muita memória.
+const COMFORT_BASE = {
+  desktop: { total: 250 * MB, perFile: 150 * MB, files: 25, pages: 2000 },
+  mobile:  { total: 80 * MB,  perFile: 60 * MB,  files: 12, pages: 700 },
 };
+function comfortFor(device) {
+  const base = COMFORT_BASE[device] || COMFORT_BASE.desktop;
+  if (!lowMemory) return base;
+  return { total: base.total / 2, perFile: base.perFile / 2, files: base.files, pages: base.pages / 2 };
+}
+const fmtMB = (b) => Math.round(b / MB) + " MB";
 
 /**
- * Valida a selecao contra os limites do dispositivo.
+ * Valida a selecao. Limites rígidos => block (rejeição com motivo específico);
+ * acima do confortável => warn (permite, mas alerta); senão ok.
  * @returns {{ level: 'ok'|'warn'|'block', messages: string[] }}
  */
 export function validateSelection(files, device = appState.device) {
-  const lim = LIMITS[device] || LIMITS.desktop;
   const count = files.length;
   const total = files.reduce((s, f) => s + (f.size || 0), 0);
   const maxFile = files.reduce((m, f) => Math.max(m, f.size || 0), 0);
   const totalPages = files.reduce((s, f) => s + (f.pages || 0), 0);
 
-  const a = lim.absolute, r = lim.recommended;
-  const messages = [];
+  // --- Limites rígidos (rejeição com mensagem específica) ---
+  if (count > MAX.files)
+    return { level: "block", messages: [`Você selecionou ${count} PDFs. O limite é de ${MAX.files} arquivos por operação.`] };
+  if (maxFile > MAX.perFile)
+    return { level: "block", messages: ["Um dos PDFs tem mais de 1 GB. O limite é de 1 GB por arquivo."] };
+  if (total > MAX.total)
+    return { level: "block", messages: [`A soma dos PDFs (${fmtMB(total)}) passa de 1 GB. O limite total é de 1 GB por operação.`] };
 
-  if (count > a.files || total > a.total || maxFile > a.perFile || totalPages > a.pages) {
-    return {
-      level: "block",
-      messages: ["Esta seleção é muito grande para processar com segurança no navegador. Reduza a quantidade de PDFs ou divida a operação em partes."],
-    };
+  // --- Zona de atenção (permite, mas avisa) ---
+  const c = comfortFor(device);
+  if (total > c.total || maxFile > c.perFile || count > c.files || totalPages > c.pages) {
+    return { level: "warn", messages: [
+      "Arquivos grandes: o processamento acontece na memória do seu navegador e pode demorar ou usar bastante memória. Em dispositivos com pouca memória pode falhar — prefira um navegador desktop e mantenha a aba aberta até concluir.",
+    ] };
   }
-  if (count > r.files || total > r.total || maxFile > r.perFile || totalPages > r.pages) {
-    messages.push("Essa operação pode demorar ou consumir muita memória do navegador. Para melhor desempenho, recomendamos reduzir a quantidade ou o tamanho dos PDFs.");
-    return { level: "warn", messages };
-  }
-  return { level: "ok", messages };
+  return { level: "ok", messages: [] };
 }
 
 /** Classificacao de risco textual para o resumo. */
@@ -133,7 +148,28 @@ export function riskLevel(files, device = appState.device) {
   if (v.level === "block") return "Alto";
   if (v.level === "warn") return "Médio";
   const total = files.reduce((s, f) => s + (f.size || 0), 0);
-  return total > (LIMITS[device].recommended.total / 2) ? "Médio" : "Baixo";
+  return total > (comfortFor(device).total / 2) ? "Médio" : "Baixo";
+}
+
+/**
+ * Estima, de forma conservadora e SEM travar nada, se há armazenamento local
+ * plausível para processar `totalBytes`. Usa navigator.storage.estimate()
+ * quando disponível. Retorna { ok:boolean, reason?:string }.
+ */
+export async function estimateCapacity(totalBytes) {
+  try {
+    if (typeof navigator !== "undefined" && navigator.storage && navigator.storage.estimate) {
+      const est = await navigator.storage.estimate();
+      const quota = est && typeof est.quota === "number" ? est.quota : null;
+      const usage = est && typeof est.usage === "number" ? est.usage : 0;
+      if (quota != null) {
+        const free = quota - usage;
+        // Folga conservadora: a engine atual mantém original + saída em memória.
+        if (free > 0 && free < totalBytes * 2) return { ok: false, reason: "storage" };
+      }
+    }
+  } catch { /* sem métricas: não bloqueia */ }
+  return { ok: true };
 }
 
 // ----------------------- Textos dinamicos de UI -----------------------

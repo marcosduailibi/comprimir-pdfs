@@ -147,6 +147,26 @@ processamento. O site usa um Web Worker (thread separada) e avisa quando a aba v
 para segundo plano, mas não há garantia de continuidade absoluta em background —
 isso é uma limitação dos navegadores, não do projeto.
 
+## Limites de arquivo
+
+- **Compressão:** até **1 GB** por PDF.
+- **União / juntar e comprimir:** até **500 PDFs** ou **1 GB** no total.
+- Acima desses valores a operação é **recusada com mensagem clara** (não trava a
+  aba). Arquivos grandes, mas dentro do limite, exibem um aviso de que o
+  processamento ocorre na memória do navegador e pode demorar ou usar bastante
+  memória — em dispositivos com pouca memória pode falhar; prefira um navegador
+  desktop.
+- Antes de iniciar, o site faz uma checagem conservadora de armazenamento local
+  (`navigator.storage.estimate()`) e usa `navigator.deviceMemory` como dica para
+  apertar os limites em aparelhos com pouca memória. Tudo continua **local**:
+  nenhum PDF é enviado para servidores.
+
+> Observação: o processamento real de PDFs muito grandes (centenas de MB a 1 GB)
+> depende da memória do dispositivo/navegador. O suporte robusto por partes
+> (divisão por páginas + armazenamento temporário em OPFS) é um próximo passo
+> planejado; hoje o limite de **entrada** é 1 GB com falha controlada quando o
+> ambiente não comporta.
+
 ## Apoie o projeto
 
 O Comprimir PDFs é gratuito e mantido de forma independente.

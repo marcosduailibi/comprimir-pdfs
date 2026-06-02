@@ -2,10 +2,10 @@
 // Bootstrap e orquestracao: liga estado (state.js), interface (ui.js) e
 // processamento (Web Worker pdf-worker.js, com fallback na thread principal).
 
-import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression } from "./state.js?v=4";
-import * as UI from "./ui.js?v=4";
-import { buildFinalName, clamp, showToast } from "./utils.js?v=4";
-import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=4";
+import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=5";
+import * as UI from "./ui.js?v=5";
+import { buildFinalName, clamp, showToast } from "./utils.js?v=5";
+import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=5";
 
 let idSeq = 0;
 let originalOrder = [];        // snapshot para "Restaurar ordem"
@@ -50,7 +50,7 @@ function clearJob() {
 // ============================ Web Worker ============================
 function initWorker() {
   try {
-    worker = new Worker(new URL("./pdf-worker.js?v=4", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./pdf-worker.js?v=5", import.meta.url), { type: "module" });
     worker.onmessage = (e) => onEngineMessage(e.data);
     worker.onerror = () => { worker = null; }; // cai no fallback ao processar
   } catch {
@@ -90,7 +90,7 @@ function analyzeFiles(batch) {
     worker.postMessage({ type: "analyze", files: batch.map((f) => f.file) });
   } else {
     (async () => {
-      const { analyzeBytes } = await import("./pdf-merge.js?v=4");
+      const { analyzeBytes } = await import("./pdf-merge.js?v=5");
       for (const f of batch) {
         try { const { pages } = await analyzeBytes(new Uint8Array(await f.file.arrayBuffer())); setPages(f.id, pages); }
         catch { setPages(f.id, null); }
@@ -158,10 +158,19 @@ function setPasses(v) {
 }
 
 // ============================ Processamento ============================
-function startProcessing() {
+async function startProcessing() {
   if (appState.status === "processing") return;
   const v = validateSelection(appState.files);
   if (v.level === "block") { UI.showBanner("error", v.messages[0]); return; }
+
+  // Falha controlada: se o navegador indicar pouco armazenamento local para o
+  // volume selecionado, recusamos com mensagem clara em vez de travar a aba.
+  const totalBytes = appState.files.reduce((s, f) => s + f.size, 0);
+  const cap = await estimateCapacity(totalBytes);
+  if (!cap.ok) {
+    UI.showBanner("error", "Seu navegador indicou pouco armazenamento local disponível para processar esta quantidade de dados com segurança. Reduza o tamanho ou a quantidade de PDFs, ou use um navegador desktop. Nenhum arquivo foi enviado para servidores.");
+    return;
+  }
 
   appState.status = "processing";
   appState.result = null;
@@ -190,7 +199,7 @@ function startProcessing() {
 async function runFallback(task) {
   fallbackCtx = { paused: false, cancelled: false, isPaused() { return this.paused; }, isCancelled() { return this.cancelled; } };
   try {
-    const { runTask } = await import("./pdf-worker.js?v=4");
+    const { runTask } = await import("./pdf-worker.js?v=5");
     await runTask(task, { ctx: fallbackCtx, emit: onEngineMessage });
   } catch (err) {
     if (err && err.message === "TASK_CANCELLED") onEngineMessage({ type: "cancelled" });
