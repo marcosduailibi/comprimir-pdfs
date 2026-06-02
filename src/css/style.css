@@ -445,110 +445,99 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
   .tool-card { padding: 20px; }
 }
 
-
 /* =========================================================================
-   CORREÇÃO FINAL — Marca/logo responsiva sem bloco vermelho
-   Motivo: a marca deve ser um SVG de traços transparente + texto HTML.
+   CORREÇÃO DEFINITIVA — logomarca SVG horizontal completa
+   -------------------------------------------------------------------------
+   A logomarca original foi desenhada em um SVG largo (viewBox 0 0 2508 627).
+   Por isso, ela deve ser renderizada como SVG completo no header/rodapé.
+   Não use brand-mark quadrado, brand-icon 280x280 ou texto separado.
    ========================================================================= */
 
 :root {
-  --brand-ink: #0f172a;
-  --brand-accent: #ef4444;
+  --logo-ink: #0f172a;
+  --logo-accent: #f2292f;
+}
+
+[data-theme="light"] {
+  --logo-ink: #0f172a;
+  --logo-accent: #f2292f;
 }
 
 [data-theme="dark"] {
-  --brand-ink: #f8fafc;
-  --brand-accent: #ef4444;
+  --logo-ink: #ffffff;
+  --logo-accent: #f2292f;
 }
 
-/* A marca não pode herdar o card vermelho antigo */
-.brand {
+.brand,
+.site-header .brand,
+.footer-brand .brand,
+.footer-brand .brand--footer {
   display: inline-flex !important;
   align-items: center !important;
-  flex-wrap: nowrap !important;
-  gap: clamp(0.42rem, 1.6vw, 0.75rem) !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
   min-width: 0 !important;
   text-decoration: none !important;
-  color: var(--text) !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-  flex-shrink: 1 !important;
+  color: inherit !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }
 
-.brand-mark {
-  width: clamp(32px, 6vw, 50px) !important;
-  height: clamp(32px, 6vw, 50px) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 0 0 auto !important;
+/* Classes antigas mantidas só para impedir efeitos residuais caso apareçam no cache/HTML antigo. */
+.brand-mark,
+.brand-icon,
+.brand-text,
+.brand-name {
   background: transparent !important;
   background-image: none !important;
   border: 0 !important;
-  border-radius: 0 !important;
   box-shadow: none !important;
-  color: inherit !important;
-  padding: 0 !important;
-  overflow: visible !important;
 }
 
-.brand-icon {
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
-  overflow: visible !important;
-  background: transparent !important;
-  fill: none !important;
-}
-
-.brand-icon,
-.brand-icon * {
-  vector-effect: non-scaling-stroke;
-}
-
-.brand-icon path {
-  fill: none !important;
-}
-
-.brand-icon .ink-stroke,
-.brand-icon .brand-ink-stroke {
-  stroke: var(--brand-ink) !important;
-}
-
-.brand-icon .accent-stroke,
-.brand-icon .brand-accent-stroke {
-  stroke: var(--brand-accent) !important;
-}
-
-.brand-text {
-  display: inline-block !important;
-  font-size: clamp(0.95rem, 2.25vw, 1.35rem) !important;
-  line-height: 1.05 !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.035em !important;
-  white-space: nowrap !important;
-  color: var(--text) !important;
-}
-
-/* Regras antigas do SVG longo não devem afetar a nova marca */
+/* SVG horizontal completo. */
 .brand-logo {
-  width: auto;
-  height: auto;
-  max-width: none;
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  background: transparent !important;
+  overflow: visible !important;
 }
 
-/* Header equilibrado */
+.brand-logo .ink-stroke {
+  stroke: var(--logo-ink) !important;
+  fill: none !important;
+}
+
+.brand-logo .accent-stroke {
+  stroke: var(--logo-accent) !important;
+  fill: none !important;
+}
+
+.brand-logo .ink-fill {
+  fill: var(--logo-ink) !important;
+  stroke: none !important;
+}
+
+/* Header: mantém a marca horizontal e proporcional aos botões. */
 .site-header .header-inner {
   min-height: clamp(68px, 9vw, 82px) !important;
   display: flex !important;
   align-items: center !important;
-  gap: clamp(0.5rem, 1.5vw, 1.25rem) !important;
+  justify-content: space-between !important;
+  gap: clamp(0.45rem, 1.4vw, 1.15rem) !important;
 }
 
 .site-header .brand {
-  flex: 1 1 auto !important;
-  max-width: none !important;
-  overflow: visible !important;
+  width: clamp(150px, 18vw, 230px) !important;
+  flex: 0 0 auto !important;
+  max-width: 30vw !important;
+}
+
+.site-header .brand-logo {
+  width: 100% !important;
 }
 
 .header-actions {
@@ -561,11 +550,12 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 }
 
 .theme-toggle,
-.mobile-menu-button {
+.mobile-menu-button,
+.btn--support {
   flex: 0 0 auto !important;
 }
 
-/* Ajustes para tablet/mobile */
+/* Tablets e celulares: reduzir de forma controlada, sem cortar a logo. */
 @media (max-width: 768px) {
   .header-inner,
   .page-shell,
@@ -575,30 +565,59 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 
   .site-header .header-inner {
     min-height: 72px !important;
+    gap: 0.55rem !important;
   }
 
-  .brand-mark {
-    width: 34px !important;
-    height: 34px !important;
-  }
-
-  .brand-text {
-    font-size: 1rem !important;
-  }
-
-  .header-actions {
-    gap: 0.5rem !important;
+  .site-header .brand {
+    width: clamp(126px, 34vw, 150px) !important;
+    max-width: 36vw !important;
   }
 
   .github-btn {
     display: none !important;
   }
 
+  .hide-sm {
+    display: none !important;
+  }
+
+  .only-sm {
+    display: inline !important;
+  }
+
+  .btn--support {
+    min-height: 50px !important;
+    padding-inline: 0.9rem !important;
+    border-radius: 17px !important;
+    font-size: 1rem !important;
+    line-height: 1 !important;
+  }
+
+  .theme-toggle,
+  .mobile-menu-button {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    border-radius: 16px !important;
+    font-size: 1.22rem !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .site-header .header-inner {
+    gap: 0.48rem !important;
+  }
+
+  .site-header .brand {
+    width: clamp(120px, 32vw, 138px) !important;
+    max-width: 34vw !important;
+  }
+
   .btn--support {
     min-height: 48px !important;
-    padding-inline: 0.9rem !important;
+    padding-inline: 0.82rem !important;
+    font-size: 0.96rem !important;
     border-radius: 16px !important;
-    font-size: 1rem !important;
   }
 
   .theme-toggle,
@@ -606,49 +625,11 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
     width: 48px !important;
     height: 48px !important;
     min-width: 48px !important;
-    border-radius: 16px !important;
-    font-size: 1.25rem !important;
-  }
-}
-
-/* Celulares comuns: manter "Comprimir PDFs" em uma única linha */
-@media (max-width: 520px) {
-  .site-header .header-inner {
-    gap: 0.45rem !important;
-  }
-
-  .brand {
-    gap: 0.42rem !important;
-  }
-
-  .brand-mark {
-    width: 30px !important;
-    height: 30px !important;
-  }
-
-  .brand-text {
-    font-size: 0.92rem !important;
-    letter-spacing: -0.04em !important;
-  }
-
-  .btn--support {
-    min-height: 44px !important;
-    padding-inline: 0.78rem !important;
-    font-size: 0.95rem !important;
     border-radius: 15px !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    border-radius: 14px !important;
-    font-size: 1.18rem !important;
+    font-size: 1.14rem !important;
   }
 }
 
-/* Celulares estreitos: reduzir controles antes de quebrar a marca */
 @media (max-width: 390px) {
   .header-inner,
   .page-shell,
@@ -660,68 +641,45 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
     gap: 0.36rem !important;
   }
 
-  .brand {
-    gap: 0.34rem !important;
-  }
-
-  .brand-mark {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .brand-text {
-    font-size: 0.84rem !important;
+  .site-header .brand {
+    width: 116px !important;
+    max-width: 33vw !important;
   }
 
   .btn--support {
-    min-height: 42px !important;
-    padding-inline: 0.62rem !important;
+    min-height: 44px !important;
+    padding-inline: 0.68rem !important;
     font-size: 0.88rem !important;
     border-radius: 14px !important;
   }
 
   .theme-toggle,
   .mobile-menu-button {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
     border-radius: 13px !important;
-    font-size: 1.05rem !important;
+    font-size: 1.04rem !important;
   }
 }
 
-/* Se a tela for extremamente estreita, priorizar a marca e ocultar só o ícone de coração visualmente */
-@media (max-width: 350px) {
-  .btn--support {
-    padding-inline: 0.55rem !important;
-    font-size: 0.82rem !important;
-  }
-
-  .brand-text {
-    font-size: 0.8rem !important;
-  }
-}
-
-/* Footer com marca horizontal e proporcional */
+/* Rodapé: a mesma logomarca, centralizada e horizontal. */
 .footer-brand .brand,
 .footer-brand .brand--footer {
   justify-content: center !important;
-  max-width: none !important;
+  width: clamp(170px, 32vw, 260px) !important;
+  max-width: 100% !important;
   flex: 0 0 auto !important;
+  margin-inline: auto !important;
 }
 
-.footer-brand .brand-mark {
-  width: clamp(32px, 5vw, 44px) !important;
-  height: clamp(32px, 5vw, 44px) !important;
-}
-
-.footer-brand .brand-text {
-  font-size: clamp(1rem, 2.8vw, 1.22rem) !important;
-  white-space: nowrap !important;
+.footer-brand .brand-logo {
+  width: 100% !important;
+  height: auto !important;
 }
 
 .footer-brand p {
-  margin-top: 0.25rem !important;
+  margin-top: 0.3rem !important;
   font-size: clamp(0.92rem, 2.6vw, 1.05rem) !important;
   line-height: 1.45 !important;
 }
@@ -741,6 +699,11 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 }
 
 @media (max-width: 520px) {
+  .footer-brand .brand,
+  .footer-brand .brand--footer {
+    width: clamp(170px, 55vw, 230px) !important;
+  }
+
   .footer-links,
   .footer-legal {
     flex-direction: column !important;
@@ -752,3 +715,4 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
     display: none !important;
   }
 }
+
