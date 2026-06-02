@@ -4,8 +4,8 @@
 // cooperativos. O mesmo `runTask` e reutilizado pela thread principal (fallback)
 // quando o Worker nao pode ser criado.
 
-import { compressBytes } from "./pdf-compress.js";
-import { mergeBytesList, analyzeBytes } from "./pdf-merge.js";
+import { compressBytes } from "./pdf-compress.js?v=4";
+import { mergeBytesList, analyzeBytes } from "./pdf-merge.js?v=4";
 
 // ----------------------------- orquestracao -----------------------------
 

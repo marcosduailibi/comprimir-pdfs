@@ -3,7 +3,7 @@
 // Exibe e copia exatamente os dados informados; orienta o usuario a conferir o
 // recebedor no app do banco antes de confirmar.
 
-import { copyText, showToast } from "./utils.js";
+import { copyText, showToast } from "./utils.js?v=4";
 
 export const PIX = {
   name: "Marcos Guimarães Duailibi Filho",
@@ -23,6 +23,18 @@ export async function copyPixKey() {
 export async function copyPixPayload() {
   const ok = await copyText(PIX.payload);
   showToast(ok ? "Pix Copia e Cola copiado!" : "Não foi possível copiar. Copie manualmente.", ok ? "success" : "error");
+}
+
+/** Copia a chave Pix e dá feedback visual no próprio botão clicado. */
+async function copyPixKeyOn(button) {
+  const ok = await copyText(PIX.key);
+  if (!ok) { showToast("Não foi possível copiar. Copie a chave manualmente.", "error"); return; }
+  if (button.dataset.busy) return;
+  const original = button.textContent;
+  button.dataset.busy = "1";
+  button.textContent = "Chave copiada!";
+  button.disabled = true;
+  setTimeout(() => { button.textContent = original; button.disabled = false; delete button.dataset.busy; }, 1800);
 }
 
 export function showDonationModal() {
@@ -64,6 +76,7 @@ export function bindDonation() {
   const qrTargets = [
     ["pixQr", "pixQrError"],
     ["pixQrModal", "pixQrModalError"],
+    ["pixQrMini", "pixQrMiniError"],
   ];
   for (const [imgId, errId] of qrTargets) {
     const qr = document.getElementById(imgId);
@@ -80,11 +93,14 @@ export function bindDonation() {
   document.getElementById("copyPixKeyBtn")?.addEventListener("click", copyPixKey);
   document.getElementById("copyPixPayloadBtn")?.addEventListener("click", copyPixPayload);
 
-  // Abrir/fechar a secao/modal de doacao a partir de qualquer gatilho.
-  // Aceita tanto [data-donate] quanto [data-open-pix] (support-card / footer).
-  document.querySelectorAll("[data-donate], [data-open-pix]").forEach((b) =>
-    b.addEventListener("click", showDonationModal)
-  );
+  // Delegação global: funciona para QUALQUER gatilho (header, hero, card lateral,
+  // footer, resultado) mesmo que seja renderizado depois. Um único listener.
+  document.addEventListener("click", (e) => {
+    const open = e.target.closest("[data-open-pix], [data-donate]");
+    if (open) { e.preventDefault(); showDonationModal(); return; }
+    const copyKey = e.target.closest("[data-copy-pix-key]");
+    if (copyKey) { e.preventDefault(); copyPixKeyOn(copyKey); return; }
+  });
   document.getElementById("modalDonation")?.addEventListener("click", (e) => {
     if (e.target.id === "modalDonation") closeDonationModal();
   });

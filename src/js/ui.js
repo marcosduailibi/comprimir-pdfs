@@ -5,8 +5,8 @@
 import {
   appState, MODES, PRESETS, STEPS, modeAllowsMultiple, modeNeedsCompression,
   qualityHint, passesInfo, presetFromValues, validateSelection, riskLevel,
-} from "./state.js";
-import { formatBytes, formatTime, prettyMode } from "./utils.js";
+} from "./state.js?v=4";
+import { formatBytes, formatTime, prettyMode } from "./utils.js?v=4";
 
 const $ = (id) => document.getElementById(id);
 let H = {}; // handlers
@@ -212,18 +212,31 @@ export function markActiveStepsPaused(paused) {
   document.querySelectorAll(".step.is-active").forEach((n) => n.classList.toggle("is-paused", paused));
 }
 
+// Progresso GLOBAL e MONOTÔNICO: o valor exibido nunca diminui durante uma
+// tarefa. As fases internas (passadas, repeticoes por qualidade) podem reemitir
+// fracoes menores; aqui travamos no maior valor ja alcancado para a barra nunca
+// "voltar". Reiniciado a cada novo processamento em showProgress().
+let lastProgressFrac = 0;
+export function resetProgress() { lastProgressFrac = 0; }
+
 export function showProgress() {
   $("progressCard").hidden = false;
   $("resultCard").hidden = true;
   renderSteps();
   setStep("loaded", "active");
+  lastProgressFrac = 0;                 // zera a trava antes de iniciar
   setProgress(0.02, "Carregando arquivos no navegador…");
   $("progressDetail").textContent = "";
   $("pauseBtn").hidden = false; $("resumeBtn").hidden = true;
   $("progressCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
+
+// Única função responsável por mover a barra. Garante 0..100 e monotonicidade.
 export function setProgress(fraction, label) {
-  const pct = Math.round(Math.max(0, Math.min(1, fraction)) * 100);
+  let f = Math.max(0, Math.min(1, fraction || 0));
+  if (f < lastProgressFrac) f = lastProgressFrac;   // trava: nunca regride
+  lastProgressFrac = f;
+  const pct = Math.round(f * 100);
   $("progressFill").style.width = pct + "%";
   $("progressPercent").textContent = pct + "% concluído";
   if (label) $("progressStepLabel").textContent = label;
