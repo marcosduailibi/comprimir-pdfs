@@ -17,7 +17,8 @@
   --success-soft: #dcfce7;
   --support: #f59e0b;
   --support-soft: #fef3c7;
-  --support-ink: #5b3d0a;
+  --support-ink: #5b3d0a;       /* texto sobre o amarelo VIVO (botão) */
+  --warn-ink: #92400e;          /* texto sobre fundo amarelo SUAVE (avisos) */
   --danger: #dc2626;
   --danger-soft: #fee2e2;
   --track: #e5e9f0;
@@ -42,7 +43,8 @@
   --success-soft: #0f3a2e;
   --support: #f59e0b;
   --support-soft: #3a2e0f;
-  --support-ink: #2a1d04;
+  --support-ink: #2a1d04;       /* texto sobre o amarelo VIVO (botão) */
+  --warn-ink: #fcd34d;          /* texto sobre fundo amarelo SUAVE (avisos) — claro p/ dark */
   --danger: #f87171;
   --danger-soft: #3a1717;
   --track: #22324a;
@@ -124,13 +126,10 @@ img { max-width: 100%; }
 .pdf-file-small { grid-column: 3; grid-row: 1; width: 92px; height: 116px; }
 .pdf-label { align-self: flex-start; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; font-size: 9px; font-weight: 800; padding: 3px 6px; border-radius: 5px; }
 .pdf-lines { flex: 1; border-radius: 6px; background: repeating-linear-gradient(var(--track) 0 5px, transparent 5px 11px); }
-.compress-arrow { grid-column: 2; grid-row: 1 / span 2; font-size: 1.7rem; color: var(--primary); font-weight: 800; }
-.file-size { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+.compress-arrow { grid-column: 2; grid-row: 1 / span 2; font-size: 1.7rem; color: var(--primary); font-weight: 800; line-height: 1; }
+.file-size { font-size: 0.86rem; font-weight: 700; color: var(--muted); line-height: 1; white-space: nowrap; margin-top: 4px; }
 .old-size { grid-column: 1; grid-row: 2; }
 .new-size { grid-column: 3; grid-row: 2; color: var(--success); }
-.spark { position: absolute; color: var(--support); opacity: 0.85; }
-.spark--1 { top: 12%; right: 14%; font-size: 0.9rem; }
-.spark--2 { bottom: 16%; right: 24%; font-size: 0.7rem; }
 
 /* ================================ Cards ================================ */
 .card,
@@ -149,7 +148,7 @@ img { max-width: 100%; }
 /* ----------------------------- Banner ----------------------------- */
 .banner { border-radius: var(--radius-sm); padding: 14px 16px; font-size: 0.9rem; border: 1px solid transparent; display: flex; gap: 10px; }
 .banner--error { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
-.banner--warn  { background: var(--support-soft); color: var(--support-ink); border-color: color-mix(in srgb, var(--support) 40%, transparent); }
+.banner--warn  { background: var(--support-soft); color: var(--warn-ink); border-color: color-mix(in srgb, var(--support) 40%, transparent); }
 .banner--info  { background: var(--primary-soft); color: var(--primary); border-color: color-mix(in srgb, var(--primary) 25%, transparent); }
 
 /* ============================ Tool card ============================ */
@@ -222,7 +221,7 @@ img { max-width: 100%; }
 #qualityValue { font-size: 1.05rem; color: var(--primary); }
 .control__scale { display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--muted); margin-top: 4px; }
 .control__hint { margin: 8px 0 0; font-size: 0.82rem; color: var(--muted); font-weight: 600; }
-.control__warn { margin: 8px 0 0; font-size: 0.8rem; color: var(--support-ink); background: var(--support-soft); border-radius: 8px; padding: 8px 10px; }
+.control__warn { margin: 8px 0 0; font-size: 0.8rem; color: var(--warn-ink); background: var(--support-soft); border-radius: 8px; padding: 8px 10px; }
 input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 6px; margin-top: 12px; background: linear-gradient(to right, var(--primary) 0%, var(--primary) 50%, var(--track) 50%, var(--track) 100%); outline: none; }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); cursor: pointer; }
@@ -259,7 +258,7 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 .progress-head { display: flex; justify-content: space-between; align-items: center; }
 .progress-percent { color: var(--primary); font-weight: 700; }
 .progress-step { margin: 4px 0 8px; color: var(--primary); font-weight: 600; }
-.processing-warning { margin: 6px 0 10px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--support-soft); color: var(--support-ink); border: 1px solid color-mix(in srgb, var(--support) 40%, transparent); font-size: 0.85rem; }
+.processing-warning { margin: 6px 0 10px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--support-soft); color: var(--warn-ink); border: 1px solid color-mix(in srgb, var(--support) 40%, transparent); font-size: 0.85rem; }
 .progressbar { height: 10px; background: var(--track); border-radius: 20px; overflow: hidden; }
 .progressbar__fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), #60a5fa); border-radius: 20px; transition: width 0.4s ease; }
 .progress-detail { margin: 10px 0 0; font-size: 0.84rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
@@ -285,7 +284,7 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 .result__head .card__title { margin: 0; }
 .result__check { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: #fff; display: grid; place-items: center; font-weight: 700; }
 .result__privacy { margin: 0 0 14px; color: var(--success); background: var(--success-soft); border: 1px solid color-mix(in srgb, var(--success) 22%, transparent); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.86rem; }
-.result__note { background: var(--support-soft); color: var(--support-ink); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.86rem; margin: 0 0 14px; }
+.result__note { background: var(--support-soft); color: var(--warn-ink); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.86rem; margin: 0 0 14px; }
 .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin: 18px 0; }
 .compare__card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; background: var(--surface-soft); }
 .compare__card small { color: var(--muted); font-size: 0.78rem; }
@@ -395,7 +394,7 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 .qr-img { width: 200px; height: 200px; object-fit: contain; border-radius: var(--radius-sm); background: #fff; padding: 8px; border: 1px solid var(--border); }
 .modal-qr p { margin: 0; text-align: center; }
 .confere { border: 1px solid color-mix(in srgb, var(--support) 34%, transparent); background: var(--support-soft); border-radius: var(--radius-sm); padding: 14px 16px; margin: 4px 0 14px; }
-.confere strong { color: var(--support-ink); }
+.confere strong { color: var(--warn-ink); }
 .confere ul { margin: 8px 0; padding-left: 18px; font-size: 0.86rem; }
 .confere code, code[data-pix-key] { font-family: ui-monospace, monospace; font-size: 0.82rem; background: color-mix(in srgb, var(--text) 8%, var(--surface)); padding: 1px 6px; border-radius: 6px; word-break: break-all; }
 
@@ -411,6 +410,16 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 .footer-copy { margin: 0; color: var(--muted); font-size: 0.82rem; }
 .footer-legal { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
 .footer-sep { color: var(--border); }
+
+/* ====== Painel de arquivos contextual (dentro do card da ferramenta) ====== */
+.files-panel { background: var(--surface-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; }
+.files-panel .card__title { font-size: 1rem; margin: 0; }
+.tool-card > .notice--info { box-shadow: none; }
+
+/* ====== Refinamentos de contraste no dark-mode ====== */
+[data-theme="dark"] .mode.is-active .mode__title,
+[data-theme="dark"] .preset.is-active .preset__name { color: #93c5fd; }
+[data-theme="dark"] .info-card__icon--support { background: color-mix(in srgb, var(--support) 26%, var(--surface)); }
 
 /* =========================== Responsividade =========================== */
 @media (max-width: 920px) {

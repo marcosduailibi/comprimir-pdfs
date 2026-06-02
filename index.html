@@ -43,7 +43,7 @@
       })();
     </script>
 
-    <link rel="stylesheet" href="./src/css/style.css?v=8" />
+    <link rel="stylesheet" href="./src/css/style.css?v=9" />
 
     <!-- ===================== Dados estruturados ====================== -->
     <script type="application/ld+json">
@@ -149,8 +149,6 @@
             <div class="compress-arrow">→</div>
             <div class="pdf-file pdf-file-small"><span class="pdf-label">PDF</span><span class="pdf-lines"></span></div>
             <span class="file-size new-size">5.1 MB</span>
-            <span class="spark spark--1">✦</span>
-            <span class="spark spark--2">✦</span>
           </div>
         </div>
       </section>
@@ -173,6 +171,21 @@
             <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden multiple />
           </div>
         </div>
+
+        <!-- Arquivos selecionados (contextual: logo após o upload) -->
+        <section class="files-panel" id="fileListCard" hidden>
+          <div class="list-head">
+            <h2 class="card__title">Arquivos selecionados</h2>
+            <div class="list-tools">
+              <button class="btn btn--ghost btn--sm" id="sortName" type="button">Ordenar por nome</button>
+              <button class="btn btn--ghost btn--sm" id="sortSize" type="button">Ordenar por tamanho</button>
+              <button class="btn btn--ghost btn--sm" id="restoreOrder" type="button">Restaurar ordem</button>
+              <button class="btn btn--ghost btn--sm" id="clearList" type="button">Limpar lista</button>
+            </div>
+          </div>
+          <p class="muted small" id="orderNote">A ordem abaixo será usada para gerar o PDF final.</p>
+          <ul class="file-list" id="fileList"></ul>
+        </section>
 
         <!-- Etapa 3 -->
         <div class="tool-step" id="configCard">
@@ -216,37 +229,22 @@
           </details>
         </div>
 
+        <!-- Resumo antes de iniciar (contextual) -->
+        <section class="notice notice--info" id="summaryCard" hidden>
+          <span class="notice__icon" aria-hidden="true">📋</span>
+          <div style="flex:1">
+            <strong>Resumo antes de iniciar</strong>
+            <div class="summary-grid" id="summaryGrid"></div>
+            <p class="muted small">A redução final depende da quantidade de imagens existentes nos PDFs.</p>
+          </div>
+        </section>
+
         <!-- Acao -->
         <div class="tool-cta">
           <button id="startBtn" class="btn btn--primary btn--lg" type="button" disabled>
             <span class="btn__icon">⚡</span><span id="startBtnLabel">Selecione PDFs para continuar</span>
           </button>
           <p class="tool-micro">🔒 O processamento é feito somente no seu dispositivo. Nenhum PDF será enviado para servidores.</p>
-        </div>
-      </section>
-
-      <!-- ===================== LISTA DE ARQUIVOS ===================== -->
-      <section class="card" id="fileListCard" hidden>
-        <div class="list-head">
-          <h2 class="card__title">Arquivos selecionados</h2>
-          <div class="list-tools">
-            <button class="btn btn--ghost btn--sm" id="sortName" type="button">Ordenar por nome</button>
-            <button class="btn btn--ghost btn--sm" id="sortSize" type="button">Ordenar por tamanho</button>
-            <button class="btn btn--ghost btn--sm" id="restoreOrder" type="button">Restaurar ordem</button>
-            <button class="btn btn--ghost btn--sm" id="clearList" type="button">Limpar lista</button>
-          </div>
-        </div>
-        <p class="muted small" id="orderNote">A ordem abaixo será usada para gerar o PDF final.</p>
-        <ul class="file-list" id="fileList"></ul>
-      </section>
-
-      <!-- ===================== RESUMO ===================== -->
-      <section class="card notice notice--info" id="summaryCard" hidden>
-        <span class="notice__icon" aria-hidden="true">📋</span>
-        <div style="flex:1">
-          <strong>Resumo antes de iniciar</strong>
-          <div class="summary-grid" id="summaryGrid"></div>
-          <p class="muted small">A redução final depende da quantidade de imagens existentes nos PDFs.</p>
         </div>
       </section>
 
