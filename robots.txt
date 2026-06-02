@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://comprimirpdfs.com.br/sitemap.xml

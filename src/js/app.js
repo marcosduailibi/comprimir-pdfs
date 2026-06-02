@@ -13,6 +13,40 @@ let worker = null;
 let fallbackCtx = null;        // ctx de pausa/cancel quando sem worker
 let analyzeQueue = [];         // FIFO de lotes (ids) aguardando analise de paginas
 
+// ============================ Estado da tarefa ============================
+// Persistimos apenas METADADOS (nunca os bytes do PDF) em sessionStorage, para
+// detectar, ao recarregar a pagina, que havia um processamento em andamento.
+const JOB_KEY = "pdfcompress_current_job";
+const isProcessing = () => appState.status === "processing" || appState.status === "paused";
+
+function saveJob(extra = {}) {
+  try {
+    const first = appState.files[0];
+    const job = {
+      status: appState.status,
+      startedAt: Date.now(),
+      fileName: first ? first.name : "",
+      fileSize: first ? first.size : 0,
+      filesCount: appState.files.length,
+      mode: appState.mode,
+      progress: 0,
+      currentStep: "",
+      ...extra,
+    };
+    sessionStorage.setItem(JOB_KEY, JSON.stringify(job));
+  } catch { /* sessionStorage indisponivel: segue sem persistir */ }
+}
+function updateJob(extra) {
+  try {
+    const raw = sessionStorage.getItem(JOB_KEY);
+    if (!raw) return;
+    sessionStorage.setItem(JOB_KEY, JSON.stringify({ ...JSON.parse(raw), ...extra }));
+  } catch { /* ignore */ }
+}
+function clearJob() {
+  try { sessionStorage.removeItem(JOB_KEY); } catch { /* ignore */ }
+}
+
 // ============================ Web Worker ============================
 function initWorker() {
   try {
@@ -131,6 +165,7 @@ function startProcessing() {
 
   appState.status = "processing";
   appState.result = null;
+  saveJob({ status: "processing", currentStep: "Carregando arquivos no navegador" });
   UI.updateStartButton();
   UI.hideBanner();
   UI.clearLog();
@@ -199,6 +234,7 @@ function onEngineMessage(msg) {
     case "progress": {
       UI.setProgress(msg.progress, msg.stepLabel);
       UI.setProgressDetail(msg);
+      updateJob({ progress: Math.round((msg.progress || 0) * 100), currentStep: msg.stepLabel || "" });
       const initialSize = appState.files.reduce((s, f) => s + f.size, 0);
       const el = UI.elapsedMs();
       if (el > 500 && msg.progress > 0.02) UI.setSpeed((msg.progress * initialSize) / 1024 / (el / 1000));
@@ -216,6 +252,7 @@ function onEngineMessage(msg) {
 
 function onDone(msg) {
   UI.stopTimer();
+  clearJob();
   appState.status = "done";
   const url = URL.createObjectURL(msg.blob);
   const name = buildFinalName(appState.mode, appState.files);
@@ -227,6 +264,7 @@ function onDone(msg) {
 
 function onCancelled() {
   UI.stopTimer();
+  clearJob();
   appState.status = "files_selected";
   document.getElementById("progressCard").hidden = true;
   UI.addLog("WARNING", "Operação cancelada. Nenhum arquivo foi enviado para servidores.");
@@ -238,6 +276,7 @@ function onCancelled() {
 
 function onError(msg) {
   UI.stopTimer();
+  clearJob();
   appState.status = "error";
   document.querySelectorAll(".step.is-active").forEach((n) => { n.classList.remove("is-active"); n.classList.add("is-error"); });
   const m = String(msg.message || "").toLowerCase();
@@ -285,8 +324,41 @@ function refresh() {
   UI.updateTechSummary();
 }
 
+// ============================ Ciclo de vida / aba ============================
+// Avisa antes de fechar/recarregar durante o processamento e alerta (sem
+// bloquear) quando a aba vai para segundo plano, onde o navegador pode reduzir
+// tarefas pesadas. Nao prometemos continuidade absoluta em background.
+let bgNoticeShown = false;
+function bindLifecycleGuards() {
+  window.addEventListener("beforeunload", (e) => {
+    if (isProcessing()) { e.preventDefault(); e.returnValue = ""; return ""; }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && isProcessing() && !bgNoticeShown) {
+      bgNoticeShown = true;
+      UI.addLog("WARNING", "Aba em segundo plano: alguns navegadores podem reduzir o processamento.");
+      showToast("A compressão continua no navegador, mas mantenha esta aba aberta para arquivos grandes.");
+    }
+    if (!document.hidden) bgNoticeShown = false;
+  });
+}
+
+// Detecta, ao carregar a pagina, um processamento que ficou em aberto (aba
+// fechada/recarregada). Como os PDFs nunca saem do navegador, nao ha como
+// restaurar os arquivos: orientamos a selecionar novamente. Sempre limpa o
+// registro para nao repetir o aviso.
+function checkPreviousJob() {
+  let job = null;
+  try { const raw = sessionStorage.getItem(JOB_KEY); if (raw) job = JSON.parse(raw); } catch { /* ignore */ }
+  if (!job) return;
+  clearJob();
+  UI.showBanner("warn", "Detectamos que havia uma compressão em andamento. Se a aba foi fechada ou o navegador pausou o processo, será necessário selecionar o arquivo novamente, pois seus PDFs não são enviados nem armazenados em servidor.");
+}
+
 // ============================ Init ============================
 initWorker();
+bindLifecycleGuards();
+checkPreviousJob();
 bindDonation();
 UI.initUI({
   onModeSelect: selectMode,

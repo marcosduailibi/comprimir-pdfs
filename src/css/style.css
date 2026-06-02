@@ -328,3 +328,34 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
   .modal { max-height: 92vh; }
   .modal-overlay { padding: 12px; }
 }
+
+/* ============ Apoio Pix + GitHub (primeira dobra) ============ */
+.fold-extras { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; }
+.support-card { display: flex; background: linear-gradient(135deg, color-mix(in srgb, var(--coffee) 10%, var(--card)), var(--card)); border-color: color-mix(in srgb, var(--coffee) 28%, var(--card-border)); }
+.support-content { display: flex; flex-direction: column; gap: 8px; }
+.support-card h2, .trust-card h2 { margin: 0; font-size: 1.05rem; }
+.support-card p, .trust-card p { margin: 0; color: var(--text-soft); font-size: 0.9rem; }
+.support-badge { align-self: flex-start; background: var(--green-soft); color: var(--green); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; padding: 4px 10px; border-radius: 999px; }
+.support-button { align-self: flex-start; margin-top: 4px; }
+.support-note { font-size: 0.78rem !important; color: var(--muted) !important; }
+.trust-card { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.trust-card .btn { margin-top: auto; }
+
+/* ============ Aviso de processamento (não fechar a aba) ============ */
+.processing-warning { margin: 6px 0 10px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); font-size: 0.85rem; }
+
+/* ============ Seções de conteúdo (SEO/confiança/FAQ) ============ */
+.howto { margin: 0; padding-left: 20px; color: var(--text-soft); }
+.howto li { margin-bottom: 8px; }
+.subhead { font-size: 0.98rem; margin: 18px 0 6px; color: var(--text); }
+#sobre p, #como-usar p, #privacidade p, #como-verificar p { color: var(--text-soft); }
+.verification-section .btn { margin: 4px 0 6px; }
+.faq { display: flex; flex-direction: column; gap: 8px; }
+.faq details { border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 12px 14px; background: color-mix(in srgb, var(--text) 2%, var(--card)); }
+.faq summary { cursor: pointer; font-weight: 600; font-size: 0.92rem; }
+.faq details[open] summary { margin-bottom: 8px; }
+.faq details p { margin: 0; color: var(--text-soft); font-size: 0.9rem; }
+
+@media (max-width: 880px) {
+  .fold-extras { grid-template-columns: 1fr; }
+}

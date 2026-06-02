@@ -75,7 +75,8 @@ export function bindDonation() {
   document.getElementById("copyPixPayloadBtn")?.addEventListener("click", copyPixPayload);
 
   // Abrir/fechar a secao/modal de doacao a partir de qualquer gatilho.
-  document.querySelectorAll("[data-donate]").forEach((b) =>
+  // Aceita tanto [data-donate] quanto [data-open-pix] (support-card / footer).
+  document.querySelectorAll("[data-donate], [data-open-pix]").forEach((b) =>
     b.addEventListener("click", showDonationModal)
   );
   document.getElementById("modalDonation")?.addEventListener("click", (e) => {
