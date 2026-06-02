@@ -1,0 +1,21 @@
+{
+  "name": "comprimir-pdf",
+  "version": "2.0.0",
+  "description": "Comprimir PDF — aplicação 100% no navegador para comprimir e juntar PDFs, com privacidade. Nenhum arquivo é enviado para servidores. As bibliotecas (pdf-lib, pako, jpeg-js) são carregadas por CDN jsDelivr com versões fixas, sem build e sem node_modules em produção.",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve .",
+    "demo": "npx --yes serve ."
+  },
+  "keywords": [
+    "pdf",
+    "compress",
+    "merge",
+    "compressor",
+    "juntar",
+    "browser",
+    "web-worker",
+    "privacy"
+  ],
+  "license": "MIT"
+}
