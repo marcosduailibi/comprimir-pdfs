@@ -87,6 +87,15 @@ img { max-width: 100%; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; font-weight: 800; font-size: 12px; letter-spacing: 0.5px; box-shadow: var(--shadow-sm); }
 .brand-name { font-size: 1.12rem; letter-spacing: -0.3px; }
+/* Logomarca SVG inline: a "tinta" segue o tema do site ([data-theme]); o
+   vermelho da seta é fixo. Como o tema é por botão (não prefers-color-scheme),
+   controlamos a cor aqui — não dentro do SVG. */
+.brand-logo { height: 30px; width: auto; display: block; }
+.brand-logo .ink-stroke { stroke: #0b0b0b; }
+.brand-logo .ink-fill { fill: #0b0b0b; }
+.brand-logo .accent-stroke { stroke: #f2292f; }
+[data-theme="dark"] .brand-logo .ink-stroke { stroke: #ffffff; }
+[data-theme="dark"] .brand-logo .ink-fill { fill: #ffffff; }
 .desktop-nav { display: flex; gap: 22px; margin-left: 12px; }
 .desktop-nav a { color: var(--muted); text-decoration: none; font-size: 0.92rem; font-weight: 600; }
 .desktop-nav a:hover { color: var(--primary); }
@@ -393,9 +402,9 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 /* ================================ Rodape ================================ */
 .site-footer { border-top: 1px solid var(--border); margin-top: 12px; padding: 30px 0 40px; }
 .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
-.footer-brand { display: flex; align-items: center; gap: 12px; }
-.footer-brand strong { display: block; }
-.footer-brand p { margin: 2px 0 0; color: var(--muted); font-size: 0.84rem; }
+.footer-brand { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.footer-brand .brand-logo { height: 26px; }
+.footer-brand p { margin: 0; color: var(--muted); font-size: 0.84rem; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center; }
 .footer-links a, .footer-links .link-btn { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 600; }
 .footer-links a:hover, .footer-links .link-btn:hover { color: var(--primary); }

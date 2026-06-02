@@ -1,10 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Comprimir PDF">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ef4444"/>
-      <stop offset="1" stop-color="#dc2626"/>
-    </linearGradient>
-  </defs>
-  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#g)"/>
-  <text x="32" y="41" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" fill="#ffffff" letter-spacing="1">PDF</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="2508" height="627" viewBox="0 0 2508 627" role="img" aria-labelledby="title desc">
+  <title id="title">Comprimir PDFs</title>
+  <desc id="desc">Logomarca minimalista com ícone de documento comprimido por setas vermelhas e texto Comprimir PDFs.</desc>
+  <style>
+    .ink-stroke { stroke: #0b0b0b; }
+    .ink-fill { fill: #0b0b0b; }
+    .accent-stroke { stroke: #f2292f; }
+    @media (prefers-color-scheme: dark) {
+      .ink-stroke { stroke: #ffffff; }
+      .ink-fill { fill: #ffffff; }
+    }
+  </style>
+
+  <g transform="translate(410 183)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path class="ink-stroke" d="M40 58 V24 Q40 10 54 10 H176 L238 72 V124" stroke-width="16"/>
+    <path class="ink-stroke" d="M176 10 V72 H238" stroke-width="16"/>
+    <path class="ink-stroke" d="M40 201 V252 Q40 266 54 266 H238 V225" stroke-width="16"/>
+
+    <path class="accent-stroke" d="M10 141 H92" stroke-width="18"/>
+    <path class="accent-stroke" d="M61 105 L99 141 L61 177" stroke-width="18"/>
+    <path class="accent-stroke" d="M270 141 H188" stroke-width="18"/>
+    <path class="accent-stroke" d="M219 105 L181 141 L219 177" stroke-width="18"/>
+  </g>
+
+  <text class="ink-fill" x="708" y="392"
+        font-family="Inter, Arial, Helvetica, sans-serif"
+        font-size="158" font-weight="800" letter-spacing="-5">
+    Comprimir PDFs
+  </text>
 </svg>
