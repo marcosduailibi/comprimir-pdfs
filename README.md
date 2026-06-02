@@ -1,72 +1,86 @@
-# Comprimir PDF
+# Comprimir PDFs
 
-Aplicação **100% no navegador** para **comprimir** e **juntar** PDFs, com
-privacidade: nenhum arquivo é enviado para servidores. Escrita em **HTML, CSS e
-JavaScript puro**, sem back-end e sem etapa de build. Pronta para **GitHub Pages**.
+Ferramenta gratuita para comprimir, organizar e juntar PDFs diretamente no navegador, sem enviar arquivos para servidores.
 
-A entrada é [`index.html`](index.html) na raiz desta pasta.
+Acesse: https://comprimirpdfs.com.br
 
-## Recursos
+## Sobre o projeto
 
-- **4 modos**: comprimir um PDF · juntar vários · juntar e depois comprimir ·
-  comprimir cada um e depois juntar.
-- **Reordenar** PDFs (arrastar e soltar, subir/descer, ordenar por nome/tamanho).
-- **Compressão** por presets (Leve/Equilibrado/Forte/Máxima) ou personalizada
-  (qualidade das imagens 1–100 e passadas 1–5), com textos de ajuda e avisos.
-- **Web Worker**: o processamento pesado roda em outra thread (a UI não trava),
-  com **pausar / retomar / parar** cooperativos. Fallback automático para a thread
-  principal quando o Worker não está disponível.
-- **Limites de segurança** por dispositivo (desktop/mobile) com aviso ou bloqueio.
-- **Progresso detalhado**, etapas visuais por modo e **logs técnicos** recolhíveis.
-- **Apoio via Pix** (voluntário, nunca bloqueia nada): QR Code, chave e Pix
-  Copia e Cola, com avisos de conferência do recebedor.
-- **Privacidade** comunicada em toda a interface + Política de Privacidade,
-  Termos de Uso, "Como verificar" e "Transparência técnica".
+O **Comprimir PDFs** foi criado para oferecer uma forma simples, rápida e privada de reduzir o tamanho de arquivos PDF.
 
-## Como rodar
+Todo o processamento acontece localmente, no próprio navegador do usuário. Isso significa que os arquivos selecionados não são enviados para servidores, não são armazenados e não são acessados por terceiros.
+
+## Funcionalidades
+
+- Comprimir um PDF
+- Juntar vários PDFs
+- Juntar PDFs e depois comprimir
+- Comprimir cada PDF e depois juntar
+- Diferentes níveis de compressão
+- Processamento local no navegador
+- Interface responsiva
+- Modo claro e escuro
+
+## Privacidade
+
+A ferramenta foi desenvolvida com foco em privacidade.
+
+Nenhum PDF é enviado para servidores. Os arquivos são processados diretamente no navegador do usuário.
+
+Mesmo assim, recomenda-se conferir o resultado final antes de compartilhar ou arquivar documentos importantes.
+
+## Tecnologia
+
+Site **100% estático** (HTML, CSS e JavaScript puro), **sem build** e **sem
+`node_modules` em produção**, pronto para **GitHub Pages**. A entrada é
+[`index.html`](index.html) na raiz do repositório, com caminhos relativos
+(`./src/...`).
+
+As bibliotecas `pdf-lib`, `pako` e `jpeg-js` são carregadas em tempo de execução
+por **CDN jsDelivr** com **versões fixas** (sufixo `/+esm`), sem dependência de
+`node_modules`. O processamento pesado roda em um **Web Worker** (com fallback
+para a thread principal), com pausar / retomar / parar.
+
+> Se o CDN (jsDelivr) for bloqueado por rede ou proxy, as bibliotecas externas
+> podem não carregar.
+
+## Como rodar localmente
 
 ```bash
-cd libjs/pdfcompress
-npm run start        # servidor estático na raiz do pacote
+npm run start        # equivale a: npx --yes serve .
 ```
 
-Abra **http://localhost:3000/**. (As bibliotecas `pdf-lib`, `pako` e `jpeg-js`
-são carregadas via **CDN jsDelivr** com versões fixas — `/+esm` — em tempo de
-execução, sem build e sem `node_modules`. Requer internet no navegador; se o CDN
-for bloqueado por rede/proxy, as libs externas podem não carregar.)
+Abra a URL indicada pelo `serve` (geralmente **http://localhost:3000/**). Requer
+internet no navegador para baixar as bibliotecas via CDN. Nenhum `npm install` é
+necessário para o site funcionar.
 
-### GitHub Pages
+## Publicação no GitHub Pages
 
-Publique a pasta `libjs/pdfcompress/` (ou copie-a para a raiz do site). Os
-caminhos são relativos (`./src/...`), então o app funciona ao acessar
-`.../pdfcompress/`.
+Em **Settings → Pages → Source: Deploy from a branch → `main` → `/(root)`**. O
+site abre diretamente por `index.html` na raiz do repositório. A pasta
+`node_modules/` está no `.gitignore` e não é enviada ao GitHub.
 
 ## Estrutura
-
-Veja [`src/README.md`](src/README.md). Resumo:
 
 ```
 index.html            # app principal
 src/css/style.css     # estilos (tema claro/escuro)
 src/js/               # app.js, ui.js, state.js, utils.js, donation.js,
                       # pdf-worker.js, pdf-compress.js, pdf-merge.js
-demo/README.md        # referência (app antigo foi substituído)
 ```
 
-## Privacidade
+## Apoie o projeto
 
-Os PDFs são processados na memória local do navegador e nunca enviados a
-servidores. As únicas requisições externas são as bibliotecas (CDN jsDelivr) e a
-imagem do QR Code Pix — nenhuma recebe o conteúdo dos PDFs. Você pode confirmar na
-aba **Rede/Network** das ferramentas de desenvolvedor.
+O Comprimir PDFs é gratuito e mantido de forma independente.
 
-## Limitações conhecidas
+Se a ferramenta te ajudou, você pode apoiar o projeto com qualquer valor via Pix. Até R$ 1 já ajuda a manter o site online, melhorar a ferramenta e continuar oferecendo uma opção simples, privada e gratuita para todos.
 
-- Não é byte-idêntico a ferramentas de servidor; a maior redução vem da qualidade
-  das imagens. Imagens CCITT/JBIG2/indexadas/com transparência são preservadas.
-- A pausa ocorre entre etapas (arquivos/páginas/imagens/passadas); o `save()` do
-  pdf-lib é indivisível, então a pausa não é instantânea.
+## Desenvolvedor
+
+Desenvolvido por **Marcos Duailibi**.
 
 ## Licença
 
-MIT.
+Este projeto é disponibilizado para consulta, estudo e verificação pública do código.
+
+Verifique o arquivo de licença do repositório para mais detalhes.
