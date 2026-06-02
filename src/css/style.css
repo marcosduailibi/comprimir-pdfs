@@ -359,3 +359,8 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
 @media (max-width: 880px) {
   .fold-extras { grid-template-columns: 1fr; }
 }
+
+/* ============ QR Pix dentro do modal "Apoie o projeto" ============ */
+.modal-qr { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 0 14px; }
+.modal-qr .qr-img { width: 200px; height: 200px; border-radius: var(--radius-sm); background: #fff; padding: 8px; border: 1px solid var(--card-border); }
+.modal-qr p { margin: 0; text-align: center; }

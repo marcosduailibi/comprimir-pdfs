@@ -60,12 +60,18 @@ export function bindDonation() {
   set("pixKeyType", PIX.keyType);
   document.querySelectorAll("[data-pix-key]").forEach((el) => (el.textContent = PIX.key));
 
-  const qr = document.getElementById("pixQr");
-  if (qr) {
+  // Preenche os QR Codes (secao de doacao e modal "Apoie o projeto").
+  const qrTargets = [
+    ["pixQr", "pixQrError"],
+    ["pixQrModal", "pixQrModalError"],
+  ];
+  for (const [imgId, errId] of qrTargets) {
+    const qr = document.getElementById(imgId);
+    if (!qr) continue;
     qr.src = PIX.qrUrl;
     qr.alt = "QR Code Pix para apoiar o projeto Comprimir PDF";
     qr.addEventListener("error", () => {
-      const warn = document.getElementById("pixQrError");
+      const warn = document.getElementById(errId);
       if (warn) warn.hidden = false;
       qr.hidden = true;
     });
