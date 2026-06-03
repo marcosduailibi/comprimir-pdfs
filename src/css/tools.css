@@ -65,6 +65,11 @@
 .hub-rail { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
 .hub-rail .tool-tile { flex: 0 0 220px; }
 
+/* Inputs das páginas de ferramenta (Dividir PDF, etc.) */
+.split-select, .split-input { width: 100%; height: 44px; padding: 0 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.95rem; }
+.split-select:focus-visible, .split-input:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.field-label { font-size: 0.84rem; font-weight: 700; color: var(--muted); }
+
 @media (prefers-reduced-motion: reduce) {
   .tool-tile, .hub-nav { transition: none; }
 }

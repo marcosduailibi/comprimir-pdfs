@@ -66,7 +66,7 @@ export const TOOLS = [
     categoryIds: ["organize"],
     aliases: ["dividir", "separar", "split", "partir", "fatiar"],
     inputExtensions: ["pdf"], outputExtensions: ["pdf", "zip"],
-    route: "#", icon: "✂️", status: "coming-soon",
+    route: "./dividir.html", icon: "✂️", status: "ready",
     supportsBatch: false, isLocalFirst: true, notes: [],
   },
   {

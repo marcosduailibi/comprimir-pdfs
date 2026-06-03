@@ -2,12 +2,12 @@
 // Renderiza o hub "Todas as ferramentas PDF" (JS puro). Consome o registry e a
 // busca pura; persiste só favoritos/uso (IDs). Não toca em arquivos do usuário.
 
-import { TOOLS, CATEGORIES } from "./registry.js?v=8";
-import { searchTools } from "./search.js?v=8";
+import { TOOLS, CATEGORIES } from "./registry.js?v=9";
+import { searchTools } from "./search.js?v=9";
 import {
   getFavorites, isFavorite, toggleFavorite,
   getRecent, getFrequent, recordOpen,
-} from "./stores.js?v=8";
+} from "./stores.js?v=9";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 function el(tag, props = {}, kids = []) {
@@ -84,7 +84,7 @@ function buildTile(tool) {
 
   if (ready) {
     return el("a", {
-      class: "tool-tile", href: tool.route, "aria-describedby": "tt-" + tool.id,
+      class: "tool-tile", href: tool.route,
       onclick: () => recordOpen(tool.id),
     }, kids);
   }
