@@ -398,7 +398,7 @@ function checkPreviousJob() {
   UI.showBanner("warn", "Detectamos que havia uma compressão em andamento. Se a aba foi fechada ou o navegador pausou o processo, será necessário selecionar o arquivo novamente, pois seus PDFs não são enviados nem armazenados em servidor.");
 }
 
-// Abre a ferramenta indicada pela URL (ex.: vinda do hub: ./index.html#tool=merge).
+// Abre a ferramenta indicada pela URL (ex.: vinda do catalogo: ./comprimir-pdf.html#tool=merge).
 function applyToolHash() {
   const m = (location.hash.match(/tool=([a-z_]+)/) || [])[1];
   const valid = ["compress", "merge", "merge_then_compress", "compress_then_merge"];

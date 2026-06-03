@@ -25,6 +25,23 @@ test("ferramentas ready nao usam rota placeholder", () => {
   for (const tool of ready) assert.notEqual(tool.route, "#", tool.id);
 });
 
+test("compressor principal aponta para pagina de ferramenta ArqKit", () => {
+  const tool = TOOLS.find((item) => item.id === "compress");
+  assert.ok(tool);
+  assert.equal(tool.status, "ready");
+  assert.equal(tool.route, "./comprimir-pdf.html#tool=compress");
+  assert.ok(tool.categoryIds.includes("pdf"));
+});
+
+test("ferramentas futuras nao usam status ready", () => {
+  for (const id of ["compress-image", "convert-image", "compress-video", "ocr"]) {
+    const tool = TOOLS.find((item) => item.id === id);
+    assert.ok(tool, id);
+    assert.notEqual(tool.status, "ready", id);
+    assert.equal(tool.route, "#", id);
+  }
+});
+
 test("registry nao contem faturas nem fluxos de IA simulada", () => {
   const all = TOOLS.map(normalizedText).join("\n");
   for (const forbidden of ["fatura", "invoice", "nota fiscal", "resumo com ia", "traducao com ia", "chat com pdf"]) {

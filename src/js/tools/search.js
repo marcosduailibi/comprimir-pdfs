@@ -1,48 +1,55 @@
 // tools/search.js
-// Busca PURA de ferramentas — sem acento, sem distinção de maiúsculas, por
-// nome, aliases (inclui termos em inglês), categorias e extensões. Módulo-folha
-// (testável em Node). A UI apenas consome o resultado.
+// Busca pura de ferramentas: sem acento, sem caixa, por nome, aliases,
+// keywords, categorias, extensoes, status e descricao.
 
-/** Remove acentos e normaliza para minúsculas. */
-export function normalize(s) {
-  return String(s == null ? "" : s)
+import { CATEGORIES, STATUS_META } from "./registry.js";
+
+export function normalize(value) {
+  return String(value == null ? "" : value)
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
-/**
- * Pontua uma ferramenta para um termo (0 = não casa).
- * Prioriza: nome começa-com > nome contém > alias exato > qualquer campo contém.
- */
+function categoryTerms(tool) {
+  return (tool.categoryIds || []).flatMap((id) => {
+    const category = CATEGORIES.find((item) => item.id === id);
+    return [id, category?.name || ""];
+  });
+}
+
 function scoreTerm(tool, term) {
   const name = normalize(tool.name);
   const short = normalize(tool.shortName);
-  if (name.startsWith(term) || short.startsWith(term)) return 6;
+  if (name.startsWith(term) || short.startsWith(term)) return 7;
 
   const aliases = (tool.aliases || []).map(normalize);
-  if (aliases.some((a) => a === term)) return 5;
+  if (aliases.some((alias) => alias === term)) return 6;
 
-  if (name.includes(term) || short.includes(term)) return 4;
-  if (aliases.some((a) => a.includes(term))) return 3;
+  if (name.includes(term) || short.includes(term)) return 5;
+  if (aliases.some((alias) => alias.includes(term))) return 4;
+
+  const keywords = (tool.keywords || []).map(normalize);
+  if (keywords.some((keyword) => keyword === term)) return 4;
+  if (keywords.some((keyword) => keyword.includes(term))) return 3;
 
   const exts = [...(tool.inputExtensions || []), ...(tool.outputExtensions || [])].map(normalize);
   if (exts.includes(term)) return 3;
 
-  const cats = (tool.categoryIds || []).map(normalize);
-  const desc = normalize(tool.description);
-  if (cats.some((c) => c.includes(term)) || desc.includes(term)) return 1;
+  const categories = categoryTerms(tool).map(normalize);
+  if (categories.some((category) => category.includes(term))) return 2;
+
+  const haystack = [
+    tool.description,
+    tool.tooltip,
+    STATUS_META[tool.status]?.label,
+    tool.status,
+  ].map(normalize).join(" ");
+  if (haystack.includes(term)) return 1;
 
   return 0;
 }
 
-/**
- * Busca ferramentas. Query vazia retorna todas (na ordem original).
- * Todos os termos precisam casar (AND); a pontuação ordena os resultados.
- * @param {string} query
- * @param {Array<object>} tools
- * @returns {Array<object>}
- */
 export function searchTools(query, tools) {
   const list = Array.isArray(tools) ? tools : [];
   const q = normalize(query).trim();
@@ -54,12 +61,19 @@ export function searchTools(query, tools) {
     let total = 0;
     let matchedAll = true;
     for (const term of terms) {
-      const s = scoreTerm(tool, term);
-      if (s === 0) { matchedAll = false; break; }
-      total += s;
+      const score = scoreTerm(tool, term);
+      if (score === 0) {
+        matchedAll = false;
+        break;
+      }
+      total += score;
     }
     if (matchedAll) scored.push({ tool, total });
   }
-  scored.sort((a, b) => b.total - a.total || a.tool.name.localeCompare(b.tool.name, "pt"));
-  return scored.map((x) => x.tool);
+
+  scored.sort((a, b) => {
+    const statusBias = (b.tool.status === "ready") - (a.tool.status === "ready");
+    return b.total - a.total || statusBias || a.tool.name.localeCompare(b.tool.name, "pt-BR");
+  });
+  return scored.map((item) => item.tool);
 }

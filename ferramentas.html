@@ -3,13 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todas as ferramentas PDF | Comprimir PDFs</title>
-    <meta name="description" content="Todas as ferramentas PDF locais e privadas: comprimir, juntar, dividir e mais — tudo no seu navegador, sem enviar arquivos para servidores." />
+    <title>Todas as ferramentas | ArqKit</title>
+    <meta name="description" content="Catálogo do ArqKit com ferramentas para PDF, imagens, vídeo, áudio, documentos, segurança e OCR. Use direto no navegador, com privacidade." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://comprimirpdfs.com.br/ferramentas.html" />
     <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
-
-    <!-- Tema antes do CSS (anti-flash); mesma chave do app. -->
     <script>
       (function () {
         try {
@@ -25,78 +23,79 @@
         } catch (e) {}
       })();
     </script>
-
     <link rel="stylesheet" href="./src/css/style.css?v=10" />
     <link rel="stylesheet" href="./src/css/tools.css?v=10" />
+    <link rel="stylesheet" href="./src/css/arqkit.css?v=12" />
   </head>
-  <body>
-    <!-- ============================ HEADER ============================ -->
+  <body class="ak-page ak-tools-page">
     <header class="site-header">
       <div class="header-inner">
-        <a href="./" class="brand" aria-label="Comprimir PDFs — início">
-          <svg class="brand-logo" viewBox="0 0 2508 627" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(410 183)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path class="ink-stroke" d="M40 58 V24 Q40 10 54 10 H176 L238 72 V124" stroke-width="16"/>
-              <path class="ink-stroke" d="M176 10 V72 H238" stroke-width="16"/>
-              <path class="ink-stroke" d="M40 201 V252 Q40 266 54 266 H238 V225" stroke-width="16"/>
-              <path class="accent-stroke" d="M10 141 H92" stroke-width="18"/>
-              <path class="accent-stroke" d="M61 105 L99 141 L61 177" stroke-width="18"/>
-              <path class="accent-stroke" d="M270 141 H188" stroke-width="18"/>
-              <path class="accent-stroke" d="M219 105 L181 141 L219 177" stroke-width="18"/>
-            </g>
-            <text class="ink-fill" x="708" y="392" font-family="Inter, Arial, Helvetica, sans-serif" font-size="158" font-weight="800" letter-spacing="-5">Comprimir PDFs</text>
-          </svg>
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - início">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
         </a>
-
-        <nav class="desktop-nav" aria-label="Navegação principal">
+        <nav class="desktop-nav" id="siteNav" aria-label="Navegacao principal">
           <a href="./">Início</a>
           <a href="./ferramentas.html" aria-current="page">Ferramentas</a>
+          <a href="./comprimir-pdf.html">PDF</a>
+          <a href="#images">Imagens</a>
+          <a href="#video">Vídeo</a>
+          <a href="./#privacidade">Privacidade</a>
           <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
-
         <div class="header-actions">
-          <a class="btn btn--support" href="./#apoiar">
-            <span aria-hidden="true">❤️</span> <span class="hide-sm">Apoiar projeto</span><span class="only-sm">Apoiar</span>
-          </a>
+          <a class="btn btn--ghost github-btn" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Ver no GitHub</a>
+          <a class="btn btn--support" href="./#apoie"><span aria-hidden="true">♥</span> Apoiar projeto</a>
           <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
-            <span class="theme-icon theme-icon--dark">🌙</span>
-            <span class="theme-icon theme-icon--light">☀️</span>
+            <span class="theme-icon theme-icon--dark">☾</span>
+            <span class="theme-icon theme-icon--light">☀</span>
           </button>
+          <button id="navToggle" class="mobile-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">☰</button>
         </div>
       </div>
     </header>
 
-    <!-- ============================== HUB ============================== -->
-    <main class="hub">
-      <div class="hub-head">
-        <h1>Todas as ferramentas PDF</h1>
-        <p>Ferramentas locais, privadas e gratuitas — tudo acontece no seu navegador.</p>
+    <main class="ak-catalog">
+      <section class="ak-catalog-head" aria-labelledby="catalogTitle">
+        <div>
+          <h1 id="catalogTitle">Todas as ferramentas</h1>
+          <p>Encontre, comprima, converta e edite arquivos direto no navegador.</p>
+        </div>
+        <label class="ak-search" for="hubSearch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="hubSearch" type="search" placeholder="Buscar ferramenta: PDF, imagem, vídeo, OCR..." autocomplete="off" />
+          <span class="ak-kbd" aria-hidden="true">Ctrl K</span>
+        </label>
+      </section>
+
+      <nav class="ak-tabs" aria-label="Categorias de ferramentas">
+        <div class="ak-chips" id="hubNav"></div>
+      </nav>
+
+      <div class="ak-recent-strip" aria-label="Ferramentas usadas recentemente">
+        <strong>Usadas recentemente</strong>
+        <div id="recentTools" style="display:contents"></div>
       </div>
 
-      <div class="hub-search">
-        <span class="hub-search__icon" aria-hidden="true">🔍</span>
-        <input id="hubSearch" type="search" placeholder="Buscar ferramenta" aria-label="Buscar ferramenta" autocomplete="off" />
-        <span class="hub-search__kbd" aria-hidden="true">Ctrl K</span>
-      </div>
-
-      <nav class="hub-nav" id="hubNav" aria-label="Categorias de ferramentas"></nav>
-
+      <div class="ak-notice" id="toolNotice" hidden aria-live="polite"></div>
       <div id="hubSections"></div>
     </main>
 
-    <!-- ============================ RODAPÉ ============================ -->
     <footer class="site-footer">
       <div class="footer-inner">
-        <nav class="footer-links" aria-label="Links do rodapé">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - início">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="footer-links" aria-label="Links do rodape">
           <a href="./">Início</a>
-          <a href="./ferramentas.html">Ferramentas</a>
           <a href="./#privacidade">Privacidade</a>
-          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
-        <p class="footer-copy">Comprimir PDFs • Tudo processado localmente no seu navegador. Nenhum arquivo é enviado para servidores.</p>
+        <p class="footer-copy">Todas as ferramentas prontas processam arquivos localmente no navegador.</p>
       </div>
     </footer>
 
-    <script type="module" src="./src/js/tools/hub.js?v=10"></script>
+    <script type="module" src="./src/js/tools/hub.js?v=12"></script>
   </body>
 </html>

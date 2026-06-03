@@ -1,203 +1,227 @@
-// tools/hub.js
-// Renderiza o hub "Todas as ferramentas PDF" (JS puro). Consome o registry e a
-// busca pura; persiste só favoritos/uso (IDs). Não toca em arquivos do usuário.
-
-import { TOOLS, CATEGORIES } from "./registry.js?v=10";
-import { searchTools } from "./search.js?v=10";
+import { TOOLS, CATEGORIES, toolsInCategory } from "./registry.js?v=12";
+import { searchTools } from "./search.js?v=12";
+import { createToolCard, el, iconMarkup, isOpenable, makeIcon } from "./render.js?v=12";
 import {
-  getFavorites, isFavorite, toggleFavorite,
-  getRecent, getFrequent, recordOpen,
+  getFavorites,
+  isFavorite,
+  toggleFavorite,
+  getRecent,
+  recordOpen,
 } from "./stores.js?v=10";
-import { bindThemeToggle } from "../theme.js?v=10";
+import { bindThemeToggle, initTheme } from "../theme.js?v=10";
 
-const $ = (sel, root = document) => root.querySelector(sel);
-function el(tag, props = {}, kids = []) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) {
-    if (k === "class") n.className = v;
-    else if (k === "html") n.innerHTML = v;
-    else if (k === "text") n.textContent = v;
-    else if (k.startsWith("on") && typeof v === "function") n.addEventListener(k.slice(2), v);
-    else if (v != null && v !== false) n.setAttribute(k, v === true ? "" : v);
-  }
-  for (const c of [].concat(kids)) if (c) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
-  return n;
-}
+const $ = (selector, root = document) => root.querySelector(selector);
 
-const STATUS = {
-  ready:             { label: "Pronto",       cls: "tool-badge--ready" },
-  beta:              { label: "Beta",          cls: "tool-badge--soon" },
-  "coming-soon":     { label: "Em breve",      cls: "tool-badge--soon" },
-  "requires-desktop":{ label: "Requer desktop", cls: "tool-badge--desktop" },
-};
-
+const SECTION_ORDER = ["popular", "pdf", "images", "video", "documents", "security", "ocr", "audio", "soon"];
 let state = { query: "", category: "all" };
 
-// ------------------------------ Popover info ------------------------------
-let openPopover = null;
-function closePopover() { if (openPopover) { openPopover.remove(); openPopover = null; } }
-function showPopover(tool, anchor) {
-  closePopover();
-  const status = STATUS[tool.status] || STATUS["coming-soon"];
-  const pop = el("div", { class: "tool-popover", role: "dialog", "aria-label": tool.name }, [
-    el("button", { class: "tool-popover__close", "aria-label": "Fechar", type: "button", onclick: closePopover }, "✕"),
-    el("h4", { text: tool.name }),
-    el("p", { text: tool.tooltip || tool.description }),
-    el("p", { class: "small", html: `<b>Status:</b> ${status.label}` }),
-    ...(tool.notes || []).map((nt) => el("p", { class: "tool-popover__note", text: nt })),
-  ]);
-  document.body.appendChild(pop);
-  const r = anchor.getBoundingClientRect();
-  const pw = Math.min(300, window.innerWidth - 24);
-  let left = Math.min(r.left, window.innerWidth - pw - 12);
-  let top = r.bottom + 8;
-  if (top + pop.offsetHeight > window.innerHeight - 8) top = Math.max(8, r.top - pop.offsetHeight - 8);
-  pop.style.left = Math.max(12, left) + "px";
-  pop.style.top = top + "px";
-  pop.style.maxWidth = pw + "px";
-  openPopover = pop;
+function showNotice(tool) {
+  const box = $("#toolNotice");
+  if (!box || !tool) return;
+  box.hidden = false;
+  box.innerHTML = "";
+  box.appendChild(makeIcon(tool, "is-small"));
+  box.appendChild(el("span", { text: `${tool.name} ainda não está pronto. Mantemos ferramentas futuras marcadas como Em breve para não abrir uma ação falsa.` }));
 }
 
-// ------------------------------ Tile ------------------------------
-function buildTile(tool) {
-  const status = STATUS[tool.status] || STATUS["coming-soon"];
-  const ready = tool.status === "ready";
+function openTool(tool) {
+  try { recordOpen(tool.id); } catch { /* optional */ }
+}
 
-  const icon = el("div", { class: "tool-tile__icon", "aria-hidden": "true", text: tool.icon || "📄" });
-  const name = el("div", { class: "tool-tile__name", text: tool.name });
-  const desc = el("div", { class: "tool-tile__desc", text: tool.description });
-  const badge = el("span", { class: "tool-badge " + status.cls, text: status.label });
-
-  const star = el("button", {
-    class: "tool-tile__star" + (isFavorite(tool.id) ? " is-fav" : ""),
+function favoriteButton(tool) {
+  return el("button", {
+    class: `ak-favorite${isFavorite(tool.id) ? " is-active" : ""}`,
     type: "button",
+    "aria-label": `${isFavorite(tool.id) ? "Remover" : "Adicionar"} ${tool.name} dos favoritos`,
     "aria-pressed": String(isFavorite(tool.id)),
-    "aria-label": (isFavorite(tool.id) ? "Remover " : "Adicionar ") + tool.name + (isFavorite(tool.id) ? " dos favoritos" : " aos favoritos"),
-    onclick: (e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(tool.id); render(); },
-  }, isFavorite(tool.id) ? "★" : "☆");
+    onclick: (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFavorite(tool.id);
+      render();
+    },
+    html: iconMarkup("star"),
+  });
+}
 
-  const info = el("button", {
-    class: "tool-tile__info", type: "button", "aria-label": "Sobre " + tool.name,
-    onclick: (e) => { e.preventDefault(); e.stopPropagation(); showPopover(tool, info); },
-  }, "ⓘ");
-
-  const kids = [icon, name, desc, badge, star, info];
-
-  if (ready) {
-    return el("a", {
-      class: "tool-tile", href: tool.route,
-      onclick: () => recordOpen(tool.id),
-    }, kids);
-  }
-  // Não-pronta: não navega para um fluxo falso — abre o popover honesto.
-  return el("div", {
-    class: "tool-tile", role: "button", tabindex: "0", "aria-disabled": "true",
-    onclick: () => showPopover(tool, info),
-    onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showPopover(tool, info); } },
-  }, kids);
+function card(tool) {
+  const node = createToolCard(tool, {
+    className: "ak-catalog-card",
+    onOpen: openTool,
+    onUnavailable: showNotice,
+  });
+  node.appendChild(favoriteButton(tool));
+  return node;
 }
 
 function grid(tools) {
-  const g = el("div", { class: "hub-grid" });
-  tools.forEach((t) => g.appendChild(buildTile(t)));
-  return g;
+  const node = el("div", { class: "ak-catalog-grid" });
+  tools.forEach((tool) => node.appendChild(card(tool)));
+  return node;
 }
-function rail(tools) {
-  const g = el("div", { class: "hub-rail" });
-  tools.forEach((t) => g.appendChild(buildTile(t)));
-  return g;
-}
-function section(title, node, extra = "") {
-  return el("section", { class: "hub-section" }, [
-    el("h2", { class: "hub-section__title", html: title + (extra ? ` <span class="small muted">${extra}</span>` : "") }),
-    node,
+
+function section(categoryId, tools) {
+  const category = CATEGORIES.find((item) => item.id === categoryId);
+  if (!category || !tools.length) return null;
+  return el("section", { class: "ak-catalog-section", id: category.id }, [
+    el("div", { class: "ak-section-title" }, [
+      el("span", { html: iconMarkup(category.icon) }),
+      el("h2", { text: category.name }),
+      el("small", { text: `${tools.length} ferramenta(s)` }),
+    ]),
+    grid(tools),
   ]);
 }
 
-const byId = (id) => TOOLS.find((t) => t.id === id);
+function renderChips() {
+  const root = $("#hubNav");
+  if (!root) return;
+  root.innerHTML = "";
+  CATEGORIES.forEach((category) => {
+    const chip = el("button", {
+      class: `ak-chip${state.category === category.id ? " is-active" : ""}`,
+      type: "button",
+      "aria-pressed": String(state.category === category.id),
+      onclick: () => {
+        state.category = category.id;
+        state.query = "";
+        const input = $("#hubSearch");
+        if (input) input.value = "";
+        renderChips();
+        render();
+      },
+    }, [
+      el("span", { html: iconMarkup(category.icon) }),
+      el("span", { text: category.name }),
+    ]);
+    root.appendChild(chip);
+  });
+}
 
-// ------------------------------ Render ------------------------------
+function renderRecent() {
+  const root = $("#recentTools");
+  if (!root) return;
+  const recentIds = getRecent(4);
+  const fallback = ["compress", "merge", "images-to-pdf", "compress-image"];
+  const tools = (recentIds.length ? recentIds : fallback)
+    .map((id) => TOOLS.find((tool) => tool.id === id))
+    .filter(Boolean);
+  root.innerHTML = "";
+  tools.forEach((tool) => {
+    root.appendChild(createToolCard(tool, {
+      className: "ak-mini-tool",
+      compact: true,
+      showBadges: false,
+      showAction: false,
+      onOpen: openTool,
+      onUnavailable: showNotice,
+    }));
+  });
+}
+
+function renderSearchResults(root) {
+  let tools = searchTools(state.query, TOOLS);
+  if (state.category !== "all") {
+    const allowed = new Set(toolsInCategory(state.category, TOOLS).map((tool) => tool.id));
+    tools = tools.filter((tool) => allowed.has(tool.id));
+  }
+
+  if (!tools.length) {
+    root.appendChild(el("div", { class: "ak-empty" }, [
+      el("strong", { text: "Nenhuma ferramenta encontrada" }),
+      el("span", { text: "Tente termos como PDF, imagem, vídeo, senha, OCR, JPG ou MP4." }),
+    ]));
+    return tools;
+  }
+
+  root.appendChild(section("all", tools) || grid(tools));
+  return tools;
+}
+
 function render() {
   const root = $("#hubSections");
   if (!root) return;
   root.innerHTML = "";
+  $("#toolNotice")?.setAttribute("hidden", "");
 
-  // Busca ativa → resultados planos
-  if (state.query.trim()) {
-    const res = searchTools(state.query, TOOLS);
-    if (res.length === 0) {
-      root.appendChild(el("div", { class: "hub-empty" }, [
-        el("p", { text: "Nenhuma ferramenta encontrada para “" + state.query + "”." }),
-        el("p", { class: "small", text: "Tente outro termo, como “juntar”, “dividir”, “jpg” ou “senha”." }),
-      ]));
-    } else {
-      root.appendChild(section(`Resultados`, grid(res), `${res.length} ferramenta(s)`));
+  const query = state.query.trim();
+  let activeTools = [];
+
+  if (query) {
+    activeTools = renderSearchResults(root);
+  } else if (state.category !== "all") {
+    activeTools = toolsInCategory(state.category, TOOLS);
+    root.appendChild(section(state.category, activeTools) || grid(activeTools));
+  } else {
+    const favs = getFavorites().map((id) => TOOLS.find((tool) => tool.id === id)).filter(Boolean);
+    if (favs.length) root.appendChild(section("star", favs) || grid(favs));
+    for (const categoryId of SECTION_ORDER) {
+      const tools = toolsInCategory(categoryId, TOOLS);
+      const node = section(categoryId, tools);
+      if (node) root.appendChild(node);
+      activeTools = activeTools.concat(tools);
     }
-    return;
   }
 
-  // Favoritos
-  const favs = getFavorites().map(byId).filter(Boolean);
-  if (favs.length) root.appendChild(section("⭐ Favoritos", grid(favs)));
-
-  // Usado por último
-  const recents = getRecent(6).map(byId).filter(Boolean);
-  if (recents.length) root.appendChild(section("🕓 Usado por último", rail(recents)));
-
-  // Frequentemente usadas
-  const frequent = getFrequent(8).map(byId).filter(Boolean);
-  if (frequent.length) root.appendChild(section("⚡ Frequentemente usadas", rail(frequent)));
-
-  // Por categoria (ou categoria filtrada)
-  const cats = state.category === "all"
-    ? CATEGORIES
-    : CATEGORIES.filter((c) => c.id === state.category);
-  for (const c of cats) {
-    const tools = TOOLS.filter((t) => (t.categoryIds || []).includes(c.id));
-    if (tools.length) root.appendChild(section(c.name, grid(tools)));
-  }
+  currentResults = activeTools;
 }
 
-// ------------------------------ Chips / nav ------------------------------
-function renderChips() {
-  const nav = $("#hubNav");
-  if (!nav) return;
-  nav.innerHTML = "";
-  const make = (id, label) => el("button", {
-    class: "hub-chip" + (state.category === id ? " is-active" : ""),
-    type: "button", "aria-pressed": String(state.category === id),
-    onclick: () => { state.category = id; state.query = ""; const i = $("#hubSearch"); if (i) i.value = ""; renderChips(); render(); window.scrollTo({ top: 0, behavior: "smooth" }); },
-  }, label);
-  nav.appendChild(make("all", "Todas"));
-  for (const c of CATEGORIES) {
-    if (TOOLS.some((t) => (t.categoryIds || []).includes(c.id))) nav.appendChild(make(c.id, c.name));
-  }
-}
+let currentResults = [];
 
-// ------------------------------ Tema ------------------------------
-function initTheme() {
-  bindThemeToggle($("#themeToggle"));
-}
-
-// ------------------------------ Init ------------------------------
-function init() {
-  renderChips();
-  render();
-  initTheme();
-
+function bindSearch() {
   const input = $("#hubSearch");
-  if (input) {
-    input.addEventListener("input", () => { state.query = input.value; if (state.query.trim()) state.category = "all", renderChips(); render(); });
-  }
-  // Atalho Ctrl/Cmd+K foca a busca; Esc fecha popover / limpa busca.
-  document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); input && input.focus(); }
-    if (e.key === "Escape") { if (openPopover) closePopover(); else if (input && document.activeElement === input) { input.value = ""; state.query = ""; render(); } }
+  if (!input) return;
+  input.addEventListener("input", () => {
+    state.query = input.value;
+    render();
   });
-  document.addEventListener("click", (e) => {
-    if (openPopover && !openPopover.contains(e.target) && !e.target.closest(".tool-tile__info")) closePopover();
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      const first = currentResults[0];
+      if (!first) return;
+      if (isOpenable(first)) {
+        openTool(first);
+        window.location.href = first.route;
+      } else {
+        showNotice(first);
+      }
+    }
+    if (event.key === "Escape") {
+      input.value = "";
+      state.query = "";
+      render();
+    }
   });
-  window.addEventListener("resize", closePopover);
+  document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      input.focus();
+    }
+    if (event.key === "Escape") $("#toolNotice")?.setAttribute("hidden", "");
+  });
+}
+
+function bindHeader() {
+  bindThemeToggle($("#themeToggle"));
+  const nav = $("#siteNav");
+  const toggle = $("#navToggle");
+  if (!nav || !toggle) return;
+  const setOpen = (open) => {
+    nav.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("nav-open", open);
+  };
+  toggle.addEventListener("click", () => setOpen(!nav.classList.contains("is-open")));
+  nav.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setOpen(false)));
+}
+
+function init() {
+  initTheme();
+  bindHeader();
+  renderChips();
+  renderRecent();
+  render();
+  bindSearch();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

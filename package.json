@@ -1,7 +1,7 @@
 {
-  "name": "comprimir-pdf",
-  "version": "2.0.0",
-  "description": "Comprimir PDF — aplicação 100% no navegador para comprimir e juntar PDFs, com privacidade. Nenhum arquivo é enviado para servidores. As bibliotecas (pdf-lib, pako, jpeg-js) são carregadas por CDN jsDelivr com versões fixas, sem build e sem node_modules em produção.",
+  "name": "arqkit",
+  "version": "2.1.0",
+  "description": "ArqKit - suite estatica de ferramentas para PDF, imagens, video, audio e documentos, com processamento local no navegador e foco em privacidade.",
   "type": "module",
   "scripts": {
     "start": "npx --yes serve .",
@@ -9,6 +9,7 @@
     "test": "node --test test/*.test.mjs"
   },
   "keywords": [
+    "arqkit",
     "pdf",
     "compress",
     "merge",
@@ -16,7 +17,9 @@
     "juntar",
     "browser",
     "web-worker",
-    "privacy"
+    "privacy",
+    "image-tools",
+    "video-tools"
   ],
   "license": "MIT"
 }
