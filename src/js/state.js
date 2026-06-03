@@ -2,8 +2,8 @@
 // Estado global da aplicacao + dados fixos (presets, limites, modos, etapas) e
 // helpers de validacao. Sem dependencias de DOM ou de PDF.
 
-import { detectDevice } from "./utils.js?v=7";
-import { MB, MAX, calculateSelectedFilesSummary } from "./pdf-limits.js?v=7";
+import { detectDevice } from "./utils.js?v=8";
+import { MB, MAX, calculateSelectedFilesSummary } from "./pdf-limits.js?v=8";
 
 // Reexporta o resumo PURO para a UI consumir a partir de state.js.
 export { MAX, calculateSelectedFilesSummary };

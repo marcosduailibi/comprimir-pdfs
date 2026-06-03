@@ -2,10 +2,11 @@
 // Bootstrap e orquestracao: liga estado (state.js), interface (ui.js) e
 // processamento (Web Worker pdf-worker.js, com fallback na thread principal).
 
-import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=7";
-import * as UI from "./ui.js?v=7";
-import { buildFinalName, clamp, showToast } from "./utils.js?v=7";
-import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=7";
+import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=8";
+import * as UI from "./ui.js?v=8";
+import { buildFinalName, clamp, showToast } from "./utils.js?v=8";
+import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=8";
+import { recordOpen, recordComplete } from "./tools/stores.js?v=8";
 
 let idSeq = 0;
 let originalOrder = [];        // snapshot para "Restaurar ordem"
@@ -50,7 +51,7 @@ function clearJob() {
 // ============================ Web Worker ============================
 function initWorker() {
   try {
-    worker = new Worker(new URL("./pdf-worker.js?v=7", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./pdf-worker.js?v=8", import.meta.url), { type: "module" });
     worker.onmessage = (e) => onEngineMessage(e.data);
     worker.onerror = () => { worker = null; }; // cai no fallback ao processar
   } catch {
@@ -103,7 +104,7 @@ function analyzeFiles(batch) {
     worker.postMessage({ type: "analyze", files: batch.map((f) => f.file) });
   } else {
     (async () => {
-      const { analyzeBytes } = await import("./pdf-merge.js?v=7");
+      const { analyzeBytes } = await import("./pdf-merge.js?v=8");
       for (const f of batch) {
         try { const { pages } = await analyzeBytes(new Uint8Array(await f.file.arrayBuffer())); setPages(f.id, pages); }
         catch { setPages(f.id, null); }
@@ -212,7 +213,7 @@ async function startProcessing() {
 async function runFallback(task) {
   fallbackCtx = { paused: false, cancelled: false, isPaused() { return this.paused; }, isCancelled() { return this.cancelled; } };
   try {
-    const { runTask } = await import("./pdf-worker.js?v=7");
+    const { runTask } = await import("./pdf-worker.js?v=8");
     await runTask(task, { ctx: fallbackCtx, emit: onEngineMessage });
   } catch (err) {
     if (err && err.message === "TASK_CANCELLED") onEngineMessage({ type: "cancelled" });
@@ -275,6 +276,7 @@ function onEngineMessage(msg) {
 function onDone(msg) {
   UI.stopTimer();
   clearJob();
+  try { recordComplete(appState.mode); } catch { /* uso é opcional */ }
   appState.status = "done";
   const url = URL.createObjectURL(msg.blob);
   const name = buildFinalName(appState.mode, appState.files);
@@ -377,6 +379,16 @@ function checkPreviousJob() {
   UI.showBanner("warn", "Detectamos que havia uma compressão em andamento. Se a aba foi fechada ou o navegador pausou o processo, será necessário selecionar o arquivo novamente, pois seus PDFs não são enviados nem armazenados em servidor.");
 }
 
+// Abre a ferramenta indicada pela URL (ex.: vinda do hub: ./index.html#tool=merge).
+function applyToolHash() {
+  const m = (location.hash.match(/tool=([a-z_]+)/) || [])[1];
+  const valid = ["compress", "merge", "merge_then_compress", "compress_then_merge"];
+  if (!m || !valid.includes(m)) return;
+  selectMode(m);
+  try { recordOpen(m); } catch { /* uso é opcional */ }
+  document.getElementById("ferramenta")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 // ============================ Init ============================
 initWorker();
 bindLifecycleGuards();
@@ -404,3 +416,7 @@ UI.initUI({
   onProcessAgain: processAgain,
   onChangeOrder: changeOrder,
 });
+
+// Abre a ferramenta vinda do hub (e ao mudar o hash sem recarregar).
+applyToolHash();
+window.addEventListener("hashchange", applyToolHash);

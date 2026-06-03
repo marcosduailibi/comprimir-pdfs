@@ -6,8 +6,8 @@ import {
   appState, MODES, PRESETS, STEPS, modeAllowsMultiple, modeNeedsCompression,
   qualityHint, passesInfo, presetFromValues, validateSelection, riskLevel,
   calculateSelectedFilesSummary,
-} from "./state.js?v=7";
-import { formatBytes, formatTime, prettyMode } from "./utils.js?v=7";
+} from "./state.js?v=8";
+import { formatBytes, formatTime, prettyMode } from "./utils.js?v=8";
 
 const $ = (id) => document.getElementById(id);
 let H = {}; // handlers
