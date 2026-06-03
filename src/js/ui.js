@@ -5,8 +5,9 @@
 import {
   appState, MODES, PRESETS, STEPS, modeAllowsMultiple, modeNeedsCompression,
   qualityHint, passesInfo, presetFromValues, validateSelection, riskLevel,
-} from "./state.js?v=6";
-import { formatBytes, formatTime, prettyMode } from "./utils.js?v=6";
+  calculateSelectedFilesSummary,
+} from "./state.js?v=7";
+import { formatBytes, formatTime, prettyMode } from "./utils.js?v=7";
 
 const $ = (id) => document.getElementById(id);
 let H = {}; // handlers
@@ -134,20 +135,22 @@ export function updateSummary() {
   const card = $("summaryCard");
   if (appState.files.length === 0) { card.hidden = true; return; }
   card.hidden = false;
-  const total = appState.files.reduce((s, f) => s + f.size, 0);
-  const maxFile = appState.files.reduce((m, f) => Math.max(m, f.size), 0);
+  // Total SEMPRE pela soma de todos os arquivos (função pura testável).
+  const { totalBytes, largestFileBytes, totalPages, remainingBytes } = calculateSelectedFilesSummary(appState.files);
   const order = appState.files.map((f) => f.name).join(" → ");
   const rows = [
     ["Modo", prettyMode(appState.mode)],
     ["Arquivos", `${appState.files.length} PDF(s)`],
-    ["Tamanho total", formatBytes(total)],
-    ["Maior arquivo", formatBytes(maxFile)],
+    ["Tamanho total", formatBytes(totalBytes)],
+    ["Maior arquivo", formatBytes(largestFileBytes)],
   ];
+  if (totalPages > 0) rows.push(["Páginas (analisadas)", String(totalPages)]);
   if (modeNeedsCompression(appState.mode)) {
     rows.push(["Qualidade das imagens", appState.quality + "%"]);
     rows.push(["Passadas", String(appState.passes)]);
   }
   rows.push(["Risco", riskLevel(appState.files)]);
+  rows.push(["Limite restante (1 GB)", formatBytes(remainingBytes)]);
   rows.push(["Processamento", "local no navegador"]);
   if (appState.files.length > 1) rows.push(["Ordem", order.length > 60 ? order.slice(0, 60) + "…" : order]);
 

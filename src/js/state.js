@@ -2,9 +2,11 @@
 // Estado global da aplicacao + dados fixos (presets, limites, modos, etapas) e
 // helpers de validacao. Sem dependencias de DOM ou de PDF.
 
-import { detectDevice } from "./utils.js?v=6";
+import { detectDevice } from "./utils.js?v=7";
+import { MB, MAX, calculateSelectedFilesSummary } from "./pdf-limits.js?v=7";
 
-const MB = 1024 * 1024;
+// Reexporta o resumo PURO para a UI consumir a partir de state.js.
+export { MAX, calculateSelectedFilesSummary };
 
 // ------------------------------ Estado ------------------------------
 export const appState = {
@@ -89,16 +91,12 @@ export const STEPS = {
 };
 
 // ------------------------------ Limites ------------------------------
-const GB = 1024 * MB;
+// MAX e o resumo PURO vêm de pdf-limits.js (módulo-folha testável em Node).
 
 // Pista de memória do dispositivo (em GB). Não existe em todos os navegadores;
 // usada apenas como dica para apertar a "zona confortável".
 export const DEVICE_MEMORY = (typeof navigator !== "undefined" && navigator.deviceMemory) || null;
 const lowMemory = DEVICE_MEMORY != null && DEVICE_MEMORY <= 2;
-
-// Limites RÍGIDOS de entrada (rejeição). O processamento é local; acima disso
-// recusamos de forma controlada — sem tentar (e travar) o navegador.
-export const MAX = { perFile: 1 * GB, total: 1 * GB, files: 500 };
 
 // Zona "confortável" para a engine atual (carrega o PDF em memória). Acima
 // disso a operação é permitida, mas avisamos que pode demorar/usar muita memória.

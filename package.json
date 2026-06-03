@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "npx --yes serve .",
-    "demo": "npx --yes serve ."
+    "demo": "npx --yes serve .",
+    "test": "node --test test/summary.test.mjs"
   },
   "keywords": [
     "pdf",

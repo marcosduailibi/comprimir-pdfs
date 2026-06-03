@@ -2,10 +2,10 @@
 // Bootstrap e orquestracao: liga estado (state.js), interface (ui.js) e
 // processamento (Web Worker pdf-worker.js, com fallback na thread principal).
 
-import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=6";
-import * as UI from "./ui.js?v=6";
-import { buildFinalName, clamp, showToast } from "./utils.js?v=6";
-import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=6";
+import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=7";
+import * as UI from "./ui.js?v=7";
+import { buildFinalName, clamp, showToast } from "./utils.js?v=7";
+import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=7";
 
 let idSeq = 0;
 let originalOrder = [];        // snapshot para "Restaurar ordem"
@@ -50,7 +50,7 @@ function clearJob() {
 // ============================ Web Worker ============================
 function initWorker() {
   try {
-    worker = new Worker(new URL("./pdf-worker.js?v=6", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./pdf-worker.js?v=7", import.meta.url), { type: "module" });
     worker.onmessage = (e) => onEngineMessage(e.data);
     worker.onerror = () => { worker = null; }; // cai no fallback ao processar
   } catch {
@@ -103,7 +103,7 @@ function analyzeFiles(batch) {
     worker.postMessage({ type: "analyze", files: batch.map((f) => f.file) });
   } else {
     (async () => {
-      const { analyzeBytes } = await import("./pdf-merge.js?v=6");
+      const { analyzeBytes } = await import("./pdf-merge.js?v=7");
       for (const f of batch) {
         try { const { pages } = await analyzeBytes(new Uint8Array(await f.file.arrayBuffer())); setPages(f.id, pages); }
         catch { setPages(f.id, null); }
@@ -212,7 +212,7 @@ async function startProcessing() {
 async function runFallback(task) {
   fallbackCtx = { paused: false, cancelled: false, isPaused() { return this.paused; }, isCancelled() { return this.cancelled; } };
   try {
-    const { runTask } = await import("./pdf-worker.js?v=6");
+    const { runTask } = await import("./pdf-worker.js?v=7");
     await runTask(task, { ctx: fallbackCtx, emit: onEngineMessage });
   } catch (err) {
     if (err && err.message === "TASK_CANCELLED") onEngineMessage({ type: "cancelled" });
