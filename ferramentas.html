@@ -13,15 +13,21 @@
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("comprimirpdf-theme");
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          var old = localStorage.getItem("comprimirpdf-theme");
+          if (!t && (old === "dark" || old === "light")) {
+            t = old;
+            localStorage.setItem("pdfTools.theme.v1", old);
+            localStorage.removeItem("comprimirpdf-theme");
+          }
           if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
       })();
     </script>
 
-    <link rel="stylesheet" href="./src/css/style.css?v=9" />
-    <link rel="stylesheet" href="./src/css/tools.css?v=9" />
+    <link rel="stylesheet" href="./src/css/style.css?v=10" />
+    <link rel="stylesheet" href="./src/css/tools.css?v=10" />
   </head>
   <body>
     <!-- ============================ HEADER ============================ -->
@@ -91,6 +97,6 @@
       </div>
     </footer>
 
-    <script type="module" src="./src/js/tools/hub.js?v=9"></script>
+    <script type="module" src="./src/js/tools/hub.js?v=10"></script>
   </body>
 </html>

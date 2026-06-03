@@ -1,10 +1,11 @@
 // tools/split-tool.js
 // Controlador da página "Dividir PDF". JS puro; processa no navegador.
 
-import { executeSplit, getPageCount } from "../pdf/split.js?v=9";
-import { planSplit, parsePageRanges, describeRangeError } from "../pdf/page-ranges.js?v=9";
+import { executeSplit, getPageCount } from "../pdf/split.js?v=10";
+import { planSplit, parsePageRanges, describeRangeError } from "../pdf/page-ranges.js?v=10";
 import { zipSync } from "https://cdn.jsdelivr.net/npm/fflate@0.8.2/+esm";
-import { recordOpen, recordComplete } from "./stores.js?v=9";
+import { recordOpen, recordComplete } from "./stores.js?v=10";
+import { bindThemeToggle } from "../theme.js?v=10";
 
 const $ = (id) => document.getElementById(id);
 const fmt = (b) => {
@@ -165,12 +166,7 @@ function init() {
   $("splitN").addEventListener("input", validate);
   $("splitRun").addEventListener("click", run);
 
-  // tema (mesma chave do app)
-  $("themeToggle")?.addEventListener("click", () => {
-    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("comprimirpdf-theme", next); } catch { /* ignore */ }
-  });
+  bindThemeToggle($("themeToggle"));
 
   toggleOptionInputs();
 }

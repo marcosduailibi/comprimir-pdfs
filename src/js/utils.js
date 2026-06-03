@@ -28,6 +28,7 @@ export const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
 /** Detecta o tipo de dispositivo (limites diferentes para mobile/desktop). */
 export function detectDevice() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return "desktop";
   const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
   const narrow = window.innerWidth <= 820;
   const uaMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);

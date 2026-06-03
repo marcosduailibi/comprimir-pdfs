@@ -2,11 +2,11 @@
 // Bootstrap e orquestracao: liga estado (state.js), interface (ui.js) e
 // processamento (Web Worker pdf-worker.js, com fallback na thread principal).
 
-import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=8";
-import * as UI from "./ui.js?v=8";
-import { buildFinalName, clamp, showToast } from "./utils.js?v=8";
-import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=8";
-import { recordOpen, recordComplete } from "./tools/stores.js?v=8";
+import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity, resolveDpiValue } from "./state.js?v=10";
+import * as UI from "./ui.js?v=10";
+import { buildFinalName, clamp, showToast } from "./utils.js?v=10";
+import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=10";
+import { recordOpen, recordComplete } from "./tools/stores.js?v=10";
 
 let idSeq = 0;
 let originalOrder = [];        // snapshot para "Restaurar ordem"
@@ -51,7 +51,7 @@ function clearJob() {
 // ============================ Web Worker ============================
 function initWorker() {
   try {
-    worker = new Worker(new URL("./pdf-worker.js?v=8", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./pdf-worker.js?v=10", import.meta.url), { type: "module" });
     worker.onmessage = (e) => onEngineMessage(e.data);
     worker.onerror = () => { worker = null; }; // cai no fallback ao processar
   } catch {
@@ -104,7 +104,7 @@ function analyzeFiles(batch) {
     worker.postMessage({ type: "analyze", files: batch.map((f) => f.file) });
   } else {
     (async () => {
-      const { analyzeBytes } = await import("./pdf-merge.js?v=8");
+      const { analyzeBytes } = await import("./pdf-merge.js?v=10");
       for (const f of batch) {
         try { const { pages } = await analyzeBytes(new Uint8Array(await f.file.arrayBuffer())); setPages(f.id, pages); }
         catch { setPages(f.id, null); }
@@ -157,17 +157,35 @@ function selectMode(mode) {
 function applyPreset(key) {
   appState.preset = key;
   const p = PRESETS[key];
-  if (key !== "custom") { appState.quality = p.quality; appState.passes = p.passes; }
+  if (key !== "custom") {
+    appState.quality = p.quality;
+    appState.passes = p.passes;
+    appState.dpi = p.dpi;
+    appState.dpiPreset = String(p.dpi);
+    appState.customDpi = p.dpi || appState.customDpi;
+  }
   UI.updateConfigUI(); UI.updateSummary(); UI.updateTechSummary();
 }
 function setQuality(v) {
   appState.quality = clamp(Math.round(v) || 1, 1, 100);
-  appState.preset = presetFromValues(appState.quality, appState.passes);
+  appState.preset = presetFromValues(appState.quality, appState.passes, appState.dpi);
   UI.updateConfigUI(); UI.updateSummary(); UI.updateTechSummary();
 }
 function setPasses(v) {
   appState.passes = clamp(Math.round(v) || 1, 1, 5);
-  appState.preset = presetFromValues(appState.quality, appState.passes);
+  appState.preset = presetFromValues(appState.quality, appState.passes, appState.dpi);
+  UI.updateConfigUI(); UI.updateSummary(); UI.updateTechSummary();
+}
+function setDpiPreset(value) {
+  appState.dpiPreset = String(value || "144");
+  appState.dpi = resolveDpiValue(appState.dpiPreset, appState.customDpi);
+  appState.preset = "custom";
+  UI.updateConfigUI(); UI.updateSummary(); UI.updateTechSummary();
+}
+function setCustomDpi(v) {
+  appState.customDpi = clamp(Math.round(v) || 144, 36, 600);
+  appState.dpi = resolveDpiValue(appState.dpiPreset, appState.customDpi);
+  appState.preset = "custom";
   UI.updateConfigUI(); UI.updateSummary(); UI.updateTechSummary();
 }
 
@@ -201,6 +219,7 @@ async function startProcessing() {
     files: appState.files.map((f) => f.file),
     quality: appState.quality,
     passes: appState.passes,
+    dpi: appState.dpi,
   };
 
   if (worker) {
@@ -213,7 +232,7 @@ async function startProcessing() {
 async function runFallback(task) {
   fallbackCtx = { paused: false, cancelled: false, isPaused() { return this.paused; }, isCancelled() { return this.cancelled; } };
   try {
-    const { runTask } = await import("./pdf-worker.js?v=8");
+    const { runTask } = await import("./pdf-worker.js?v=10");
     await runTask(task, { ctx: fallbackCtx, emit: onEngineMessage });
   } catch (err) {
     if (err && err.message === "TASK_CANCELLED") onEngineMessage({ type: "cancelled" });
@@ -408,6 +427,8 @@ UI.initUI({
   onPresetSelect: applyPreset,
   onQualityInput: setQuality,
   onPassesInput: setPasses,
+  onDpiPreset: setDpiPreset,
+  onCustomDpi: setCustomDpi,
   onStart: startProcessing,
   onPause: pauseProcessing,
   onResume: resumeProcessing,

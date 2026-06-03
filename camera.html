@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Câmera para PDF | Comprimir PDFs</title>
+    <meta name="description" content="Fotografe documentos no celular e gere um PDF localmente no navegador. Nenhuma imagem é enviada para servidor." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://comprimirpdfs.com.br/camera.html" />
+    <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          var old = localStorage.getItem("comprimirpdf-theme");
+          if (!t && (old === "dark" || old === "light")) {
+            t = old;
+            localStorage.setItem("pdfTools.theme.v1", old);
+            localStorage.removeItem("comprimirpdf-theme");
+          }
+          if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="./src/css/style.css?v=10" />
+    <link rel="stylesheet" href="./src/css/tools.css?v=10" />
+    <link rel="stylesheet" href="./src/css/camera.css?v=10" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="./" class="brand" aria-label="Comprimir PDFs - início">
+          <svg class="brand-logo" viewBox="0 0 2508 627" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+            <g transform="translate(410 183)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path class="ink-stroke" d="M40 58 V24 Q40 10 54 10 H176 L238 72 V124" stroke-width="16"/>
+              <path class="ink-stroke" d="M176 10 V72 H238" stroke-width="16"/>
+              <path class="ink-stroke" d="M40 201 V252 Q40 266 54 266 H238 V225" stroke-width="16"/>
+              <path class="accent-stroke" d="M10 141 H92" stroke-width="18"/>
+              <path class="accent-stroke" d="M61 105 L99 141 L61 177" stroke-width="18"/>
+              <path class="accent-stroke" d="M270 141 H188" stroke-width="18"/>
+              <path class="accent-stroke" d="M219 105 L181 141 L219 177" stroke-width="18"/>
+            </g>
+            <text class="ink-fill" x="708" y="392" font-family="Inter, Arial, Helvetica, sans-serif" font-size="158" font-weight="800" letter-spacing="-5">Comprimir PDFs</text>
+          </svg>
+        </a>
+        <nav class="desktop-nav" aria-label="Navegação principal">
+          <a href="./">Início</a>
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./dividir.html">Dividir PDF</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <div class="header-actions">
+          <a class="btn btn--support" href="./#apoiar"><span aria-hidden="true">♥</span> <span class="hide-sm">Apoiar projeto</span><span class="only-sm">Apoiar</span></a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
+            <span class="theme-icon theme-icon--dark">☾</span>
+            <span class="theme-icon theme-icon--light">☀</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="camera-shell">
+      <section class="camera-hero card">
+        <div>
+          <p class="camera-kicker">100% local · feito para celular · várias páginas</p>
+          <h1>Câmera para PDF</h1>
+          <p>Fotografe documentos no celular, revise as páginas e gere um PDF localmente no navegador.</p>
+          <div class="camera-actions">
+            <button id="openCamera" class="btn btn--primary btn--lg" type="button">Abrir câmera</button>
+            <button id="galleryButton" class="btn btn--ghost btn--lg" type="button">Importar imagens</button>
+          </div>
+          <p class="muted small">A câmera só será acessada após sua permissão. Suas fotos não saem do seu dispositivo.</p>
+        </div>
+        <div class="camera-privacy">
+          <span>Seus arquivos não são enviados.</span>
+          <span>O PDF é gerado localmente.</span>
+          <span>As imagens são removidas ao limpar ou sair.</span>
+        </div>
+      </section>
+
+      <section id="desktopNotice" class="notice notice--info" hidden>
+        <span class="notice__icon" aria-hidden="true">ⓘ</span>
+        <div>
+          <strong>Melhor no celular</strong>
+          <p class="muted small">A captura direta foi pensada para câmera traseira de celular. No desktop, use Importar imagens.</p>
+        </div>
+      </section>
+
+      <section id="cameraError" class="banner banner--error camera-error" hidden></section>
+      <p id="cameraLive" class="camera-live" aria-live="polite"></p>
+
+      <input id="importCameraImages" type="file" accept="image/*" capture="environment" multiple hidden />
+      <input id="importGalleryImages" type="file" accept="image/*" multiple hidden />
+
+      <section id="cameraPanel" class="camera-panel card" hidden>
+        <div class="camera-preview">
+          <video id="cameraVideo" playsinline muted></video>
+          <div class="camera-grid-overlay" aria-hidden="true"></div>
+        </div>
+        <div class="camera-capture-bar">
+          <button id="closeCamera" class="btn btn--ghost" type="button">Fechar câmera</button>
+          <button id="capturePage" class="camera-shutter" type="button" aria-label="Capturar página"></button>
+          <button id="cameraGalleryButton" class="btn btn--ghost" type="button">Galeria</button>
+        </div>
+      </section>
+
+      <section class="camera-workspace">
+        <div class="card camera-review">
+          <div class="camera-section-head">
+            <div>
+              <h2 class="card__title">Páginas</h2>
+              <p id="pageCount" class="muted small">0 página(s)</p>
+            </div>
+            <button id="clearPages" class="btn btn--ghost btn--sm" type="button" disabled>Limpar imagens</button>
+          </div>
+          <p id="cameraEmpty" class="camera-empty">Capture pela câmera ou importe imagens para começar.</p>
+          <div id="cameraPages" class="camera-pages" aria-label="Páginas capturadas"></div>
+        </div>
+
+        <aside class="card camera-settings">
+          <h2 class="card__title">Ajustes</h2>
+          <div id="selectedPageTools" class="camera-tool-group" hidden>
+            <span class="field-label">Página selecionada</span>
+            <div class="camera-inline-actions">
+              <button id="movePageUp" class="btn btn--ghost btn--sm" type="button">Subir</button>
+              <button id="movePageDown" class="btn btn--ghost btn--sm" type="button">Descer</button>
+            </div>
+            <div class="camera-inline-actions">
+              <button id="rotateLeft" class="btn btn--ghost btn--sm" type="button">Girar -90°</button>
+              <button id="rotateRight" class="btn btn--ghost btn--sm" type="button">Girar +90°</button>
+            </div>
+            <button id="deletePage" class="btn btn--danger-outline btn--sm" type="button">Excluir página</button>
+          </div>
+
+          <label class="field-label" for="imagePreset">Filtro</label>
+          <select id="imagePreset" class="select-control"></select>
+
+          <label class="field-label" for="pageSize">Tamanho</label>
+          <select id="pageSize" class="select-control">
+            <option value="a4">A4</option>
+            <option value="letter">Carta</option>
+            <option value="legal">Ofício</option>
+            <option value="a3">A3</option>
+            <option value="a5">A5</option>
+            <option value="auto">Automático</option>
+          </select>
+
+          <label class="field-label" for="pageOrientation">Orientação</label>
+          <select id="pageOrientation" class="select-control">
+            <option value="auto">Automática</option>
+            <option value="portrait">Retrato</option>
+            <option value="landscape">Paisagem</option>
+          </select>
+
+          <label class="field-label" for="pageMargin">Margens</label>
+          <select id="pageMargin" class="select-control">
+            <option value="small">Pequena</option>
+            <option value="none">Nenhuma</option>
+            <option value="medium">Média</option>
+            <option value="large">Grande</option>
+          </select>
+
+          <label class="field-label" for="pageFit">Ajuste</label>
+          <select id="pageFit" class="select-control">
+            <option value="contain">Conter</option>
+            <option value="cover">Preencher</option>
+          </select>
+
+          <label class="field-label" for="cameraQuality">Qualidade</label>
+          <input id="cameraQuality" type="range" min="45" max="95" value="84" />
+
+          <label class="field-label" for="cameraDpi">DPI</label>
+          <select id="cameraDpi" class="select-control">
+            <option value="96">96 DPI</option>
+            <option value="144" selected>144 DPI</option>
+            <option value="200">200 DPI</option>
+            <option value="300">300 DPI</option>
+          </select>
+          <p class="muted small">DPI controla a resolução usada para colocar suas fotos no PDF. DPI menor deixa o arquivo mais leve; DPI maior mantém mais nitidez.</p>
+
+          <button id="generatePdf" class="btn btn--primary btn--lg" type="button" disabled>Gerar PDF</button>
+          <p id="cameraProgress" class="processing-warning" hidden></p>
+        </aside>
+      </section>
+
+      <section id="cameraResults" class="card result camera-results" hidden>
+        <div class="result__head">
+          <span class="result__check">✓</span>
+          <h2 class="card__title">PDF criado</h2>
+        </div>
+        <p class="result__privacy">O PDF foi gerado localmente. Nenhuma imagem foi enviada para servidor.</p>
+        <p id="resultStats" class="muted"></p>
+        <div class="result__actions">
+          <a id="cameraDownload" class="btn btn--primary btn--lg" download>Baixar PDF</a>
+          <button id="createAnother" class="btn btn--ghost" type="button">Criar outro</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <nav class="footer-links" aria-label="Links do rodapé">
+          <a href="./">Início</a>
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./#privacidade">Privacidade</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        </nav>
+        <p class="footer-copy">Comprimir PDFs · Tudo processado localmente no seu navegador.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/js/tools/camera-to-pdf-tool.js?v=10"></script>
+  </body>
+</html>

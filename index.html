@@ -36,14 +36,20 @@
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("comprimirpdf-theme");
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          var old = localStorage.getItem("comprimirpdf-theme");
+          if (!t && (old === "dark" || old === "light")) {
+            t = old;
+            localStorage.setItem("pdfTools.theme.v1", old);
+            localStorage.removeItem("comprimirpdf-theme");
+          }
           if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
       })();
     </script>
 
-    <link rel="stylesheet" href="./src/css/style.css?v=9" />
+    <link rel="stylesheet" href="./src/css/style.css?v=10" />
 
     <!-- ===================== Dados estruturados ====================== -->
     <script type="application/ld+json">
@@ -198,12 +204,25 @@
           <div class="quality">
             <div class="control__head">
               <label for="qualityRange">Qualidade das imagens <span class="info" title="A qualidade das imagens é o ajuste que mais influencia o tamanho final do PDF.">ⓘ</span></label>
-              <strong id="qualityValue">50%</strong>
+              <strong id="qualityValue">60%</strong>
             </div>
-            <input type="range" id="qualityRange" min="1" max="100" value="50" />
+            <input type="range" id="qualityRange" min="1" max="100" value="60" />
             <div class="control__scale"><span>Menor qualidade</span><span>Maior qualidade</span></div>
             <p class="control__hint" id="qualityHint">Equilíbrio entre tamanho menor e qualidade aceitável.</p>
             <p class="control__warn" id="qualityWarn" hidden></p>
+          </div>
+
+          <div class="field control control--dpi">
+            <label for="dpiPreset">Resolução (DPI) <span class="info" title="DPI afeta principalmente imagens e scans. PDFs com texto selecionável podem reduzir pouco.">ⓘ</span></label>
+            <select id="dpiPreset" class="select-control" aria-describedby="dpiHint dpiExplain"></select>
+            <div class="field" id="dpiCustomWrap" hidden>
+              <label for="dpiCustom" class="field-label">DPI personalizado</label>
+              <input type="number" id="dpiCustom" class="number-control" min="36" max="600" value="144" inputmode="numeric" />
+            </div>
+            <div class="control__scale"><span>DPI menor = arquivo menor</span><span>DPI maior = mais nitidez</span></div>
+            <p class="control__hint" id="dpiHint">Equilíbrio para tela e documentos do dia a dia.</p>
+            <p class="control__warn" id="dpiWarn" hidden></p>
+            <p class="muted small" id="dpiExplain">DPI significa pontos por polegada. Em PDFs, ele afeta principalmente imagens, scans e páginas rasterizadas; texto selecionável, fontes e formas vetoriais nem sempre têm DPI.</p>
           </div>
 
           <details class="advanced">
@@ -583,6 +602,6 @@
       </div>
     </div>
 
-    <script type="module" src="./src/js/app.js?v=8"></script>
+    <script type="module" src="./src/js/app.js?v=10"></script>
   </body>
 </html>

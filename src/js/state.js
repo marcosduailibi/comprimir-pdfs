@@ -2,8 +2,8 @@
 // Estado global da aplicacao + dados fixos (presets, limites, modos, etapas) e
 // helpers de validacao. Sem dependencias de DOM ou de PDF.
 
-import { detectDevice } from "./utils.js?v=8";
-import { MB, MAX, calculateSelectedFilesSummary } from "./pdf-limits.js?v=8";
+import { detectDevice } from "./utils.js?v=10";
+import { MB, MAX, calculateSelectedFilesSummary } from "./pdf-limits.js?v=10";
 
 // Reexporta o resumo PURO para a UI consumir a partir de state.js.
 export { MAX, calculateSelectedFilesSummary };
@@ -12,8 +12,11 @@ export { MAX, calculateSelectedFilesSummary };
 export const appState = {
   mode: "compress",          // compress | merge | merge_then_compress | compress_then_merge
   files: [],                 // [{ id, file, name, size, pages }]
-  quality: 50,
+  quality: 60,
   passes: 2,
+  dpiPreset: "144",
+  customDpi: 144,
+  dpi: 144,                  // 0 = sem reduzir DPI
   preset: "balanced",
   device: detectDevice(),
   status: "idle",            // idle|files_selected|ready|processing|paused|cancelled|done|error
@@ -30,8 +33,9 @@ export const taskState = {
   currentPage: 0,
   totalFiles: 0,
   totalPages: 0,
-  quality: 50,
+  quality: 60,
   passes: 2,
+  dpi: 144,
   progress: 0,
   status: "idle",
   isPaused: false,
@@ -44,12 +48,39 @@ export const taskState = {
 
 // ------------------------------ Presets ------------------------------
 export const PRESETS = {
-  light:    { label: "Leve", quality: 75, passes: 1, description: "Menor redução", primary: true },
-  balanced: { label: "Equilibrado", quality: 50, passes: 2, description: "Boa redução", primary: true },
-  strong:   { label: "Forte", quality: 30, passes: 3, description: "Maior redução", primary: true },
-  max:      { label: "Máxima compressão", quality: 15, passes: 3, description: "Menor tamanho possível, qualidade mais baixa.", primary: false },
-  custom:   { label: "Personalizado", quality: null, passes: null, description: "Controle manual da qualidade e das passadas.", primary: false },
+  light:    { label: "Leve", quality: 80, passes: 1, dpi: 200, description: "Menor redução", primary: true },
+  balanced: { label: "Equilibrado", quality: 60, passes: 2, dpi: 144, description: "Boa redução", primary: true },
+  strong:   { label: "Forte", quality: 50, passes: 3, dpi: 120, description: "Maior redução", primary: true },
+  max:      { label: "Máxima compressão", quality: 40, passes: 3, dpi: 96, description: "Menor tamanho possível, qualidade mais baixa.", primary: false },
+  custom:   { label: "Personalizado", quality: null, passes: null, dpi: null, description: "Controle manual de qualidade, DPI e passadas.", primary: false },
 };
+
+export const DPI_PRESETS = [
+  { value: "auto", label: "Automático" },
+  { value: "72", label: "72 DPI" },
+  { value: "96", label: "96 DPI" },
+  { value: "120", label: "120 DPI" },
+  { value: "144", label: "144 DPI (recomendado)" },
+  { value: "150", label: "150 DPI" },
+  { value: "180", label: "180 DPI" },
+  { value: "200", label: "200 DPI" },
+  { value: "240", label: "240 DPI" },
+  { value: "300", label: "300 DPI" },
+  { value: "none", label: "Sem reduzir DPI" },
+  { value: "custom", label: "Personalizado" },
+];
+
+export function resolveDpiValue(preset, customDpi = 144) {
+  if (preset === "none") return 0;
+  if (preset === "custom") return Math.max(36, Math.min(600, Math.round(Number(customDpi) || 144)));
+  if (preset === "auto") return 144;
+  const n = Math.round(Number(preset));
+  return Number.isFinite(n) && n > 0 ? Math.max(36, Math.min(600, n)) : 144;
+}
+
+export function dpiLabel(dpi) {
+  return dpi === 0 ? "Sem reduzir DPI" : `${dpi} DPI`;
+}
 
 // ------------------------------- Modos -------------------------------
 export const MODES = [
@@ -185,6 +216,22 @@ export function qualityHint(v) {
   return { text, warn };
 }
 
+export function dpiHint(dpi) {
+  if (dpi === 0) return {
+    text: "Sem redução de resolução. Mantém as dimensões das imagens embutidas quando possível.",
+    warn: null,
+  };
+
+  let text;
+  if (dpi <= 96) text = "Arquivo menor, mas scans e letras pequenas podem perder nitidez.";
+  else if (dpi <= 150) text = "Equilíbrio para tela e documentos do dia a dia.";
+  else if (dpi <= 240) text = "Mais nitidez, com redução menor.";
+  else text = "Alta nitidez, geralmente com pouca redução por DPI.";
+
+  const warn = dpi < 120 ? "DPI baixo pode prejudicar scans, fórmulas, gráficos e letras pequenas." : null;
+  return { text, warn };
+}
+
 export function passesInfo(n) {
   let text, warn = null;
   if (n <= 1) text = "Rápida — menor tempo.";
@@ -195,10 +242,10 @@ export function passesInfo(n) {
 }
 
 /** Detecta qual preset corresponde aos valores atuais (ou 'custom'). */
-export function presetFromValues(quality, passes) {
+export function presetFromValues(quality, passes, dpi = null) {
   for (const [key, p] of Object.entries(PRESETS)) {
     if (key === "custom") continue;
-    if (p.quality === quality && p.passes === passes) return key;
+    if (p.quality === quality && p.passes === passes && (dpi == null || p.dpi === dpi)) return key;
   }
   return "custom";
 }

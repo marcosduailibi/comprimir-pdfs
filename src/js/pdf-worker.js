@@ -4,8 +4,8 @@
 // cooperativos. O mesmo `runTask` e reutilizado pela thread principal (fallback)
 // quando o Worker nao pode ser criado.
 
-import { compressBytes } from "./pdf-compress.js?v=8";
-import { mergeBytesList, analyzeBytes } from "./pdf-merge.js?v=8";
+import { compressBytes } from "./pdf-compress.js?v=10";
+import { mergeBytesList, analyzeBytes } from "./pdf-merge.js?v=10";
 
 // ----------------------------- orquestracao -----------------------------
 
@@ -27,11 +27,11 @@ function blobOf(bytes) {
 
 /**
  * Executa uma tarefa completa.
- * @param {{mode,files,quality,passes}} task  files = array de File
+ * @param {{mode,files,quality,passes,dpi}} task  files = array de File
  * @param {{ctx, emit}} io  ctx.isPaused()/isCancelled(); emit(msg)
  */
 export async function runTask(task, { ctx, emit }) {
-  const { mode, files, quality = 50, passes = 2 } = task;
+  const { mode, files, quality = 60, passes = 2, dpi = 144 } = task;
   emit({ type: "log", level: "INFO", message: "Arquivos selecionados localmente pelo usuário." });
   emit({ type: "log", level: "INFO", message: "Nenhum upload foi realizado." });
 
@@ -50,10 +50,10 @@ export async function runTask(task, { ctx, emit }) {
     const file = loaded[0];
     emit({ type: "step", step: "analyzed", status: "done" });
     emit({ type: "step", step: "images", status: "active" });
-    emit({ type: "log", level: "INFO", message: `Compressão iniciada com qualidade de ${quality}%.` });
+    emit({ type: "log", level: "INFO", message: `Compressão iniciada com qualidade de ${quality}% e DPI ${dpi || "sem reduzir"}.` });
 
     const r = await compressBytes(file.bytes, {
-      quality, passes, ctx,
+      quality, passes, dpi, ctx,
       onImage: ({ pass, totalPasses, index, count }) => {
         const frac = count > 0 ? index / count : 1;
         const overall = ((pass - 1) + frac) / totalPasses;
@@ -100,10 +100,10 @@ export async function runTask(task, { ctx, emit }) {
     totalPages = merged.totalPages;
     emit({ type: "step", step: "merged", status: "done" });
     emit({ type: "step", step: "images", status: "active" });
-    emit({ type: "log", level: "INFO", message: `Compressão do PDF unido com qualidade de ${quality}%.` });
+    emit({ type: "log", level: "INFO", message: `Compressão do PDF unido com qualidade de ${quality}% e DPI ${dpi || "sem reduzir"}.` });
 
     const r = await compressBytes(merged.bytes, {
-      quality, passes, ctx,
+      quality, passes, dpi, ctx,
       onImage: ({ pass, totalPasses, index, count }) => {
         const frac = count > 0 ? index / count : 1;
         const overall = ((pass - 1) + frac) / totalPasses;
@@ -125,7 +125,7 @@ export async function runTask(task, { ctx, emit }) {
       const file = loaded[i];
       emit({ type: "log", level: "INFO", message: `Comprimindo arquivo ${i + 1} de ${loaded.length}: ${file.name}` });
       const r = await compressBytes(file.bytes, {
-        quality, passes, ctx,
+        quality, passes, dpi, ctx,
         onImage: ({ pass, totalPasses, index, count }) => {
           const frac = count > 0 ? index / count : 1;
           const fileFrac = ((pass - 1) + frac) / totalPasses;
@@ -162,7 +162,7 @@ export async function runTask(task, { ctx, emit }) {
   emit({
     type: "done",
     blob: blobOf(resultBytes),
-    stats: { initialSize, finalSize: resultBytes.length, totalPages, filesProcessed, mode, quality, passes },
+    stats: { initialSize, finalSize: resultBytes.length, totalPages, filesProcessed, mode, quality, passes, dpi },
   });
 }
 

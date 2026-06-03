@@ -87,11 +87,71 @@ async function encodeJpeg(rgba, width, height, quality) {
   return new Uint8Array(out.data);
 }
 
+export function targetLongEdgeForDpi(dpi) {
+  const n = Math.round(Number(dpi) || 0);
+  if (n <= 0) return Infinity;
+  // A4 vertical: 11.69 inches. This is a conservative proxy when the PDF image
+  // XObject does not expose its physical placement.
+  return Math.max(320, Math.round(n * 11.69));
+}
+
+export function planImageResize(width, height, dpi) {
+  const maxLongEdge = targetLongEdgeForDpi(dpi);
+  const longEdge = Math.max(width || 0, height || 0);
+  if (!Number.isFinite(maxLongEdge) || !longEdge || longEdge <= maxLongEdge) {
+    return { width, height, resized: false };
+  }
+  const scale = maxLongEdge / longEdge;
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+    resized: true,
+  };
+}
+
+function resizeNearest(rgba, width, height, nextWidth, nextHeight) {
+  const out = new Uint8ClampedArray(nextWidth * nextHeight * 4);
+  for (let y = 0; y < nextHeight; y++) {
+    const srcY = Math.min(height - 1, Math.floor((y / nextHeight) * height));
+    for (let x = 0; x < nextWidth; x++) {
+      const srcX = Math.min(width - 1, Math.floor((x / nextWidth) * width));
+      const src = (srcY * width + srcX) * 4;
+      const dst = (y * nextWidth + x) * 4;
+      out[dst] = rgba[src];
+      out[dst + 1] = rgba[src + 1];
+      out[dst + 2] = rgba[src + 2];
+      out[dst + 3] = rgba[src + 3];
+    }
+  }
+  return out;
+}
+
+async function resizeRGBA(decoded, nextWidth, nextHeight) {
+  if (decoded.width === nextWidth && decoded.height === nextHeight) return decoded;
+  if (hasCanvas) {
+    const src = new OffscreenCanvas(decoded.width, decoded.height);
+    const srcCtx = src.getContext("2d");
+    srcCtx.putImageData(new ImageData(decoded.rgba, decoded.width, decoded.height), 0, 0);
+    const dst = new OffscreenCanvas(nextWidth, nextHeight);
+    const dstCtx = dst.getContext("2d");
+    dstCtx.imageSmoothingEnabled = true;
+    dstCtx.imageSmoothingQuality = "high";
+    dstCtx.drawImage(src, 0, 0, nextWidth, nextHeight);
+    const data = dstCtx.getImageData(0, 0, nextWidth, nextHeight).data;
+    return { rgba: data, width: nextWidth, height: nextHeight };
+  }
+  return {
+    rgba: resizeNearest(decoded.rgba, decoded.width, decoded.height, nextWidth, nextHeight),
+    width: nextWidth,
+    height: nextHeight,
+  };
+}
+
 /**
  * Recomprime as imagens elegiveis do documento (porta de images.js).
  * @returns {Promise<number>} imagens efetivamente substituidas.
  */
-async function recompressImages(pdfDoc, quality, { ctx, onImage } = {}) {
+async function recompressImages(pdfDoc, quality, { dpi = 144, ctx, onImage } = {}) {
   const context = pdfDoc.context;
   const candidates = [];
   for (const [ref, obj] of context.enumerateIndirectObjects()) {
@@ -147,6 +207,8 @@ async function recompressImages(pdfDoc, quality, { ctx, onImage } = {}) {
       }
 
       if (!decoded) continue;
+      const plan = planImageResize(decoded.width, decoded.height, dpi);
+      if (plan.resized) decoded = await resizeRGBA(decoded, plan.width, plan.height);
       const jpegBytes = await encodeJpeg(decoded.rgba, decoded.width, decoded.height, quality);
       if (jpegBytes.length >= original.length) continue;
 
@@ -173,9 +235,9 @@ async function recompressImages(pdfDoc, quality, { ctx, onImage } = {}) {
 }
 
 /** Uma passada: load + recompress + save compacto (porta de optimizeOnce). */
-async function optimizeOnce(bytes, quality, { ctx, onImage } = {}) {
+async function optimizeOnce(bytes, quality, { dpi = 144, ctx, onImage } = {}) {
   const pdfDoc = await PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: true });
-  await recompressImages(pdfDoc, quality, { ctx, onImage });
+  await recompressImages(pdfDoc, quality, { dpi, ctx, onImage });
   return pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
 }
 
@@ -184,8 +246,9 @@ async function optimizeOnce(bytes, quality, { ctx, onImage } = {}) {
  * @returns {Promise<{ bytes: Uint8Array, initialSize: number, finalSize: number }>}
  */
 export async function compressBytes(bytes, {
-  quality = 50,
+  quality = 60,
   passes = 2,
+  dpi = 144,
   qualityStep = 0.3,
   minQuality = 1,
   ctx,
@@ -202,6 +265,7 @@ export async function compressBytes(bytes, {
     await checkpoint(ctx);
     const passNumber = compressCount + 1;
     const result = await optimizeOnce(current, imageQuality, {
+      dpi,
       ctx,
       onImage: onImage ? (info) => onImage({ ...info, pass: passNumber, totalPasses: passes }) : undefined,
     });

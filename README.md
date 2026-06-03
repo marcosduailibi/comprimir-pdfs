@@ -16,7 +16,10 @@ Todo o processamento acontece localmente, no próprio navegador do usuário. Iss
 - Juntar vários PDFs
 - Juntar PDFs e depois comprimir
 - Comprimir cada PDF e depois juntar
+- Dividir PDF por intervalos, páginas, blocos, todas as páginas ou ímpares/pares
+- Câmera para PDF mobile-first, com fallback de importação de imagens
 - Diferentes níveis de compressão
+- Controle de qualidade e DPI para imagens/scans
 - Processamento local no navegador
 - Interface responsiva
 - Modo claro e escuro
@@ -47,7 +50,8 @@ ao carregar). O header traz navegação, link para o GitHub e botão de apoio; a
 primeira dobra tem um hero e a ferramenta em um card único com 3 etapas (modos,
 upload e ajustes). Modos e presets menos usados ficam em **Configurações
 avançadas**. O apoio via Pix fica centralizado em um modal (QR Code, chave e
-copiar), acessível por qualquer botão "Apoiar".
+copiar), acessível por qualquer botão "Apoiar". A preferência de tema usa a
+chave local `pdfTools.theme.v1`, com migração automática da chave antiga.
 
 > Se o CDN (jsDelivr) for bloqueado por rede ou proxy, as bibliotecas externas
 > podem não carregar.
@@ -56,6 +60,7 @@ copiar), acessível por qualquer botão "Apoiar".
 
 ```bash
 npm run start        # equivale a: npx --yes serve .
+npm test             # executa os testes unitários Node
 ```
 
 Abra a URL indicada pelo `serve` (geralmente **http://localhost:3000/**). Requer
@@ -77,7 +82,8 @@ sitemap.xml           # mapa do site
 src/css/style.css     # estilos (tema claro/escuro)
 src/assets/           # favicon.svg + (a criar) favicon.ico, apple-touch-icon.png, og-image.png
 src/js/               # app.js, ui.js, state.js, utils.js, donation.js,
-                      # pdf-worker.js, pdf-compress.js, pdf-merge.js
+                      # pdf-worker.js, pdf-compress.js, pdf-merge.js,
+                      # camera/*, tools/*
 ```
 
 ## SEO e publicação
@@ -151,6 +157,7 @@ isso é uma limitação dos navegadores, não do projeto.
 
 - **Compressão:** até **1 GB** por PDF.
 - **União / juntar e comprimir:** até **500 PDFs** ou **1 GB** no total.
+- **Câmera para PDF:** até **200 imagens** ou **1 GB** no total, com geração local.
 - Acima desses valores a operação é **recusada com mensagem clara** (não trava a
   aba). Arquivos grandes, mas dentro do limite, exibem um aviso de que o
   processamento ocorre na memória do navegador e pode demorar ou usar bastante
@@ -166,6 +173,22 @@ isso é uma limitação dos navegadores, não do projeto.
 > (divisão por páginas + armazenamento temporário em OPFS) é um próximo passo
 > planejado; hoje o limite de **entrada** é 1 GB com falha controlada quando o
 > ambiente não comporta.
+
+## Câmera para PDF
+
+Acesse `camera.html` ou a ferramenta "Câmera para PDF" no hub. A captura direta
+é mobile-first e só inicia após clique do usuário e permissão do navegador. No
+desktop, a página permite importar imagens. As fotos ficam em memória/Blob URLs
+locais, são revogadas ao limpar ou sair, e o PDF final é gerado no navegador.
+
+Para testar em celular, publique em HTTPS pelo GitHub Pages e abra:
+
+```text
+https://comprimirpdfs.com.br/camera.html
+```
+
+Valide permissão concedida/negada, importador de imagens, rotação, reordenação,
+geração do PDF e desligamento da câmera ao fechar/sair.
 
 ## Apoie o projeto
 

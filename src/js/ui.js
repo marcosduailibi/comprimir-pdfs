@@ -5,9 +5,10 @@
 import {
   appState, MODES, PRESETS, STEPS, modeAllowsMultiple, modeNeedsCompression,
   qualityHint, passesInfo, presetFromValues, validateSelection, riskLevel,
-  calculateSelectedFilesSummary,
-} from "./state.js?v=8";
-import { formatBytes, formatTime, prettyMode } from "./utils.js?v=8";
+  calculateSelectedFilesSummary, DPI_PRESETS, dpiHint, dpiLabel,
+} from "./state.js?v=10";
+import { formatBytes, formatTime, prettyMode } from "./utils.js?v=10";
+import { bindThemeToggle, initTheme as initSharedTheme } from "./theme.js?v=10";
 
 const $ = (id) => document.getElementById(id);
 let H = {}; // handlers
@@ -116,6 +117,31 @@ export function updateConfigUI() {
   const qw = $("qualityWarn");
   if (qh.warn) { qw.textContent = qh.warn; qw.hidden = false; } else qw.hidden = true;
 
+  const dpiSelect = $("dpiPreset");
+  if (dpiSelect) {
+    if (!dpiSelect.options.length) {
+      DPI_PRESETS.forEach((opt) => {
+        const o = document.createElement("option");
+        o.value = opt.value;
+        o.textContent = opt.label;
+        dpiSelect.appendChild(o);
+      });
+    }
+    dpiSelect.value = appState.dpiPreset;
+    const customWrap = $("dpiCustomWrap");
+    if (customWrap) customWrap.hidden = appState.dpiPreset !== "custom";
+    const customInput = $("dpiCustom");
+    if (customInput) customInput.value = appState.customDpi;
+    const dh = dpiHint(appState.dpi);
+    const hint = $("dpiHint");
+    if (hint) hint.textContent = dh.text;
+    const warn = $("dpiWarn");
+    if (warn) {
+      if (dh.warn) { warn.textContent = dh.warn; warn.hidden = false; }
+      else warn.hidden = true;
+    }
+  }
+
   $("passesValue").value = appState.passes;
   const pi = passesInfo(appState.passes);
   $("passesHint").textContent = pi.text;
@@ -147,6 +173,7 @@ export function updateSummary() {
   if (totalPages > 0) rows.push(["Páginas (analisadas)", String(totalPages)]);
   if (modeNeedsCompression(appState.mode)) {
     rows.push(["Qualidade das imagens", appState.quality + "%"]);
+    rows.push(["Resolução", dpiLabel(appState.dpi)]);
     rows.push(["Passadas", String(appState.passes)]);
   }
   rows.push(["Risco", riskLevel(appState.files)]);
@@ -292,7 +319,7 @@ export function showResult(stats, result) {
   ];
   if (stats.totalPages) cards.push(["Páginas", String(stats.totalPages)]);
   if (stats.filesProcessed) cards.push(["Arquivos", String(stats.filesProcessed)]);
-  if (modeNeedsCompression(stats.mode)) { cards.push(["Qualidade", stats.quality + "%"]); cards.push(["Passadas", String(stats.passes)]); }
+  if (modeNeedsCompression(stats.mode)) { cards.push(["Qualidade", stats.quality + "%"]); cards.push(["DPI", dpiLabel(stats.dpi ?? 144)]); cards.push(["Passadas", String(stats.passes)]); }
 
   $("resultGrid").innerHTML = cards.map(([k, v]) =>
     `<div class="compare__card"><small>${k}</small><strong${/Redução|Economia/.test(k) ? ' class="text-green"' : ""}>${escapeHtml(String(v))}</strong></div>`
@@ -322,7 +349,7 @@ export function clearLog() { $("log").innerHTML = ""; }
 export function updateTechSummary() {
   $("techSummary").textContent =
     `Modo: ${prettyMode(appState.mode)} · Arquivos: ${appState.files.length} · ` +
-    (modeNeedsCompression(appState.mode) ? `Qualidade ${appState.quality}% · Passadas ${appState.passes} · ` : "") +
+    (modeNeedsCompression(appState.mode) ? `Qualidade ${appState.quality}% · ${dpiLabel(appState.dpi)} · Passadas ${appState.passes} · ` : "") +
     `Processamento local no navegador`;
 }
 
@@ -346,15 +373,8 @@ function bindModals() {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAllModals(); });
 }
 
-function toggleTheme() {
-  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("comprimirpdf-theme", next);
-}
 export function initTheme() {
-  const saved = localStorage.getItem("comprimirpdf-theme");
-  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  document.documentElement.setAttribute("data-theme", saved || (prefersDark ? "dark" : "light"));
+  initSharedTheme();
 }
 
 // --------------------------- bind geral ---------------------------
@@ -364,7 +384,7 @@ export function initUI(handlers) {
   renderModes(); renderPresets(); updateConfigUI(); updateUploadUI(); updateStartButton();
   bindModals();
 
-  $("themeToggle").addEventListener("click", toggleTheme);
+  bindThemeToggle($("themeToggle"));
 
   // navegacao mobile (hamburger)
   const navToggle = $("navToggle");
@@ -407,6 +427,8 @@ export function initUI(handlers) {
 
   // config
   $("qualityRange").addEventListener("input", (e) => H.onQualityInput(Number(e.target.value)));
+  $("dpiPreset")?.addEventListener("change", (e) => H.onDpiPreset(e.target.value));
+  $("dpiCustom")?.addEventListener("input", (e) => H.onCustomDpi(Number(e.target.value)));
   $("passesValue").addEventListener("input", (e) => H.onPassesInput(Number(e.target.value)));
   $("passesMinus").addEventListener("click", () => H.onPassesInput(appState.passes - 1));
   $("passesPlus").addEventListener("click", () => H.onPassesInput(appState.passes + 1));

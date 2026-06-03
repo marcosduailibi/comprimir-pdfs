@@ -1,0 +1,271 @@
+/* camera.css - ferramenta Camera para PDF */
+
+.camera-shell {
+  width: min(100% - 32px, 1120px);
+  margin-inline: auto;
+  padding: 34px 0 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.camera-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+  gap: 24px;
+  align-items: center;
+}
+
+.camera-hero h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.05;
+}
+
+.camera-hero p {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+.camera-kicker {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary) !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.camera-actions,
+.camera-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.camera-privacy {
+  display: grid;
+  gap: 10px;
+}
+
+.camera-privacy span {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  color: var(--text);
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.camera-error {
+  flex-direction: column;
+}
+
+.camera-error span {
+  color: inherit;
+}
+
+.camera-live {
+  min-height: 1.2em;
+  margin: 0;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.camera-panel {
+  display: grid;
+  gap: 14px;
+  padding-bottom: calc(22px + env(safe-area-inset-bottom));
+}
+
+.camera-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 280px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #020617;
+}
+
+.camera-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, transparent 33%, rgba(255,255,255,.28) 33.2%, transparent 33.6%, transparent 66%, rgba(255,255,255,.28) 66.2%, transparent 66.6%),
+    linear-gradient(to bottom, transparent 33%, rgba(255,255,255,.28) 33.2%, transparent 33.6%, transparent 66%, rgba(255,255,255,.28) 66.2%, transparent 66.6%);
+}
+
+.camera-capture-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.camera-shutter {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid var(--surface);
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary), var(--shadow-sm);
+  cursor: pointer;
+}
+
+.camera-shutter:focus-visible {
+  outline: 3px solid var(--primary-hover);
+  outline-offset: 4px;
+}
+
+.camera-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 18px;
+}
+
+.camera-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.camera-empty {
+  margin: 14px 0 0;
+  color: var(--muted);
+}
+
+.camera-pages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.camera-page {
+  text-align: left;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  color: var(--text);
+  padding: 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.camera-page.is-active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.camera-page__thumb {
+  aspect-ratio: 3 / 4;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: block;
+}
+
+.camera-page__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-page__meta {
+  display: grid;
+  min-width: 0;
+}
+
+.camera-page__meta strong,
+.camera-page__meta small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.camera-page__meta small {
+  color: var(--muted);
+}
+
+.camera-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: start;
+  position: sticky;
+  top: 92px;
+}
+
+.camera-tool-group {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+.camera-results {
+  scroll-margin-top: 96px;
+}
+
+@media (max-width: 900px) {
+  .camera-hero,
+  .camera-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-settings {
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .camera-shell {
+    width: min(100% - 20px, 1120px);
+    padding-top: 22px;
+  }
+
+  .camera-hero {
+    padding: 18px;
+  }
+
+  .camera-actions .btn,
+  .camera-inline-actions .btn,
+  .camera-capture-bar .btn {
+    width: 100%;
+  }
+
+  .camera-capture-bar {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .camera-preview {
+    aspect-ratio: 3 / 4;
+    min-height: 360px;
+  }
+
+  .camera-pages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

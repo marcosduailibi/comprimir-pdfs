@@ -2,12 +2,13 @@
 // Renderiza o hub "Todas as ferramentas PDF" (JS puro). Consome o registry e a
 // busca pura; persiste só favoritos/uso (IDs). Não toca em arquivos do usuário.
 
-import { TOOLS, CATEGORIES } from "./registry.js?v=9";
-import { searchTools } from "./search.js?v=9";
+import { TOOLS, CATEGORIES } from "./registry.js?v=10";
+import { searchTools } from "./search.js?v=10";
 import {
   getFavorites, isFavorite, toggleFavorite,
   getRecent, getFrequent, recordOpen,
-} from "./stores.js?v=9";
+} from "./stores.js?v=10";
+import { bindThemeToggle } from "../theme.js?v=10";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 function el(tag, props = {}, kids = []) {
@@ -175,13 +176,7 @@ function renderChips() {
 
 // ------------------------------ Tema ------------------------------
 function initTheme() {
-  const btn = $("#themeToggle");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("comprimirpdf-theme", next); } catch { /* ignore */ }
-  });
+  bindThemeToggle($("#themeToggle"));
 }
 
 // ------------------------------ Init ------------------------------
