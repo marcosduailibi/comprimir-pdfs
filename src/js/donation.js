@@ -3,7 +3,7 @@
 // Exibe e copia exatamente os dados informados; orienta o usuario a conferir o
 // recebedor no app do banco antes de confirmar.
 
-import { copyText, showToast } from "./utils.js?v=5";
+import { copyText, showToast } from "./utils.js?v=6";
 
 export const PIX = {
   name: "Marcos Guimarães Duailibi Filho",

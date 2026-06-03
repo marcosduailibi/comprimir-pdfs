@@ -2,7 +2,7 @@
 // Estado global da aplicacao + dados fixos (presets, limites, modos, etapas) e
 // helpers de validacao. Sem dependencias de DOM ou de PDF.
 
-import { detectDevice } from "./utils.js?v=5";
+import { detectDevice } from "./utils.js?v=6";
 
 const MB = 1024 * 1024;
 

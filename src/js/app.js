@@ -2,10 +2,10 @@
 // Bootstrap e orquestracao: liga estado (state.js), interface (ui.js) e
 // processamento (Web Worker pdf-worker.js, com fallback na thread principal).
 
-import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=5";
-import * as UI from "./ui.js?v=5";
-import { buildFinalName, clamp, showToast } from "./utils.js?v=5";
-import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=5";
+import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity } from "./state.js?v=6";
+import * as UI from "./ui.js?v=6";
+import { buildFinalName, clamp, showToast } from "./utils.js?v=6";
+import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=6";
 
 let idSeq = 0;
 let originalOrder = [];        // snapshot para "Restaurar ordem"
@@ -50,7 +50,7 @@ function clearJob() {
 // ============================ Web Worker ============================
 function initWorker() {
   try {
-    worker = new Worker(new URL("./pdf-worker.js?v=5", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./pdf-worker.js?v=6", import.meta.url), { type: "module" });
     worker.onmessage = (e) => onEngineMessage(e.data);
     worker.onerror = () => { worker = null; }; // cai no fallback ao processar
   } catch {
@@ -70,8 +70,21 @@ function onFilesAdded(fileList) {
   if (invalid.length) UI.showBanner("error", "Um dos arquivos selecionados não parece ser um PDF válido. Remova o arquivo e tente novamente.");
 
   let valid = incoming.filter(isPdf);
-  if (!modeAllowsMultiple(appState.mode)) valid = valid.slice(0, 1);   // compressao unica: 1 PDF
-  if (!modeAllowsMultiple(appState.mode)) appState.files = [];          // substitui
+
+  // Modo de arquivo único ("Comprimir um PDF"):
+  //  - Se o usuário selecionar VÁRIOS PDFs de uma vez, ele claramente quer
+  //    trabalhar com múltiplos. Em vez de descartar os extras em silêncio (o que
+  //    fazia o "tamanho total" refletir só 1 arquivo), mudamos para "Juntar e
+  //    comprimir" e mantemos todos.
+  //  - Se selecionar apenas 1, mantemos a semântica de substituir o arquivo atual.
+  if (!modeAllowsMultiple(appState.mode)) {
+    if (valid.length > 1) {
+      appState.mode = "merge_then_compress";
+      showToast("Vários PDFs selecionados — mudamos para “Juntar e comprimir”. Você pode trocar o modo acima.");
+    } else {
+      appState.files = [];   // 1 arquivo: substitui (modo Comprimir)
+    }
+  }
 
   const added = valid.map((file) => ({ id: ++idSeq, file, name: file.name, size: file.size, pages: null }));
   appState.files = appState.files.concat(added);
@@ -90,7 +103,7 @@ function analyzeFiles(batch) {
     worker.postMessage({ type: "analyze", files: batch.map((f) => f.file) });
   } else {
     (async () => {
-      const { analyzeBytes } = await import("./pdf-merge.js?v=5");
+      const { analyzeBytes } = await import("./pdf-merge.js?v=6");
       for (const f of batch) {
         try { const { pages } = await analyzeBytes(new Uint8Array(await f.file.arrayBuffer())); setPages(f.id, pages); }
         catch { setPages(f.id, null); }
@@ -199,7 +212,7 @@ async function startProcessing() {
 async function runFallback(task) {
   fallbackCtx = { paused: false, cancelled: false, isPaused() { return this.paused; }, isCancelled() { return this.cancelled; } };
   try {
-    const { runTask } = await import("./pdf-worker.js?v=5");
+    const { runTask } = await import("./pdf-worker.js?v=6");
     await runTask(task, { ctx: fallbackCtx, emit: onEngineMessage });
   } catch (err) {
     if (err && err.message === "TASK_CANCELLED") onEngineMessage({ type: "cancelled" });
