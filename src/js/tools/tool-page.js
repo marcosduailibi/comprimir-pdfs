@@ -1,4 +1,4 @@
-import { bindThemeToggle, initTheme } from "../theme.js?v=10";
+import { bindThemeToggle, initTheme } from "../theme.js?v=11";
 
 export const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -114,7 +114,7 @@ export function parsePageSelection(input, pageCount, mode = "all") {
   if (!raw) return all;
   const selected = new Set();
   for (const token of raw.split(",")) {
-    const part = token.trim().replace(/[–—]/g, "-");
+    const part = token.trim().replace(/\u2013|\u2014/g, "-");
     if (!part) continue;
     const match = part.match(/^(\d+)(?:-(\d+))?$/);
     if (!match) throw new Error(`Intervalo invalido: ${part}`);

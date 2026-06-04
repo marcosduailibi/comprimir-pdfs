@@ -22,11 +22,11 @@ export const COMPRESSION_MODES = {
   },
   bitrate: {
     label: "Bitrate manual",
-    description: "Voce define bitrate de video e audio diretamente.",
+    description: "Você define bitrate de vídeo e áudio diretamente.",
   },
   extreme: {
     label: "Agressivo",
-    description: "Combina CRF alto, resolucao/FPS menores e audio reduzido.",
+    description: "Combina CRF alto, resolução/FPS menores e áudio reduzido.",
   },
 };
 
@@ -263,7 +263,7 @@ export function buildCompressPlan(options) {
   };
 
   if (mode === "target" && targetMB && estimatedMB > targetMB * 1.2) {
-    estimate.warnings.push("O alvo parece apertado para a duracao. Ative 2-pass e considere reduzir resolucao/FPS.");
+    estimate.warnings.push("O alvo parece apertado para a duração. Ative 2-pass e considere reduzir resolução/FPS.");
   }
   if (mode === "extreme") {
     estimate.warnings.push("Modo agressivo pode consumir muita CPU/RAM e deixar a aba lenta.");

@@ -1,7 +1,7 @@
-import { TOOLS, CATEGORIES, toolsInCategory } from "./registry.js?v=12";
+import { TOOLS, CATEGORIES, toolsInCategory } from "./registry.js?v=13";
 import { searchTools } from "./search.js?v=12";
 import { createToolCard, el, iconMarkup, isOpenable, makeIcon } from "./render.js?v=12";
-import { bindToolDetails, openToolDetails } from "./details.js?v=12";
+import { bindToolDetails, openToolDetails } from "./details.js?v=13";
 import {
   getFavorites,
   isFavorite,
@@ -9,7 +9,7 @@ import {
   getRecent,
   recordOpen,
 } from "./stores.js?v=10";
-import { bindThemeToggle, initTheme } from "../theme.js?v=10";
+import { bindThemeToggle, initTheme } from "../theme.js?v=11";
 import { bindStaticHashRoutes } from "../static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);

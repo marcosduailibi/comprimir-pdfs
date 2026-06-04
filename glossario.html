@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glossário | ArqKit</title>
+    <meta name="description" content="Glossário do ArqKit: entenda bitrate, CRF, tamanho parcial, WASM, Workers, Canvas, processamento local e outros termos das ferramentas." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://arqkit.com.br/glossario.html" />
+    <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="./src/css/style.css?v=12" />
+    <link rel="stylesheet" href="./src/css/arqkit.css?v=13" />
+  </head>
+  <body class="ak-page ak-doc-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - início">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="site-nav" id="siteNav" aria-label="Navegação principal">
+          <a href="./">Início</a>
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./comprimir-pdf.html">PDF</a>
+          <a href="./ferramentas.html#images">Imagens</a>
+          <a href="./ferramentas.html#video">Vídeo</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <div class="header-actions">
+          <a class="btn btn--support" href="./#apoie"><span aria-hidden="true">$</span> Apoiar</a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">Tema</button>
+          <button id="navToggle" class="mobile-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">Menu</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="ak-doc-shell">
+      <nav class="ak-breadcrumb" aria-label="Breadcrumb">
+        <a href="./">Início</a>
+        <span aria-hidden="true">&gt;</span>
+        <span>Glossário</span>
+      </nav>
+
+      <section class="ak-doc-hero" aria-labelledby="glossaryTitle">
+        <p class="ak-kicker">Como o ArqKit funciona</p>
+        <h1 id="glossaryTitle">Glossário</h1>
+        <p>Termos técnicos explicados em linguagem direta para você entender o que acontece quando um arquivo é processado no navegador.</p>
+      </section>
+
+      <section class="ak-doc-grid" aria-label="Termos do ArqKit">
+        <article class="ak-doc-card">
+          <h2>Processamento local</h2>
+          <p>Significa que o arquivo escolhido é lido e transformado dentro do navegador. O ArqKit evita enviar PDFs, imagens, vídeos ou áudios para servidores próprios nas ferramentas prontas.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>File API</h2>
+          <p>É a API do navegador que permite ler arquivos selecionados por você em um campo de upload ou arrastar e soltar. A página só acessa arquivos que você escolheu.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Bitrate</h2>
+          <p>É a quantidade de dados usada por segundo em áudio ou vídeo. Bitrate maior tende a preservar mais qualidade e gerar arquivo maior. Bitrate menor tende a reduzir o arquivo, mas pode criar perda visual, áudio mais fraco ou artefatos.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Tamanho parcial</h2>
+          <p>É uma leitura aproximada do arquivo que está sendo gerado durante o processamento. Quando o FFmpeg não informa esse número, o ArqKit estima usando a porcentagem concluída, o tempo processado e o tamanho final previsto.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>CRF</h2>
+          <p>CRF é um controle de qualidade constante em codecs como H.264. Valores menores preservam mais qualidade e geram arquivos maiores. Valores maiores comprimem mais e podem reduzir a qualidade.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>2-pass</h2>
+          <p>É uma compressão em duas passadas. Na primeira, o encoder analisa o vídeo. Na segunda, usa essa análise para distribuir melhor o bitrate e tentar chegar mais perto do tamanho alvo.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>WASM</h2>
+          <p>WebAssembly permite rodar bibliotecas pesadas, como FFmpeg e qpdf, dentro do navegador. Isso aumenta o poder das ferramentas locais, mas também pode consumir bastante CPU e memória.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Web Worker</h2>
+          <p>É uma thread separada do navegador usada para tarefas pesadas. Workers ajudam a reduzir travamentos da interface, mas ainda usam recursos do dispositivo.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Canvas</h2>
+          <p>Canvas é uma área de desenho do navegador. O ArqKit usa Canvas para redimensionar, converter e reprocessar imagens localmente.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>OffscreenCanvas</h2>
+          <p>É uma versão do Canvas que pode funcionar fora da thread principal quando o navegador suporta. Ajuda a manter a interface mais responsiva em processamento de imagem.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>PDF.js e pdf-lib</h2>
+          <p>PDF.js renderiza páginas de PDF no navegador. pdf-lib cria ou modifica PDFs localmente, como juntar, converter imagens em PDF ou aplicar marca d'água.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>FFmpeg.wasm</h2>
+          <p>É o FFmpeg rodando no navegador via WebAssembly. Ele permite comprimir, converter, cortar vídeo e extrair áudio sem upload, mas transcodificação pode ser lenta e consumir muita memória.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Tesseract.js</h2>
+          <p>É uma biblioteca de OCR para reconhecer texto em imagens e documentos escaneados. OCR local pode demorar porque analisa pixels e tenta identificar letras.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Arquivo temporário</h2>
+          <p>É um dado usado durante o processamento, como uma imagem renderizada, um Blob ou um arquivo dentro da memória do WASM. Ele deve ser descartado ao concluir, cancelar ou limpar a ferramenta.</p>
+        </article>
+        <article class="ak-doc-card ak-doc-card--soft">
+          <h2>Limites do navegador</h2>
+          <p>O navegador pode pausar, reduzir ou encerrar tarefas pesadas quando a aba é fechada, recarregada ou fica sem memória. Por isso, mantenha a página aberta durante compressões grandes.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - início">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="footer-links" aria-label="Links do rodapé">
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="./glossario.html">Glossário</a>
+          <a href="./termos.html">Termos</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <p class="footer-copy">ArqKit - ferramentas locais para trabalhar com arquivos no navegador.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/js/static-page.js?v=13"></script>
+  </body>
+</html>

@@ -5,7 +5,7 @@ import { executeSplit, getPageCount } from "../pdf/split.js?v=10";
 import { planSplit, parsePageRanges, describeRangeError } from "../pdf/page-ranges.js?v=10";
 import { zipSync } from "https://cdn.jsdelivr.net/npm/fflate@0.8.2/+esm";
 import { recordOpen, recordComplete } from "./stores.js?v=10";
-import { bindThemeToggle } from "../theme.js?v=10";
+import { bindThemeToggle } from "../theme.js?v=11";
 
 const $ = (id) => document.getElementById(id);
 const fmt = (b) => {
@@ -104,10 +104,10 @@ function renderResults(parts) {
   if (parts.length > 1) {
     const zipBtn = document.createElement("button");
     zipBtn.className = "btn btn--primary"; zipBtn.type = "button";
-    zipBtn.textContent = "⬇️ Baixar todos (.zip)";
+    zipBtn.textContent = "Baixar todos (.zip)";
     zipBtn.addEventListener("click", () => {
       const map = {}; parts.forEach((p) => { map[p.name] = p.bytes; });
-      const zipped = zipSync(map, { level: 0 }); // PDFs já comprimidos → store
+      const zipped = zipSync(map, { level: 0 }); // PDFs ja comprimidos: store
       const url = URL.createObjectURL(new Blob([zipped], { type: "application/zip" }));
       st.urls.push(url);
       const a = document.createElement("a"); a.href = url; a.download = `${st.baseName}-dividido.zip`;
@@ -135,10 +135,10 @@ async function run() {
   const btn = $("splitRun");
   btn.disabled = true;
   $("splitProgress").hidden = false;
-  $("splitProgress").textContent = "Dividindo o PDF no seu navegador…";
+  $("splitProgress").textContent = "Dividindo o PDF no seu navegador...";
   try {
     const parts = await executeSplit(st.bytes, plan, st.baseName, ({ index, total }) => {
-      $("splitProgress").textContent = `Gerando parte ${index} de ${total}…`;
+      $("splitProgress").textContent = `Gerando parte ${index} de ${total}...`;
     });
     $("splitProgress").hidden = true;
     renderResults(parts);

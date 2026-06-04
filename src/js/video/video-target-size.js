@@ -59,10 +59,10 @@ export function sizeReductionPercent(originalBytes, outputBytes) {
 
 export function targetCompressionWarning({ targetMB, durationSeconds, videoKbps, resolution, fps }) {
   const warnings = [];
-  if (!durationSeconds) warnings.push("Sem duracao detectada, a estimativa pode variar bastante.");
-  if (videoKbps < 250) warnings.push("O bitrate de video ficou muito baixo; a imagem pode perder bastante detalhe.");
-  if (targetMB && targetMB < 5) warnings.push("Tamanho alvo muito pequeno costuma exigir cortes fortes em resolucao, FPS ou audio.");
-  if (resolution === "360p") warnings.push("Resolucao 360p prioriza tamanho minimo e reduz nitidez.");
+  if (!durationSeconds) warnings.push("Sem duração detectada, a estimativa pode variar bastante.");
+  if (videoKbps < 250) warnings.push("O bitrate de vídeo ficou muito baixo; a imagem pode perder bastante detalhe.");
+  if (targetMB && targetMB < 5) warnings.push("Tamanho alvo muito pequeno costuma exigir cortes fortes em resolução, FPS ou áudio.");
+  if (resolution === "360p") warnings.push("Resolução 360p prioriza tamanho mínimo e reduz nitidez.");
   if (fps && fps !== "original" && Number(fps) <= 20) warnings.push("FPS baixo deixa movimentos menos fluidos.");
   return warnings;
 }

@@ -1,4 +1,4 @@
-import { STATUS_META, getTool } from "./registry.js?v=12";
+import { STATUS_META, getTool } from "./registry.js?v=13";
 import { el, getStatusBadges, iconMarkup, isOpenable } from "./render.js?v=12";
 
 let overlay = null;

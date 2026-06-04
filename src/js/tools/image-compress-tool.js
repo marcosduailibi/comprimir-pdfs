@@ -1,4 +1,4 @@
-import { bindThemeToggle, initTheme } from "../theme.js?v=10";
+import { bindThemeToggle, initTheme } from "../theme.js?v=11";
 import { showToast } from "../utils.js?v=10";
 import { recordComplete, recordOpen } from "./stores.js?v=10";
 import { getSupportedOutputFormats, outputFormatForFile, outputFormatIds } from "../image/image-formats.js";

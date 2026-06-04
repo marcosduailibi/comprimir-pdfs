@@ -2,7 +2,7 @@ const MB = 1024 * 1024;
 
 export const PROCESSING_MODES = {
   compatible: {
-    label: "Compativel",
+    label: "Compatível",
     description: "Usa poucos recursos. Melhor para celular, notebook simples e arquivos grandes.",
     x264Preset: "veryfast",
     webm: ["-deadline", "good", "-cpu-used", "8"],
@@ -11,7 +11,7 @@ export const PROCESSING_MODES = {
   },
   gentle: {
     label: "Mais leve",
-    description: "Reduz pressao de CPU e memoria. Melhor para celular, notebook simples e arquivos grandes.",
+    description: "Reduz pressão de CPU e memória. Melhor para celular, notebook simples e arquivos grandes.",
     x264Preset: "ultrafast",
     webm: ["-deadline", "good", "-cpu-used", "8"],
     maxThreads: 1,
@@ -37,14 +37,14 @@ export const PROCESSING_MODES = {
   },
   balanced: {
     label: "Equilibrado",
-    description: "Boa relacao entre tempo, tamanho final e estabilidade.",
+    description: "Boa relação entre tempo, tamanho final e estabilidade.",
     x264Preset: "fast",
     webm: ["-deadline", "good", "-cpu-used", "5"],
     maxThreads: 2,
     risk: "medium",
   },
   compression: {
-    label: "Mais compressao",
+    label: "Mais compressão",
     description: "Gasta mais CPU para tentar gerar arquivo menor.",
     x264Preset: "slow",
     webm: ["-deadline", "good", "-cpu-used", "2"],
@@ -52,8 +52,8 @@ export const PROCESSING_MODES = {
     risk: "high",
   },
   maximum: {
-    label: "Maxima compressao",
-    description: "Usa preset lento e mais memoria. Pode travar navegadores fracos.",
+    label: "Máxima compressão",
+    description: "Usa preset lento e mais memória. Pode travar navegadores fracos.",
     x264Preset: "slower",
     webm: ["-deadline", "best", "-cpu-used", "1"],
     maxThreads: 4,
@@ -138,7 +138,7 @@ export function processingSummary(selected = "auto", context = {}) {
   const mode = PROCESSING_MODES[resolved];
   const riskyChoice = ["compression", "maximum", "custom"].includes(resolved);
   const riskMessage = riskyChoice && (capabilities.lowPower || isLargeVideoJob(context))
-    ? "Este modo pode deixar a aba lenta ou sem memoria neste dispositivo."
+    ? "Este modo pode deixar a aba lenta ou sem memória neste dispositivo."
     : riskyChoice
       ? "Este modo usa mais CPU/RAM para tentar reduzir mais o tamanho."
       : "";

@@ -28,6 +28,11 @@ export function parseFfmpegLog(message = "") {
   return stats;
 }
 
+export function isKnownFfmpegValue(value) {
+  const text = String(value ?? "").trim();
+  return !!text && text !== "N/A" && text !== "--";
+}
+
 export function percentFromStats(stats, durationSeconds) {
   if (!stats || !Number.isFinite(stats.timeSeconds) || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
     return null;
@@ -35,11 +40,11 @@ export function percentFromStats(stats, durationSeconds) {
   return Math.max(1, Math.min(99, Math.round((stats.timeSeconds / durationSeconds) * 100)));
 }
 
-export function friendlyProgressMessage(stats, fallback = "Processando video localmente.") {
+export function friendlyProgressMessage(stats, fallback = "Processando vídeo localmente.") {
   if (!stats) return fallback;
   const parts = [];
   if (stats.time) parts.push(`tempo ${stats.time}`);
   if (stats.speed) parts.push(`velocidade ${stats.speed}`);
-  if (stats.bitrate && stats.bitrate !== "N/A") parts.push(`bitrate ${stats.bitrate}`);
-  return parts.length ? `Processando no navegador: ${parts.join(" · ")}.` : fallback;
+  if (isKnownFfmpegValue(stats.bitrate)) parts.push(`bitrate ${stats.bitrate}`);
+  return parts.length ? `Processando no navegador: ${parts.join(" - ")}.` : fallback;
 }
