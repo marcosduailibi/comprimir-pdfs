@@ -7,6 +7,7 @@ const APP_SOURCE = "arqkit";
 let diagnostics = null;
 let ffmpeg = null;
 let qpdf = null;
+let activeFfmpegTask = null;
 
 function post(message, transfer = []) {
   const target = window.parent && window.parent !== window ? window.parent : window.opener;
@@ -93,10 +94,15 @@ async function loadFFmpeg(id) {
 
   ffmpeg = new FFmpeg();
   ffmpeg.on("progress", ({ progress: pct }) => {
-    progress(id, "Processando com ffmpeg.wasm no runner isolado.", Math.round((pct || 0) * 100));
+    const task = activeFfmpegTask || { id, stageIndex: 0, stageCount: 1 };
+    const stageCount = Math.max(1, task.stageCount || 1);
+    const stagePct = Math.max(0, Math.min(1, pct || 0));
+    const overall = Math.round(10 + (((task.stageIndex || 0) + stagePct) / stageCount) * 85);
+    progress(task.id, task.stageLabel || "Processando com ffmpeg.wasm no runner isolado.", overall);
   });
   ffmpeg.on("log", ({ message }) => {
-    if (message) progress(id, message.slice(0, 180));
+    const task = activeFfmpegTask || { id };
+    if (message) progress(task.id, message.slice(0, 180));
   });
   progress(id, "Carregando ffmpeg.wasm sob demanda.", 5);
   await ffmpeg.load(await createFFmpegLoadOptions(util));
@@ -149,14 +155,31 @@ async function runFfmpegTask(message) {
   const { payload, file } = message;
   const inputName = payload.inputName || "input.bin";
   const outputName = payload.outputName || "output.bin";
-  const command = payload.command || [];
-  if (!Array.isArray(command) || !command.length) throw new Error("Comando ffmpeg ausente.");
+  const commands = Array.isArray(payload.commands) && payload.commands.length ? payload.commands : [payload.command || []];
+  if (!commands.every((command) => Array.isArray(command) && command.length)) throw new Error("Comando ffmpeg ausente.");
   await engine.writeFile(inputName, new Uint8Array(file.buffer));
-  progress(message.id, `Executando ffmpeg ${command.join(" ")}`, 12);
-  await engine.exec(command);
+  try {
+    for (const [index, command] of commands.entries()) {
+      activeFfmpegTask = {
+        id: message.id,
+        stageIndex: index,
+        stageCount: commands.length,
+        stageLabel: commands.length > 1
+          ? `Etapa ${index + 1} de ${commands.length}: processando localmente.`
+          : "Processando com ffmpeg.wasm no runner isolado.",
+      };
+      progress(message.id, `Executando ffmpeg etapa ${index + 1}/${commands.length}: ${command.join(" ")}`, Math.round(10 + (index / commands.length) * 85));
+      await engine.exec(command);
+    }
+  } finally {
+    activeFfmpegTask = null;
+  }
   const output = await engine.readFile(outputName);
   try { await engine.deleteFile(inputName); } catch {}
   try { await engine.deleteFile(outputName); } catch {}
+  for (const name of payload.cleanupNames || []) {
+    try { await engine.deleteFile(name); } catch {}
+  }
   const buffer = output.buffer.slice(output.byteOffset, output.byteOffset + output.byteLength);
   post({
     type: "result",

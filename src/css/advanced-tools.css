@@ -148,6 +148,10 @@
   gap: 12px;
 }
 
+.tool-row--single {
+  grid-template-columns: 1fr;
+}
+
 .tool-check {
   display: flex !important;
   grid-template-columns: none !important;
@@ -370,6 +374,42 @@
   font-size: 0.76rem;
 }
 
+.tool-summary-warnings {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #f59e0b 42%, var(--ak-border));
+  border-radius: 12px;
+  background: color-mix(in srgb, #f59e0b 8%, var(--ak-surface));
+}
+
+.tool-summary-warnings ul {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ak-text);
+}
+
+.tool-risk-panel {
+  display: grid;
+  gap: 8px;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, #ef4444 44%, var(--ak-border));
+  border-radius: 14px;
+  background: color-mix(in srgb, #ef4444 8%, var(--ak-surface));
+}
+
+.tool-risk-panel strong {
+  color: var(--ak-text);
+}
+
+.tool-risk-panel span {
+  color: var(--ak-muted);
+  line-height: 1.45;
+}
+
 .tool-output {
   display: grid;
   gap: 10px;
@@ -392,6 +432,53 @@
   border: 1px solid var(--ak-border);
   border-radius: 12px;
   background: color-mix(in srgb, var(--ak-bg) 70%, var(--ak-surface));
+}
+
+.tool-result-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, #22c55e 38%, var(--ak-border));
+  border-radius: 16px;
+  background: color-mix(in srgb, #22c55e 7%, var(--ak-surface));
+}
+
+.tool-result-card > div {
+  display: grid;
+  gap: 3px;
+}
+
+.tool-result-card strong,
+.tool-result-card b {
+  color: var(--ak-text);
+}
+
+.tool-result-card span {
+  color: var(--ak-muted);
+}
+
+.tool-result-card ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tool-result-card li {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: var(--ak-surface);
+}
+
+.tool-result-card b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tool-note {
@@ -429,7 +516,8 @@
   }
 
   .tool-progress__stats,
-  .tool-processing-summary ul {
+  .tool-processing-summary ul,
+  .tool-result-card ul {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -445,7 +533,8 @@
   }
 
   .tool-progress__stats,
-  .tool-processing-summary ul {
+  .tool-processing-summary ul,
+  .tool-result-card ul {
     grid-template-columns: 1fr;
   }
 }

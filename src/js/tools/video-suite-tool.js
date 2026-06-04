@@ -1,11 +1,13 @@
 import { createFFmpegLoadOptions, loadFFmpegKit } from "../cdn-loader.js?v=2";
 import { friendlyProgressMessage, parseFfmpegLog, percentFromStats } from "../video/ffmpeg-progress.js?v=1";
+import { buildCompressPlan } from "../video/video-commands.js?v=1";
 import {
   PROCESSING_MODES,
   detectBrowserCapabilities,
   processingArgsFor,
   processingSummary,
-} from "../video/video-processing-options.js?v=1";
+} from "../video/video-processing-options.js?v=2";
+import { sizeReductionPercent } from "../video/video-target-size.js?v=1";
 import { runWasmTask } from "../wasm-runner-client.js?v=2";
 import {
   $,
@@ -115,12 +117,30 @@ function processingControlMarkup() {
     <label>Ritmo de processamento
       <select id="processingMode">
         <option value="auto" selected>Automatico recomendado</option>
-        <option value="gentle">Mais leve para o navegador</option>
+        <option value="compatible">Compativel e leve</option>
+        <option value="speed">Alta velocidade</option>
         <option value="balanced">Equilibrado</option>
-        <option value="fast">Mais rapido</option>
-        <option value="quality">Mais qualidade, mais lento</option>
+        <option value="compression">Mais compressao</option>
+        <option value="maximum">Maxima compressao</option>
+        <option value="custom">Personalizado</option>
       </select>
     </label>
+    <div class="tool-row tool-row--custom-speed" data-custom-processing hidden>
+      <label>Preset H.264
+        <select id="customPreset">
+          <option value="ultrafast">ultrafast</option>
+          <option value="veryfast">veryfast</option>
+          <option value="fast">fast</option>
+          <option value="medium" selected>medium</option>
+          <option value="slow">slow</option>
+          <option value="slower">slower</option>
+          <option value="veryslow">veryslow</option>
+        </select>
+      </label>
+      <label>Threads
+        <input id="customThreads" type="number" min="1" max="8" value="2" />
+      </label>
+    </div>
   `;
 }
 
@@ -129,22 +149,98 @@ function controlsMarkup() {
     return `
       <h2>2. Compressao</h2>
       <div class="tool-row">
-        <label>Perfil
-          <select id="profile"><option value="light">Leve</option><option value="balanced" selected>Equilibrado</option><option value="strong">Forte</option><option value="custom">Personalizado</option></select>
+        <label>Modo
+          <select id="compressionMode">
+            <option value="profile" selected>Preset rapido</option>
+            <option value="target">Tamanho alvo em MB</option>
+            <option value="crf">Qualidade CRF</option>
+            <option value="bitrate">Bitrate manual</option>
+            <option value="extreme">Agressivo</option>
+          </select>
         </label>
         <label>Formato
           <select id="outputFormat"><option value="mp4" selected>MP4</option><option value="webm">WebM</option></select>
         </label>
       </div>
-      <div class="tool-row">
-        <label>Bitrate de video
-          <input id="videoBitrate" type="text" value="1200k" />
+      <div class="tool-row" data-compression-panel="profile">
+        <label>Perfil
+          <select id="profile">
+            <option value="light">Leve</option>
+            <option value="balanced" selected>Equilibrado</option>
+            <option value="strong">Forte</option>
+          </select>
         </label>
-        <label>Bitrate de audio
-          <input id="audioBitrate" type="text" value="128k" />
+        <label>CRF de referencia
+          <input type="text" value="automatico pelo perfil" disabled />
+        </label>
+      </div>
+      <div class="tool-row" data-compression-panel="target" hidden>
+        <label>Tamanho alvo
+          <input id="targetMB" type="number" min="1" step="0.5" value="26" />
+        </label>
+        <label>Margem de seguranca
+          <select id="targetSafety">
+            <option value="0.88">Mais agressiva</option>
+            <option value="0.92" selected>Recomendada</option>
+            <option value="0.96">Mais conservadora</option>
+          </select>
+        </label>
+      </div>
+      <label class="tool-check" data-compression-panel="target" hidden><input id="targetTwoPass" type="checkbox" checked /> Usar 2-pass no MP4 para chegar mais perto do tamanho alvo</label>
+      <div class="tool-row" data-compression-panel="crf" hidden>
+        <label>CRF
+          <input id="crf" type="range" min="18" max="42" step="1" value="30" />
+        </label>
+        <label>Valor do CRF
+          <input id="crfValue" type="number" min="18" max="42" step="1" value="30" />
+        </label>
+      </div>
+      <div class="tool-row">
+        <label>Resolucao maxima
+          <select id="resolution">
+            <option value="original">Original</option>
+            <option value="1080p">1080p</option>
+            <option value="720p" selected>720p</option>
+            <option value="540p">540p</option>
+            <option value="480p">480p</option>
+            <option value="360p">360p extremo</option>
+          </select>
+        </label>
+        <label>FPS maximo
+          <select id="fps">
+            <option value="original">Original</option>
+            <option value="30" selected>30 fps</option>
+            <option value="24">24 fps</option>
+            <option value="20">20 fps</option>
+            <option value="15">15 fps extremo</option>
+          </select>
+        </label>
+      </div>
+      <div class="tool-row tool-row--single" data-compression-panel="bitrate" hidden>
+        <label>Bitrate de video
+          <input id="videoBitrate" type="text" value="900k" />
+        </label>
+      </div>
+      <div class="tool-row" data-audio-panel>
+        <label>Audio
+          <select id="audioBitrate">
+            <option value="128k">128k</option>
+            <option value="96k" selected>96k</option>
+            <option value="64k">64k</option>
+            <option value="48k">48k agressivo</option>
+            <option value="32k">32k extremo</option>
+          </select>
+        </label>
+        <label>Observacao
+          <input type="text" value="remover audio reduz mais" disabled />
         </label>
       </div>
       ${processingControlMarkup()}
+      <div class="tool-risk-panel" data-extreme-warning hidden>
+        <strong>Modo agressivo</strong>
+        <span>Este modo pode usar muita CPU e RAM, deixar a aba lenta ou falhar em celular/notebook simples. Os arquivos continuam locais no navegador.</span>
+        <label class="tool-check"><input id="extremeAck" type="checkbox" /> Entendo o risco e quero testar mesmo assim</label>
+      </div>
       <label class="tool-check"><input id="removeAudio" type="checkbox" /> Remover audio</label>
     `;
   }
@@ -293,10 +389,48 @@ function bindControls() {
   $("#useEnd")?.addEventListener("click", () => {
     $("#endTime").value = formatTime($("#videoPreview")?.currentTime || 0);
   });
-  ["profile", "outputFormat", "audioFormat", "processingMode", "videoBitrate", "audioBitrate", "removeAudio", "cutMode"].forEach((id) => {
+  $("#compressionMode")?.addEventListener("change", () => {
+    applyCompressionModeDefaults($("#compressionMode")?.value || "profile");
+    updateCompressionModeVisibility();
+    updateProcessingSummary();
+  });
+  $("#crf")?.addEventListener("input", () => {
+    const value = $("#crf")?.value || "30";
+    const target = $("#crfValue");
+    if (target) target.value = value;
+    updateProcessingSummary();
+  });
+  $("#crfValue")?.addEventListener("input", () => {
+    const value = $("#crfValue")?.value || "30";
+    const target = $("#crf");
+    if (target) target.value = value;
+    updateProcessingSummary();
+  });
+  [
+    "profile",
+    "outputFormat",
+    "audioFormat",
+    "processingMode",
+    "customPreset",
+    "customThreads",
+    "videoBitrate",
+    "audioBitrate",
+    "targetMB",
+    "targetSafety",
+    "targetTwoPass",
+    "resolution",
+    "fps",
+    "removeAudio",
+    "extremeAck",
+    "cutMode",
+  ].forEach((id) => {
     $(`#${id}`)?.addEventListener("change", updateProcessingSummary);
     $(`#${id}`)?.addEventListener("input", updateProcessingSummary);
   });
+  ["outputFormat", "processingMode", "removeAudio"].forEach((id) => {
+    $(`#${id}`)?.addEventListener("change", updateCompressionModeVisibility);
+  });
+  updateCompressionModeVisibility();
   document.querySelector("[data-run-tool]").addEventListener("click", runCurrentTool);
   document.querySelector("[data-cancel-tool]").addEventListener("click", cancelTool);
   document.querySelector("[data-clear-tool]").addEventListener("click", clearTool);
@@ -348,26 +482,147 @@ function selectedProcessingMode() {
   return $("#processingMode")?.value || "auto";
 }
 
+function applyCompressionModeDefaults(mode) {
+  const defaults = {
+    profile: { resolution: "720p", fps: "30", audioBitrate: "96k", processingMode: "auto" },
+    target: { resolution: "720p", fps: "30", audioBitrate: "64k", processingMode: "compression" },
+    crf: { resolution: "720p", fps: "original", audioBitrate: "96k", processingMode: "balanced", crf: "30" },
+    bitrate: { resolution: "720p", fps: "30", audioBitrate: "96k", videoBitrate: "900k", processingMode: "balanced" },
+    extreme: { resolution: "480p", fps: "20", audioBitrate: "48k", processingMode: "maximum", crf: "36" },
+  }[mode];
+  if (!defaults) return;
+  for (const [id, value] of Object.entries(defaults)) {
+    const element = $(`#${id}`);
+    if (element) element.value = value;
+  }
+  if (defaults.crf) {
+    const crfRange = $("#crf");
+    const crfValue = $("#crfValue");
+    if (crfRange) crfRange.value = defaults.crf;
+    if (crfValue) crfValue.value = defaults.crf;
+  }
+}
+
+function updateCompressionModeVisibility() {
+  const processingMode = selectedProcessingMode();
+  const customPanel = document.querySelector("[data-custom-processing]");
+  if (customPanel) customPanel.hidden = processingMode !== "custom";
+  if (currentToolId !== "compress-video") return;
+  const mode = $("#compressionMode")?.value || "profile";
+  const format = $("#outputFormat")?.value || "mp4";
+  document.querySelectorAll("[data-compression-panel]").forEach((panel) => {
+    const value = panel.getAttribute("data-compression-panel");
+    const shouldShow = value === mode && (value !== "target" || format === "mp4" || panel.tagName !== "LABEL");
+    panel.hidden = !shouldShow;
+  });
+  if (mode === "target" && format !== "mp4") {
+    $("#targetTwoPass")?.closest("label")?.setAttribute("hidden", "");
+  }
+  const extremeWarning = document.querySelector("[data-extreme-warning]");
+  if (extremeWarning) extremeWarning.hidden = !(mode === "extreme" || processingMode === "maximum" || processingMode === "custom");
+  const audioSelect = $("#audioBitrate");
+  if (audioSelect) audioSelect.disabled = !!$("#removeAudio")?.checked;
+}
+
+function compressionOptions(input = "input.mp4", output = "output.mp4") {
+  const mode = $("#compressionMode")?.value || "profile";
+  const format = outputFor("compress-video");
+  return {
+    inputName: input,
+    outputName: output,
+    outputFormat: format,
+    compressionMode: mode,
+    profile: $("#profile")?.value || "balanced",
+    targetMB: $("#targetMB")?.value || 26,
+    twoPass: $("#targetTwoPass")?.checked !== false,
+    safetyFactor: $("#targetSafety")?.value || 0.92,
+    crf: $("#crfValue")?.value || $("#crf")?.value || 30,
+    videoBitrate: $("#videoBitrate")?.value || "900k",
+    audioBitrate: $("#audioBitrate")?.value || "96k",
+    resolution: $("#resolution")?.value || "720p",
+    fps: $("#fps")?.value || "30",
+    removeAudio: !!$("#removeAudio")?.checked,
+    processingMode: selectedProcessingMode(),
+    customPreset: $("#customPreset")?.value || "medium",
+    customThreads: $("#customThreads")?.value || "2",
+    context: processingContext(),
+  };
+}
+
+function currentCompressPlan(input = "input.mp4", output = "output.mp4") {
+  return buildCompressPlan(compressionOptions(input, output));
+}
+
+function customProcessingSettings() {
+  if (selectedProcessingMode() !== "custom") return {};
+  return {
+    x264Preset: $("#customPreset")?.value || "medium",
+    threads: $("#customThreads")?.value || "2",
+  };
+}
+
+function formatMB(value) {
+  return `${(Math.max(0, Number(value) || 0)).toFixed(value >= 10 ? 1 : 2)} MB`;
+}
+
 function updateProcessingSummary() {
   const root = $("#processingSummary");
   if (!root) return;
+  updateCompressionModeVisibility();
   const context = processingContext();
-  const summary = processingSummary(selectedProcessingMode(), context);
-  const qualityOption = $("#processingMode option[value='quality']");
-  if (qualityOption) {
-    qualityOption.disabled = summary.lowPower || summary.largeJob;
-    if (qualityOption.disabled && selectedProcessingMode() === "quality") $("#processingMode").value = "auto";
-  }
   const effective = processingSummary(selectedProcessingMode(), context);
   const memory = effective.memory ? `${effective.memory} GB RAM aprox.` : "memoria nao informada";
   const recommendation = effective.selected === "auto"
     ? `Automatico escolheu ${effective.label.toLowerCase()}.`
     : `Modo escolhido: ${effective.label.toLowerCase()}.`;
-  const warning = effective.qualityBlocked
-    ? "Modo de qualidade alta foi evitado neste navegador/arquivo para reduzir risco de travamento."
-    : effective.lowPower || effective.largeJob
-      ? "Recomendacao conservadora para manter a aba responsiva."
-      : "Configuracao adequada para este navegador.";
+  const warning = effective.riskMessage
+    || (effective.lowPower || effective.largeJob
+      ? "Use modos agressivos apenas se aceitar risco de lentidao ou falha por memoria."
+      : "Configuracao adequada para este navegador.");
+
+  if (currentToolId === "compress-video") {
+    let plan = null;
+    try {
+      plan = currentCompressPlan();
+    } catch (error) {
+      root.innerHTML = `<div><strong>Revise os parametros</strong><span>${escapeHtml(error?.message || "Configuracao invalida.")}</span></div>`;
+      return;
+    }
+    const estimatedBytes = plan.estimate.estimatedMB * 1024 * 1024;
+    const originalLabel = currentFile ? formatBytes(currentFile.size) : "selecione um video";
+    const estimateLabel = context.durationSeconds ? formatBytes(estimatedBytes) : "aguardando duracao";
+    const targetLabel = plan.estimate.targetMB ? formatMB(plan.estimate.targetMB) : "sem alvo fixo";
+    const projectedReduction = currentFile && context.durationSeconds
+      ? `${sizeReductionPercent(currentFile.size, estimatedBytes)}%`
+      : "estimativa";
+    const twoPass = plan.twoPass ? "2-pass ativo" : "1-pass";
+    const warnings = plan.estimate.warnings.length
+      ? plan.estimate.warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+      : "<li>Arquivos continuam locais. Resultado final pode variar conforme codec e conteudo.</li>";
+
+    root.innerHTML = `
+      <div>
+        <strong>${escapeHtml(plan.modeLabel)} - ${escapeHtml(recommendation)}</strong>
+        <span>${escapeHtml(warning)}</span>
+      </div>
+      <ul>
+        <li><b>${escapeHtml(originalLabel)}</b><span>arquivo original</span></li>
+        <li><b>${escapeHtml(estimateLabel)}</b><span>estimativa de saida</span></li>
+        <li><b>${escapeHtml(targetLabel)}</b><span>tamanho alvo</span></li>
+        <li><b>${escapeHtml(projectedReduction)}</b><span>reducao prevista</span></li>
+        <li><b>${plan.settings.videoKbps}k</b><span>video alvo</span></li>
+        <li><b>${plan.settings.audioKbps ? `${plan.settings.audioKbps}k` : "sem audio"}</b><span>audio</span></li>
+        <li><b>${escapeHtml(plan.settings.resolution)}</b><span>resolucao maxima</span></li>
+        <li><b>${escapeHtml(plan.settings.fps === "original" ? "original" : `${plan.settings.fps} fps`)}</b><span>FPS</span></li>
+        <li><b>${escapeHtml(twoPass)}</b><span>passadas</span></li>
+        <li><b>${effective.threads}</b><span>threads alvo</span></li>
+        <li><b>${escapeHtml(memory)}</b><span>capacidade</span></li>
+        <li><b>${escapeHtml(PROCESSING_MODES[effective.resolved].label)}</b><span>ritmo efetivo</span></li>
+      </ul>
+      <div class="tool-summary-warnings"><strong>Avisos</strong><ul>${warnings}</ul></div>
+    `;
+    return;
+  }
 
   root.innerHTML = `
     <div>
@@ -445,28 +700,45 @@ function inputName(file) {
   return `input.${fileExt(file.name) || "mp4"}`;
 }
 
-function resultButton(blob, name) {
+function resultButton(blob, name, plan = null) {
+  const reduction = currentFile ? sizeReductionPercent(currentFile.size, blob.size) : 0;
+  const delta = currentFile ? currentFile.size - blob.size : 0;
+  const estimate = plan?.estimate?.estimatedMB ? formatBytes(plan.estimate.estimatedMB * 1024 * 1024) : "sem estimativa";
+  const actual = formatBytes(blob.size);
+  const original = currentFile ? formatBytes(currentFile.size) : "arquivo original";
   $("#toolOutput").innerHTML = `
-    <div class="tool-list-item">
-      <strong>Download preparado</strong>
-      <small>${escapeHtml(name)} - ${formatBytes(blob.size)}</small>
+    <div class="tool-result-card">
+      <div>
+        <strong>Download preparado</strong>
+        <span>${escapeHtml(name)}</span>
+      </div>
+      <ul>
+        <li><b>${escapeHtml(original)}</b><span>original</span></li>
+        <li><b>${escapeHtml(actual)}</b><span>resultado</span></li>
+        <li><b>${reduction}%</b><span>reducao real</span></li>
+        <li><b>${escapeHtml(formatBytes(Math.abs(delta)))}</b><span>${delta >= 0 ? "economizados" : "maior que original"}</span></li>
+        <li><b>${escapeHtml(estimate)}</b><span>estimativa</span></li>
+        <li><b>${escapeHtml(plan?.modeLabel || "Processamento")}</b><span>modo usado</span></li>
+      </ul>
     </div>
-    <button class="btn btn--primary" id="downloadResult" type="button">Baixar resultado</button>
+    <div class="tool-actions">
+      <button class="btn btn--primary" id="downloadResult" type="button">Baixar resultado</button>
+      ${currentToolId === "compress-video" ? '<button class="btn btn--ghost" id="trySmaller" type="button">Tentar menor</button>' : ""}
+    </div>
   `;
   $("#downloadResult").addEventListener("click", () => downloadBlob(blob, name));
-}
-
-function profileArgs() {
-  const profile = $("#profile")?.value || "balanced";
-  const customVideo = $("#videoBitrate")?.value || "1200k";
-  const customAudio = $("#audioBitrate")?.value || "128k";
-  const presets = {
-    light: ["-b:v", "1800k", "-b:a", "160k"],
-    balanced: ["-vf", "scale='min(1280,iw)':-2", "-b:v", "1200k", "-b:a", "128k"],
-    strong: ["-vf", "scale='min(854,iw)':-2", "-b:v", "700k", "-b:a", "96k"],
-    custom: ["-b:v", customVideo, "-b:a", customAudio],
-  };
-  return presets[profile] || presets.balanced;
+  $("#trySmaller")?.addEventListener("click", () => {
+    const nextTarget = Math.max(1, (blob.size / (1024 * 1024)) * 0.86);
+    $("#compressionMode").value = "target";
+    $("#targetMB").value = nextTarget.toFixed(nextTarget >= 10 ? 1 : 2);
+    $("#resolution").value = plan?.settings?.resolution === "360p" ? "360p" : "480p";
+    $("#fps").value = "20";
+    $("#audioBitrate").value = "48k";
+    $("#processingMode").value = "compression";
+    updateCompressionModeVisibility();
+    updateProcessingSummary();
+    setAlert("#toolAlert", "Ajustei um alvo menor. Revise os avisos e rode novamente se quiser testar.");
+  });
 }
 
 function outputFor(type) {
@@ -486,7 +758,7 @@ function mimeForOutput(ext) {
 }
 
 function codecArgs(format) {
-  const speedArgs = processingArgsFor(format, selectedProcessingMode(), processingContext());
+  const speedArgs = processingArgsFor(format, selectedProcessingMode(), processingContext(), customProcessingSettings());
   if (format === "webm") return ["-c:v", "libvpx-vp9", "-c:a", "libopus", ...speedArgs];
   if (format === "gif") return ["-vf", `fps=${$("#fps")?.value || 12},scale=640:-1:flags=lanczos`];
   return ["-c:v", "libx264", "-c:a", "aac", ...speedArgs, "-movflags", "+faststart"];
@@ -502,9 +774,7 @@ function audioArgs(format) {
 
 function buildCommand(input, output) {
   if (currentToolId === "compress-video") {
-    const args = ["-i", input, ...profileArgs(), ...codecArgs(outputFor(currentToolId))];
-    if ($("#removeAudio")?.checked) args.push("-an");
-    return [...args, output];
+    return currentCompressPlan(input, output).commands[0];
   }
   if (currentToolId === "convert-video") {
     const format = outputFor(currentToolId);
@@ -519,6 +789,63 @@ function buildCommand(input, output) {
     return ["-ss", start, ...(end ? ["-to", end] : []), "-i", input, ...(fast ? ["-c", "copy"] : codecArgs(outputFor(currentToolId))), output];
   }
   return ["-i", input, ...audioArgs(outputFor(currentToolId)), output];
+}
+
+function planForCurrentTool(input, output) {
+  if (currentToolId === "compress-video") return currentCompressPlan(input, output);
+  return {
+    modeLabel: TOOL_CONFIG[currentToolId].title,
+    outputName: output,
+    outputFormat: outputFor(currentToolId),
+    commands: [buildCommand(input, output)],
+    fallbackCommands: [],
+    cleanupNames: [],
+    twoPass: false,
+    estimate: { warnings: [] },
+    settings: {},
+  };
+}
+
+async function executeRunnerPlan({ plan, input, output, ext, downloadName, commands = null }) {
+  const result = await runWasmTask({
+    engine: "ffmpeg",
+    action: currentToolId,
+    file: currentFile,
+    payload: {
+      inputName: input,
+      outputName: output,
+      commands: commands || plan.commands,
+      cleanupNames: plan.cleanupNames || [],
+      outputType: mimeForOutput(ext),
+      downloadName,
+    },
+    onProgress: (event) => updateProgressFromMessage(event.message || "Processando no runner WASM.", event.value ?? null),
+  });
+  return result.blob;
+}
+
+async function executeInPagePlan({ plan, input, output, ext, commands = null }) {
+  const { util } = await loadFFmpegKit();
+  const engine = await getFFmpeg();
+  await engine.writeFile(input, await util.fetchFile(currentFile));
+  const runCommands = commands || plan.commands;
+  for (const [index, command] of runCommands.entries()) {
+    updateVideoProgress(
+      Math.round(10 + (index / runCommands.length) * 85),
+      runCommands.length > 1 ? `Etapa ${index + 1} de ${runCommands.length} no modo compativel.` : "Executando processamento local no modo compativel.",
+    );
+    await engine.exec(command);
+  }
+  if (cancelled) throw new Error("Processamento cancelado.");
+  const data = await engine.readFile(output);
+  const buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+  const blob = new Blob([buffer], { type: mimeForOutput(ext) });
+  try { await engine.deleteFile(input); } catch {}
+  try { await engine.deleteFile(output); } catch {}
+  for (const name of plan.cleanupNames || []) {
+    try { await engine.deleteFile(name); } catch {}
+  }
+  return blob;
 }
 
 async function runCurrentTool() {
@@ -537,40 +864,36 @@ async function runCurrentTool() {
     const input = inputName(currentFile);
     const ext = outputFor(currentToolId);
     const output = `output.${ext}`;
-    const command = buildCommand(input, output);
+    if (currentToolId === "compress-video") {
+      const mode = $("#compressionMode")?.value || "profile";
+      const risky = mode === "extreme" || selectedProcessingMode() === "maximum";
+      if (risky && !$("#extremeAck")?.checked) {
+        setAlert("#toolAlert", "Marque que entende o risco do modo agressivo/maximo antes de processar.", "error");
+        return;
+      }
+    }
+    const plan = planForCurrentTool(input, output);
     const downloadName = `${baseName(currentFile.name)}-${currentToolId.replace(/-/g, "-")}.${ext}`;
     let blob = null;
     try {
       updateVideoProgress(8, "Preparando runner isolado. Nada sera enviado para servidores do ArqKit.");
-      const result = await runWasmTask({
-        engine: "ffmpeg",
-        action: currentToolId,
-        file: currentFile,
-        payload: {
-          inputName: input,
-          outputName: output,
-          command,
-          outputType: mimeForOutput(ext),
-          downloadName,
-        },
-        onProgress: (event) => updateProgressFromMessage(event.message || "Processando no runner WASM.", event.value ?? null),
-      });
-      blob = result.blob;
+      blob = await executeRunnerPlan({ plan, input, output, ext, downloadName });
     } catch (runnerError) {
-      setAlert("#toolAlert", `Runner isolado indisponivel (${runnerError.message}). Tentando modo compativel single-thread nesta pagina.`);
-      const { util } = await loadFFmpegKit();
-      const engine = await getFFmpeg();
-      await engine.writeFile(input, await util.fetchFile(currentFile));
-      updateVideoProgress(10, "Executando compressao local no modo compativel.");
-      await engine.exec(command);
-      if (cancelled) throw new Error("Processamento cancelado.");
-      const data = await engine.readFile(output);
-      blob = new Blob([data.buffer], { type: mimeForOutput(ext) });
-      try { await engine.deleteFile(input); } catch {}
-      try { await engine.deleteFile(output); } catch {}
+      if (plan.twoPass && plan.fallbackCommands?.length) {
+        try {
+          setAlert("#toolAlert", `2-pass falhou (${runnerError.message}). Tentando 1-pass com o mesmo alvo.`);
+          blob = await executeRunnerPlan({ plan, input, output, ext, downloadName, commands: plan.fallbackCommands });
+        } catch (fallbackRunnerError) {
+          setAlert("#toolAlert", `Runner isolado indisponivel (${fallbackRunnerError.message}). Tentando modo compativel single-thread nesta pagina.`);
+          blob = await executeInPagePlan({ plan, input, output, ext, commands: plan.fallbackCommands });
+        }
+      } else {
+        setAlert("#toolAlert", `Runner isolado indisponivel (${runnerError.message}). Tentando modo compativel single-thread nesta pagina.`);
+        blob = await executeInPagePlan({ plan, input, output, ext });
+      }
     }
     updateVideoProgress(100, "Resultado pronto para download.");
-    resultButton(blob, downloadName);
+    resultButton(blob, downloadName, plan);
     try { recordComplete(currentToolId); } catch {}
     setAlert("#toolAlert", "Pronto. Download preparado.", "success");
   } catch (error) {

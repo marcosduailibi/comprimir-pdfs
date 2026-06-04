@@ -1,26 +1,71 @@
 const MB = 1024 * 1024;
 
 export const PROCESSING_MODES = {
+  compatible: {
+    label: "Compativel",
+    description: "Usa poucos recursos. Melhor para celular, notebook simples e arquivos grandes.",
+    x264Preset: "veryfast",
+    webm: ["-deadline", "good", "-cpu-used", "8"],
+    maxThreads: 1,
+    risk: "low",
+  },
   gentle: {
     label: "Mais leve",
     description: "Reduz pressao de CPU e memoria. Melhor para celular, notebook simples e arquivos grandes.",
     x264Preset: "ultrafast",
     webm: ["-deadline", "good", "-cpu-used", "8"],
     maxThreads: 1,
+    aliasOf: "compatible",
+    risk: "low",
+  },
+  speed: {
+    label: "Alta velocidade",
+    description: "Prioriza terminar antes. O arquivo final pode ficar maior.",
+    x264Preset: "ultrafast",
+    webm: ["-deadline", "realtime", "-cpu-used", "8"],
+    maxThreads: 3,
+    risk: "medium",
+  },
+  fast: {
+    label: "Alta velocidade",
+    description: "Prioriza terminar antes. O arquivo final pode ficar maior.",
+    x264Preset: "ultrafast",
+    webm: ["-deadline", "realtime", "-cpu-used", "8"],
+    maxThreads: 3,
+    aliasOf: "speed",
+    risk: "medium",
   },
   balanced: {
     label: "Equilibrado",
     description: "Boa relacao entre tempo, tamanho final e estabilidade.",
-    x264Preset: "veryfast",
+    x264Preset: "fast",
     webm: ["-deadline", "good", "-cpu-used", "5"],
     maxThreads: 2,
+    risk: "medium",
   },
-  fast: {
-    label: "Mais rapido",
-    description: "Prioriza terminar antes. Pode gerar arquivo um pouco maior.",
-    x264Preset: "ultrafast",
-    webm: ["-deadline", "realtime", "-cpu-used", "8"],
+  compression: {
+    label: "Mais compressao",
+    description: "Gasta mais CPU para tentar gerar arquivo menor.",
+    x264Preset: "slow",
+    webm: ["-deadline", "good", "-cpu-used", "2"],
     maxThreads: 3,
+    risk: "high",
+  },
+  maximum: {
+    label: "Maxima compressao",
+    description: "Usa preset lento e mais memoria. Pode travar navegadores fracos.",
+    x264Preset: "slower",
+    webm: ["-deadline", "best", "-cpu-used", "1"],
+    maxThreads: 4,
+    risk: "extreme",
+  },
+  custom: {
+    label: "Personalizado",
+    description: "Permite escolher preset e threads manualmente.",
+    x264Preset: "medium",
+    webm: ["-deadline", "good", "-cpu-used", "4"],
+    maxThreads: 2,
+    risk: "high",
   },
   quality: {
     label: "Mais qualidade",
@@ -28,6 +73,8 @@ export const PROCESSING_MODES = {
     x264Preset: "medium",
     webm: ["-deadline", "good", "-cpu-used", "2"],
     maxThreads: 2,
+    aliasOf: "compression",
+    risk: "high",
   },
 };
 
@@ -48,22 +95,19 @@ export function isLargeVideoJob({ fileSize = 0, durationSeconds = 0 } = {}) {
 export function recommendedProcessingMode(context = {}) {
   const capabilities = context.capabilities || detectBrowserCapabilities();
   const largeJob = isLargeVideoJob(context);
-  if (capabilities.lowPower || largeJob) return "gentle";
-  if (capabilities.cores >= 8 && (capabilities.memory === null || capabilities.memory >= 8)) return "fast";
+  if (capabilities.lowPower || largeJob) return "compatible";
+  if (capabilities.cores >= 8 && (capabilities.memory === null || capabilities.memory >= 8)) return "speed";
   return "balanced";
 }
 
 export function isProcessingModeAllowed(modeId, context = {}) {
-  if (!PROCESSING_MODES[modeId]) return false;
-  if (modeId !== "quality") return true;
-  const capabilities = context.capabilities || detectBrowserCapabilities();
-  return !capabilities.lowPower && !isLargeVideoJob(context);
+  return !!PROCESSING_MODES[modeId];
 }
 
 export function resolveProcessingMode(selected = "auto", context = {}) {
   const requested = PROCESSING_MODES[selected] ? selected : "auto";
   if (requested === "auto") return recommendedProcessingMode(context);
-  return isProcessingModeAllowed(requested, context) ? requested : recommendedProcessingMode(context);
+  return requested;
 }
 
 export function processingThreadCount(modeId, capabilities = detectBrowserCapabilities()) {
@@ -71,13 +115,20 @@ export function processingThreadCount(modeId, capabilities = detectBrowserCapabi
   return Math.max(1, Math.min(mode.maxThreads, capabilities.cores || 1));
 }
 
-export function processingArgsFor(format, selected = "auto", context = {}) {
+export function processingArgsFor(format, selected = "auto", context = {}, custom = {}) {
   const capabilities = context.capabilities || detectBrowserCapabilities();
   const modeId = resolveProcessingMode(selected, { ...context, capabilities });
   const mode = PROCESSING_MODES[modeId] || PROCESSING_MODES.balanced;
   if (format === "gif") return [];
-  if (format === "webm") return [...mode.webm, "-threads", String(processingThreadCount(modeId, capabilities))];
-  return ["-preset", mode.x264Preset, "-threads", String(processingThreadCount(modeId, capabilities))];
+  const threads = custom.threads
+    ? Math.max(1, Math.min(Number(custom.threads) || 1, capabilities.cores || 1))
+    : processingThreadCount(modeId, capabilities);
+  if (format === "webm") {
+    const cpuUsed = custom.webmCpuUsed ? ["-deadline", "good", "-cpu-used", String(custom.webmCpuUsed)] : mode.webm;
+    return [...cpuUsed, "-threads", String(threads)];
+  }
+  const preset = custom.x264Preset || mode.x264Preset;
+  return ["-preset", preset, "-threads", String(threads)];
 }
 
 export function processingSummary(selected = "auto", context = {}) {
@@ -85,6 +136,12 @@ export function processingSummary(selected = "auto", context = {}) {
   const recommended = recommendedProcessingMode({ ...context, capabilities });
   const resolved = resolveProcessingMode(selected, { ...context, capabilities });
   const mode = PROCESSING_MODES[resolved];
+  const riskyChoice = ["compression", "maximum", "custom"].includes(resolved);
+  const riskMessage = riskyChoice && (capabilities.lowPower || isLargeVideoJob(context))
+    ? "Este modo pode deixar a aba lenta ou sem memoria neste dispositivo."
+    : riskyChoice
+      ? "Este modo usa mais CPU/RAM para tentar reduzir mais o tamanho."
+      : "";
   return {
     selected,
     recommended,
@@ -96,6 +153,8 @@ export function processingSummary(selected = "auto", context = {}) {
     memory: capabilities.memory,
     lowPower: capabilities.lowPower,
     largeJob: isLargeVideoJob(context),
-    qualityBlocked: selected === "quality" && resolved !== "quality",
+    qualityBlocked: false,
+    risk: mode.risk || "medium",
+    riskMessage,
   };
 }
