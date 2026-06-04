@@ -5,7 +5,7 @@ import { executeSplit, getPageCount } from "../pdf/split.js?v=10";
 import { planSplit, parsePageRanges, describeRangeError } from "../pdf/page-ranges.js?v=10";
 import { zipSync } from "https://cdn.jsdelivr.net/npm/fflate@0.8.2/+esm";
 import { recordOpen, recordComplete } from "./stores.js?v=10";
-import { bindThemeToggle } from "../theme.js?v=11";
+import { bindThemeToggle } from "../theme.js?v=13";
 
 const $ = (id) => document.getElementById(id);
 const fmt = (b) => {

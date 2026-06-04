@@ -25,7 +25,7 @@
     </script>
     <link rel="stylesheet" href="./src/css/style.css?v=12" />
     <link rel="stylesheet" href="./src/css/tools.css?v=10" />
-    <link rel="stylesheet" href="./src/css/arqkit.css?v=13" />
+    <link rel="stylesheet" href="./src/css/arqkit.css?v=15" />
     <link rel="stylesheet" href="./src/css/advanced-tools.css?v=5" />
   </head>
   <body class="ak-page ak-tool-page advanced-tool-page">
@@ -43,10 +43,13 @@
           <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
         <div class="header-actions">
-          <a class="btn btn--support" href="./#apoie"><span aria-hidden="true">$</span> Apoiar</a>
-          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
-            <span class="theme-icon theme-icon--dark">Tema</span>
-            <span class="theme-icon theme-icon--light">Tema</span>
+          <a class="btn btn--support support-button" href="./#apoie">
+            <svg class="support-button__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span class="support-button__label">Apoiar</span>
+          </a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Ativar modo escuro" title="Ativar modo escuro">
+            <svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
           </button>
           <button id="navToggle" class="mobile-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">Menu</button>
         </div>
@@ -94,6 +97,6 @@
       </div>
     </footer>
 
-    <script type="module" src="./src/js/tools/video-suite-tool.js?v=6"></script>
+    <script type="module" src="./src/js/tools/video-suite-tool.js?v=7"></script>
   </body>
 </html>

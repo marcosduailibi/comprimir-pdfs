@@ -18,7 +18,7 @@ import {
   setText,
   showStartNotice,
   scrollProgressSoon,
-} from "./tool-page.js?v=2";
+} from "./tool-page.js?v=3";
 import { recordComplete, recordOpen } from "./stores.js?v=10";
 
 const TOOL_CONFIG = {

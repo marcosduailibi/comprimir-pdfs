@@ -1,4 +1,4 @@
-import { bindThemeToggle, initTheme } from "../theme.js?v=11";
+import { bindThemeToggle, initTheme } from "../theme.js?v=13";
 
 export const $ = (selector, root = document) => root.querySelector(selector);
 

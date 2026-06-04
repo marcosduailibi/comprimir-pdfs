@@ -8,7 +8,7 @@ import {
   calculateSelectedFilesSummary, DPI_PRESETS, dpiHint, dpiLabel,
 } from "./state.js?v=11";
 import { formatBytes, formatTime, prettyMode } from "./utils.js?v=10";
-import { bindThemeToggle, initTheme as initSharedTheme } from "./theme.js?v=11";
+import { bindThemeToggle, initTheme as initSharedTheme } from "./theme.js?v=13";
 
 const $ = (id) => document.getElementById(id);
 let H = {}; // handlers

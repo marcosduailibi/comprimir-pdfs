@@ -1,5 +1,5 @@
 import { loadPdfJs, loadPdfLib } from "../cdn-loader.js";
-import { baseName, pad } from "../tools/tool-page.js";
+import { baseName, pad } from "../tools/tool-page.js?v=3";
 
 export async function readPdf(file, password = "") {
   const pdfjsLib = await loadPdfJs();

@@ -9,7 +9,7 @@ import {
   getRecent,
   recordOpen,
 } from "./stores.js?v=10";
-import { bindThemeToggle, initTheme } from "../theme.js?v=11";
+import { bindThemeToggle, initTheme } from "../theme.js?v=13";
 import { bindStaticHashRoutes } from "../static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);

@@ -6,6 +6,14 @@ export const THEME_KEY = "pdfTools.theme.v1";
 export const LEGACY_THEME_KEY = "comprimirpdf-theme";
 const JOB_STORE_KEY = "arqkit.activeJobs.v1";
 
+// Ícones do header (SVG inline, herdam a cor via currentColor).
+const SUPPORT_ICON =
+  '<svg class="support-button__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+const THEME_ICON_MOON =
+  '<svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const THEME_ICON_SUN =
+  '<svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+
 export function normalizeTheme(value) {
   return value === "dark" || value === "light" ? value : null;
 }
@@ -62,8 +70,25 @@ export function initTheme(doc = globalThis.document, storage = globalThis.localS
 export function bindThemeToggle(button, doc = globalThis.document, storage = globalThis.localStorage) {
   normalizeGlobalUi(doc);
   if (!button) return null;
-  button.addEventListener("click", () => toggleTheme(doc, storage));
+  button.addEventListener("click", () => {
+    toggleTheme(doc, storage);
+    updateThemeToggleLabel(button, doc);
+  });
+  updateThemeToggleLabel(button, doc);
   return button;
+}
+
+function currentThemeIsDark(doc = globalThis.document) {
+  return doc?.documentElement?.getAttribute("data-theme") === "dark";
+}
+
+// O ícone (lua/sol) é trocado por CSS conforme [data-theme]; aqui só mantemos
+// o rótulo acessível coerente com a ação que o clique vai executar.
+function updateThemeToggleLabel(button, doc = globalThis.document) {
+  if (!button) return;
+  const label = currentThemeIsDark(doc) ? "Ativar modo claro" : "Ativar modo escuro";
+  button.setAttribute("aria-label", label);
+  button.setAttribute("title", label);
 }
 
 function normalizeGlobalUi(doc = globalThis.document) {
@@ -88,19 +113,24 @@ function normalizeHeader(doc) {
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
-  let support = actions.querySelector(".btn--support");
+  let support = actions.querySelector(".btn--support, .support-button");
   if (!support) {
     support = doc.createElement("a");
-    support.className = "btn btn--support";
     actions.insertBefore(support, actions.firstChild);
   }
-  support.href = support.getAttribute("href") || "./#apoie";
-  support.innerHTML = '<span aria-hidden="true">$</span><span>Apoiar</span>';
+  support.className = "btn btn--support support-button";
+  // Em <a> mantemos o destino (#apoie); em <button data-open-pix> preservamos o
+  // comportamento de modal — não criar expando href.
+  if (support.tagName === "A") {
+    support.href = support.getAttribute("href") || "./#apoie";
+  }
+  support.innerHTML = `${SUPPORT_ICON}<span class="support-button__label">Apoiar</span>`;
 
   const themeButton = actions.querySelector("#themeToggle");
   if (themeButton) {
-    themeButton.setAttribute("aria-label", "Alternar tema");
-    themeButton.innerHTML = '<span class="theme-icon theme-icon--dark">Tema</span><span class="theme-icon theme-icon--light">Tema</span>';
+    themeButton.classList.add("theme-toggle");
+    themeButton.innerHTML = `${THEME_ICON_MOON}${THEME_ICON_SUN}`;
+    updateThemeToggleLabel(themeButton, doc);
   }
 
   const navButton = actions.querySelector("#navToggle");
