@@ -51,8 +51,64 @@ export function setProgress(selector, value, message = "") {
   const progress = root.querySelector("progress");
   const text = root.querySelector("[data-progress-text]");
   root.hidden = false;
-  if (progress && Number.isFinite(Number(value))) progress.value = Math.max(0, Math.min(100, Number(value)));
+  if (progress && Number.isFinite(Number(value))) {
+    const next = Math.max(0, Math.min(100, Number(value)));
+    const previous = Number(root.dataset.progressLast || 0);
+    const safeValue = next < previous ? previous : next;
+    root.dataset.progressLast = String(safeValue);
+    progress.value = safeValue;
+  }
   if (text) text.textContent = message;
+}
+
+export function resetProgress(selector) {
+  const root = $(selector);
+  if (!root) return;
+  const progress = root.querySelector("progress");
+  delete root.dataset.progressLast;
+  if (progress) progress.value = 0;
+  const text = root.querySelector("[data-progress-text]");
+  if (text) text.textContent = "Preparando.";
+}
+
+export function scrollToElement(selectorOrElement, block = "center") {
+  const element = typeof selectorOrElement === "string" ? $(selectorOrElement) : selectorOrElement;
+  if (!element) return;
+  element.scrollIntoView({ behavior: "smooth", block });
+}
+
+export function scrollProgressSoon(selector = "#toolProgress") {
+  window.requestAnimationFrame(() => window.setTimeout(() => scrollToElement(selector), 50));
+}
+
+export function showStartNotice({
+  title = "Processamento iniciado",
+  message = "Acompanhe o progresso abaixo.",
+  targetSelector = "#toolProgress",
+} = {}) {
+  let notice = document.querySelector(".tool-start-notice");
+  if (!notice) {
+    notice = document.createElement("div");
+    notice.className = "tool-start-notice";
+    notice.innerHTML = `
+      <div>
+        <strong data-start-title></strong>
+        <span data-start-message></span>
+      </div>
+      <button class="btn btn--primary btn--sm" type="button">Ver progresso</button>
+    `;
+    document.body.appendChild(notice);
+  }
+  notice.querySelector("[data-start-title]").textContent = title;
+  notice.querySelector("[data-start-message]").textContent = message;
+  notice.querySelector("button").onclick = () => scrollToElement(targetSelector);
+  notice.hidden = false;
+  notice.classList.add("is-visible");
+  window.clearTimeout(showStartNotice.timer);
+  showStartNotice.timer = window.setTimeout(() => {
+    notice.classList.remove("is-visible");
+    window.setTimeout(() => { notice.hidden = true; }, 200);
+  }, 5200);
 }
 
 export function downloadBlob(blob, name) {

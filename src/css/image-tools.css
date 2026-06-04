@@ -209,8 +209,22 @@
 .image-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
   margin-top: 8px;
+}
+
+.image-settings-card .image-actions,
+.image-results-card .image-actions {
+  width: 100%;
+}
+
+.image-help {
+  margin: -2px 0 0;
+  color: var(--ak-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .image-card-head {
@@ -442,6 +456,7 @@
     grid-column: 1 / -1;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   .image-number-grid,

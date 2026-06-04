@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="./src/css/style.css?v=12" />
     <link rel="stylesheet" href="./src/css/tools.css?v=10" />
     <link rel="stylesheet" href="./src/css/arqkit.css?v=13" />
-    <link rel="stylesheet" href="./src/css/image-tools.css?v=1" />
+    <link rel="stylesheet" href="./src/css/image-tools.css?v=2" />
   </head>
   <body class="ak-page ak-tool-page image-tool-page">
     <header class="site-header">
@@ -110,9 +110,10 @@
 
           <label class="field-label" for="qualityRange">Qualidade</label>
           <div class="image-range-row">
-            <input id="qualityRange" type="range" min="1" max="100" value="72" />
+            <input id="qualityRange" type="range" min="1" max="100" value="72" aria-describedby="imageQualityHelp" />
             <output id="qualityValue" for="qualityRange">72%</output>
           </div>
+          <p class="image-help" id="imageQualityHelp">Em JPG/WebP/AVIF, qualidade maior preserva detalhes e aumenta o arquivo; qualidade menor reduz tamanho com mais perda visual. PNG reduz pouco sem redimensionamento porque usa compressão sem perdas.</p>
 
           <label class="field-label" for="resizeMode">Redimensionamento</label>
           <select id="resizeMode" class="split-select">
@@ -238,7 +239,7 @@
       </div>
     </footer>
 
-    <script type="module" src="./src/js/tools/image-compress-tool.js?v=2"></script>
+    <script type="module" src="./src/js/tools/image-compress-tool.js?v=3"></script>
   </body>
 </html>
 

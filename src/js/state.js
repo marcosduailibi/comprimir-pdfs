@@ -84,7 +84,7 @@ export function dpiLabel(dpi) {
 
 // ------------------------------- Modos -------------------------------
 export const MODES = [
-  { id: "compress", icon: "🗜️", title: "Comprimir",
+  { id: "compress", icon: "📉", title: "Comprimir",
     text: "Reduzir o tamanho do PDF", multi: false, primary: true },
   { id: "merge", icon: "🔗", title: "Juntar PDFs",
     text: "Unir vários PDFs em um só", multi: true, primary: true },

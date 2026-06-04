@@ -12,10 +12,13 @@ import {
   fileExt,
   formatBytes,
   parsePageSelection,
+  resetProgress,
   setAlert,
   setProgress,
   setText,
-} from "./tool-page.js";
+  showStartNotice,
+  scrollProgressSoon,
+} from "./tool-page.js?v=2";
 import { recordComplete, recordOpen } from "./stores.js?v=10";
 
 const TOOL_CONFIG = {
@@ -183,14 +186,16 @@ function bindUpload() {
   renderFileInfo();
 }
 
-function resultButton(blob, name, label = "Baixar resultado") {
+function resultButton(blob, name, label = "Baixar arquivo") {
   const root = $("#toolOutput");
   root.innerHTML = `
     <div class="tool-list-item">
       <strong>Download preparado</strong>
       <small>${escapeHtml(name)} - ${formatBytes(blob.size)}</small>
     </div>
-    <button class="btn btn--primary" type="button" id="downloadResult">${escapeHtml(label)}</button>
+    <div class="tool-actions">
+      <button class="btn btn--primary" type="button" id="downloadResult">${escapeHtml(label)}</button>
+    </div>
   `;
   $("#downloadResult").addEventListener("click", () => downloadBlob(blob, name));
 }
@@ -244,8 +249,9 @@ function pdfToImagesMarkup() {
         </label>
       </div>
       <label>Qualidade JPG/WebP
-        <input id="quality" type="range" min="40" max="100" value="86" />
+        <input id="quality" type="range" min="40" max="100" value="86" aria-describedby="qualityHelp" />
       </label>
+      <p class="tool-help" id="qualityHelp">Controla a compressão de JPG e WebP: valores altos preservam mais detalhes e geram arquivos maiores; valores baixos reduzem mais o tamanho com perda visual. PNG ignora esse controle porque usa compressão sem perdas.</p>
       <div class="tool-actions">
         <button class="btn btn--primary" type="button" data-run-tool>Gerar imagens</button>
         <button class="btn btn--ghost" type="button" data-cancel-tool hidden>Cancelar</button>
@@ -479,6 +485,7 @@ function ocrMarkup() {
 
 async function runOcr() {
   const file = requireFile();
+  setProgress("#toolProgress", 4, "Preparando OCR local.");
   const Tesseract = await loadTesseract();
   const lang = $("#ocrLang").value;
   const blobs = [];
@@ -487,7 +494,8 @@ async function runOcr() {
     const pages = parsePageSelection($("#pageRange").value, pdf.numPages, $("#pageMode").value);
     for (let index = 0; index < pages.length; index += 1) {
       const pageNumber = pages[index];
-      setProgress("#toolProgress", Math.round((index / pages.length) * 35), `Renderizando pagina ${pageNumber}.`);
+      const renderPct = 5 + Math.round(((index + 1) / pages.length) * 30);
+      setProgress("#toolProgress", renderPct, `Renderizando página ${pageNumber} de ${pdf.numPages}.`);
       const { blob } = await renderPageBlob(pdf, pageNumber, { format: "png", dpi: 180 });
       blobs.push({ blob, label: `Pagina ${pageNumber}` });
     }
@@ -495,11 +503,13 @@ async function runOcr() {
     blobs.push({ blob: file, label: file.name });
   }
 
+  let currentOcrIndex = 0;
   const worker = await Tesseract.createWorker(lang, 1, {
     logger: (message) => {
       if (message.status === "recognizing text") {
-        const pct = 35 + Math.round((message.progress || 0) * 60);
-        setProgress("#toolProgress", pct, "Reconhecendo texto localmente.");
+        const itemShare = 60 / Math.max(1, blobs.length);
+        const pct = 35 + Math.round((currentOcrIndex + (message.progress || 0)) * itemShare);
+        setProgress("#toolProgress", pct, `Reconhecendo texto: ${blobs[currentOcrIndex]?.label || "arquivo"}.`);
       }
     },
   });
@@ -507,7 +517,9 @@ async function runOcr() {
   const output = [];
   for (let index = 0; index < blobs.length; index += 1) {
     if (cancelled) throw new Error("OCR cancelado.");
-    setProgress("#toolProgress", 35, `OCR em ${blobs[index].label}.`);
+    currentOcrIndex = index;
+    const basePct = 35 + Math.round((index / Math.max(1, blobs.length)) * 60);
+    setProgress("#toolProgress", basePct, `OCR em ${blobs[index].label} (${index + 1} de ${blobs.length}).`);
     const result = await worker.recognize(blobs[index].blob);
     output.push(`--- ${blobs[index].label} ---\n${normalizePdfText(result.data.text || "")}`);
   }
@@ -729,10 +741,21 @@ function renderWorkspace() {
 }
 
 async function runCurrentTool() {
+  if (!primaryFiles.length) {
+    setAlert("#toolAlert", "Selecione um arquivo antes de continuar.", "error");
+    return;
+  }
   cancelled = false;
   setBusy(true);
   $("#toolOutput").innerHTML = "";
+  resetProgress("#toolProgress");
   setAlert("#toolAlert", "Processando localmente no navegador.");
+  setProgress("#toolProgress", 1, "Processamento iniciado.");
+  showStartNotice({
+    title: `${TOOL_CONFIG[currentToolId]?.title || "Ferramenta"} iniciada`,
+    message: "Acompanhe o progresso desta tarefa abaixo.",
+  });
+  scrollProgressSoon("#toolProgress");
   try {
     try { recordOpen(currentToolId); } catch {}
     const map = {

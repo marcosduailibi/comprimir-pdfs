@@ -395,6 +395,11 @@ async function runCompression() {
   $("#cancelCompression").hidden = false;
   $("#imageResults").hidden = true;
   ready.forEach(resetItemResult);
+  updateProgress(0, ready.length);
+  $("#imageProgressCard")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  showToast(IMAGE_MODE === "convert-image"
+    ? "Conversao iniciada. Acompanhe o progresso abaixo."
+    : "Compressao iniciada. Acompanhe o progresso abaixo.", "info");
 
   const useWorker = canUseImageWorker();
   let client = null;
@@ -481,7 +486,7 @@ function renderList() {
         <span>${escapeHtml(itemResultMeta(item))}</span>
       </div>
       <div class="image-file-actions">
-        ${item.status === "done" ? `<button class="btn btn--primary btn--sm" type="button" data-action="download">Baixar</button>` : ""}
+        ${item.status === "done" ? `<button class="btn btn--primary btn--sm" type="button" data-action="download">Baixar imagem</button>` : ""}
         <button class="btn btn--ghost btn--sm" type="button" data-action="select">Previa</button>
         <button class="btn btn--ghost btn--sm" type="button" data-action="remove" aria-label="Remover ${escapeHtml(item.name)}">Remover</button>
       </div>

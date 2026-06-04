@@ -524,7 +524,7 @@ function updateActiveJob(extra = {}) {
     tool: currentToolId,
     title: TOOL_CONFIG[currentToolId]?.title || "Processamento local",
     fileName: currentFile?.name || "arquivo",
-    href: "./video-ferramentas.html#compress-video",
+    href: `./video-ferramentas.html#${currentToolId}`,
     progress: latestProgressValue,
     status: processingActive ? "processing" : "idle",
     message: "Processamento local no navegador.",
@@ -868,7 +868,7 @@ function resultButton(blob, name, plan = null) {
       </ul>
     </div>
     <div class="tool-actions">
-      <button class="btn btn--primary" id="downloadResult" type="button">Baixar resultado</button>
+      <button class="btn btn--primary" id="downloadResult" type="button">${escapeHtml(downloadLabelForCurrentTool())}</button>
       ${currentToolId === "compress-video" ? '<button class="btn btn--ghost" id="trySmaller" type="button">Tentar menor</button>' : ""}
     </div>
   `;
@@ -885,6 +885,15 @@ function resultButton(blob, name, plan = null) {
     updateProcessingSummary();
     setAlert("#toolAlert", "Ajustei um alvo menor. Revise os avisos e rode novamente se quiser testar.");
   });
+}
+
+function downloadLabelForCurrentTool() {
+  return {
+    "compress-video": "Baixar vídeo comprimido",
+    "convert-video": "Baixar vídeo convertido",
+    "cut-video": "Baixar vídeo cortado",
+    "extract-audio": "Baixar áudio",
+  }[currentToolId] || "Baixar arquivo";
 }
 
 function outputFor(type) {

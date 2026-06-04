@@ -2,8 +2,8 @@
 // Bootstrap e orquestracao: liga estado (state.js), interface (ui.js) e
 // processamento (Web Worker pdf-worker.js, com fallback na thread principal).
 
-import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity, resolveDpiValue } from "./state.js?v=10";
-import * as UI from "./ui.js?v=10";
+import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity, resolveDpiValue } from "./state.js?v=11";
+import * as UI from "./ui.js?v=11";
 import { buildFinalName, clamp, showToast } from "./utils.js?v=10";
 import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=11";
 import { recordOpen, recordComplete } from "./tools/stores.js?v=10";
@@ -19,6 +19,28 @@ let analyzeQueue = [];         // FIFO de lotes (ids) aguardando analise de pagi
 // detectar, ao recarregar a pagina, que havia um processamento em andamento.
 const JOB_KEY = "pdfcompress_current_job";
 const isProcessing = () => appState.status === "processing" || appState.status === "paused";
+const PAGE_HEADINGS = {
+  compress: {
+    title: "Comprimir PDF",
+    crumb: "Comprimir PDF",
+    description: "Reduza o tamanho do seu PDF localmente, com segurança e sem perder o controle dos seus arquivos.",
+  },
+  merge: {
+    title: "Juntar PDFs",
+    crumb: "Juntar PDFs",
+    description: "Una vários PDFs em um único arquivo localmente, mantendo seus documentos somente no navegador.",
+  },
+  merge_then_compress: {
+    title: "Juntar e Comprimir PDF",
+    crumb: "Juntar e comprimir",
+    description: "Una vários PDFs e reduza o tamanho do arquivo final em um fluxo local no navegador.",
+  },
+  compress_then_merge: {
+    title: "Comprimir e Juntar PDFs",
+    crumb: "Comprimir e juntar",
+    description: "Comprima cada PDF individualmente e depois gere um único arquivo final localmente.",
+  },
+};
 
 function saveJob(extra = {}) {
   try {
@@ -211,6 +233,7 @@ async function startProcessing() {
   UI.hideBanner();
   UI.clearLog();
   UI.showProgress();
+  showToast("Processamento iniciado. Acompanhe o progresso abaixo.");
   const initialSize = appState.files.reduce((s, f) => s + f.size, 0);
   UI.startTimer(initialSize);
 
@@ -365,6 +388,18 @@ function refresh() {
   UI.updateSummary();
   UI.updateStartButton();
   UI.updateTechSummary();
+  updatePageHeading();
+}
+
+function updatePageHeading() {
+  const info = PAGE_HEADINGS[appState.mode] || PAGE_HEADINGS.compress;
+  document.title = `${info.title} | ArqKit`;
+  const title = document.getElementById("compressTitle");
+  if (title) title.textContent = info.title;
+  const description = document.querySelector(".ak-tool-heading p");
+  if (description) description.textContent = info.description;
+  const crumb = document.querySelector(".ak-tool-heading .ak-breadcrumb span:last-child");
+  if (crumb) crumb.textContent = info.crumb;
 }
 
 // ============================ Ciclo de vida / aba ============================

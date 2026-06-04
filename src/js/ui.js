@@ -6,7 +6,7 @@ import {
   appState, MODES, PRESETS, STEPS, modeAllowsMultiple, modeNeedsCompression,
   qualityHint, passesInfo, presetFromValues, validateSelection, riskLevel,
   calculateSelectedFilesSummary, DPI_PRESETS, dpiHint, dpiLabel,
-} from "./state.js?v=10";
+} from "./state.js?v=11";
 import { formatBytes, formatTime, prettyMode } from "./utils.js?v=10";
 import { bindThemeToggle, initTheme as initSharedTheme } from "./theme.js?v=11";
 
@@ -258,7 +258,7 @@ export function showProgress() {
   setProgress(0.02, "Carregando arquivos no navegador…");
   $("progressDetail").textContent = "";
   $("pauseBtn").hidden = false; $("resumeBtn").hidden = true;
-  $("progressCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  $("progressCard").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 // Única função responsável por mover a barra. Garante 0..100 e monotonicidade.

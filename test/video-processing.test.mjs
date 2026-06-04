@@ -130,6 +130,8 @@ test("plano agressivo combina CRF alto com resolucao e FPS menores", () => {
   assert.equal(plan.settings.crf, 36);
   assert.equal(plan.settings.resolution, "480p");
   assert.equal(plan.settings.fps, "20");
+  assert.equal(plan.settings.audioKbps, 0);
   assert.ok(plan.commands[0].includes("-an"));
+  assert.equal(plan.commands[0].includes("0:a?"), false);
   assert.ok(plan.commands[0].includes("-crf"));
 });
