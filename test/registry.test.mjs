@@ -33,12 +33,39 @@ test("compressor principal aponta para pagina de ferramenta ArqKit", () => {
   assert.ok(tool.categoryIds.includes("pdf"));
 });
 
-test("ferramentas futuras nao usam status ready", () => {
-  for (const id of ["compress-image", "convert-image", "compress-video", "ocr"]) {
+test("compress-image esta pronta e aponta para rota real", () => {
+  const tool = TOOLS.find((item) => item.id === "compress-image");
+  assert.ok(tool);
+  assert.equal(tool.status, "ready");
+  assert.equal(tool.route, "./comprimir-imagem.html");
+  assert.equal(tool.isLocalFirst, true);
+  assert.equal(tool.browser, true);
+  assert.equal(tool.supportsBatch, true);
+  assert.ok(tool.inputExtensions.includes("webp"));
+  assert.ok(tool.outputExtensions.includes("zip"));
+});
+
+test("ferramentas implementadas em lote usam rotas reais e status honesto", () => {
+  const expected = {
+    "convert-image": "ready",
+    "pdf-to-images": "beta",
+    protect: "beta",
+    unlock: "beta",
+    ocr: "beta",
+    "compress-video": "beta",
+    "convert-video": "beta",
+    "cut-video": "beta",
+    "extract-audio": "beta",
+    "convert-to-pdf": "beta",
+    "pdf-to-word": "beta",
+    watermark: "ready",
+  };
+  for (const [id, status] of Object.entries(expected)) {
     const tool = TOOLS.find((item) => item.id === id);
     assert.ok(tool, id);
-    assert.notEqual(tool.status, "ready", id);
-    assert.equal(tool.route, "#", id);
+    assert.equal(tool.status, status, id);
+    assert.notEqual(tool.route, "#", id);
+    assert.equal(tool.isLocalFirst, true, id);
   }
 });
 
@@ -46,5 +73,13 @@ test("registry nao contem faturas nem fluxos de IA simulada", () => {
   const all = TOOLS.map(normalizedText).join("\n");
   for (const forbidden of ["fatura", "invoice", "nota fiscal", "resumo com ia", "traducao com ia", "chat com pdf"]) {
     assert.equal(all.includes(forbidden), false, forbidden);
+  }
+});
+
+test("registry nao usa placeholders nem badge desktop", () => {
+  for (const tool of TOOLS) {
+    assert.notEqual(tool.route, "#", tool.id);
+    assert.notEqual(tool.status, "coming-soon", tool.id);
+    assert.equal(normalizedText(tool).includes("desktop"), false, tool.id);
   }
 });

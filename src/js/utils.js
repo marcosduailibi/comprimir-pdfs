@@ -26,13 +26,13 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** Limita um numero ao intervalo [min, max]. */
 export const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
-/** Detecta o tipo de dispositivo (limites diferentes para mobile/desktop). */
+/** Detecta o tipo de dispositivo (limites diferentes para mobile/computador). */
 export function detectDevice() {
-  if (typeof window === "undefined" || typeof navigator === "undefined") return "desktop";
+  if (typeof window === "undefined" || typeof navigator === "undefined") return "computer";
   const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
   const narrow = window.innerWidth <= 820;
   const uaMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  return (coarse && narrow) || uaMobile ? "mobile" : "desktop";
+  return (coarse && narrow) || uaMobile ? "mobile" : "computer";
 }
 
 /** Copia texto para a area de transferencia (com fallback para navegadores antigos). */

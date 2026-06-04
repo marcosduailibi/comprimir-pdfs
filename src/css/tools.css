@@ -48,7 +48,6 @@
 .tool-badge { align-self: flex-start; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; padding: 2px 7px; border-radius: 999px; margin-top: 2px; }
 .tool-badge--ready { background: var(--success-soft); color: var(--success); }
 .tool-badge--soon { background: var(--primary-soft); color: var(--primary); }
-.tool-badge--desktop { background: var(--support-soft); color: var(--warn-ink); }
 .tool-badge--local { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
 
 /* Popover de informação (acessível) */

@@ -1,0 +1,256 @@
+.advanced-tool-page {
+  background: var(--ak-bg);
+}
+
+.tool-shell {
+  width: min(100% - 40px, 1180px);
+  margin: 0 auto;
+  padding: 48px 0 72px;
+}
+
+.tool-hero {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tool-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1.02;
+}
+
+.tool-hero p {
+  max-width: 760px;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.tool-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tool-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--ak-border);
+  border-radius: 999px;
+  background: var(--ak-surface);
+  color: var(--ak-text);
+  font-weight: 700;
+}
+
+.tool-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.6fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.tool-card,
+.tool-panel {
+  border: 1px solid var(--ak-border);
+  border-radius: 18px;
+  background: var(--ak-surface);
+  box-shadow: var(--ak-shadow);
+}
+
+.tool-card {
+  padding: 22px;
+}
+
+.tool-panel {
+  padding: 18px;
+}
+
+.tool-card h2,
+.tool-panel h2 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.tool-upload {
+  display: grid;
+  place-items: center;
+  min-height: 190px;
+  padding: 22px;
+  border: 2px dashed var(--ak-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ak-primary) 5%, var(--ak-surface));
+  text-align: center;
+  cursor: pointer;
+}
+
+.tool-upload strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 1.05rem;
+}
+
+.tool-upload.is-dragover {
+  border-color: var(--ak-primary);
+  background: color-mix(in srgb, var(--ak-primary) 10%, var(--ak-surface));
+}
+
+.tool-file {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ak-bg) 70%, var(--ak-surface));
+}
+
+.tool-file small {
+  display: block;
+  margin-top: 4px;
+}
+
+.tool-form {
+  display: grid;
+  gap: 14px;
+}
+
+.tool-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--ak-text);
+  font-weight: 700;
+}
+
+.tool-form input,
+.tool-form select,
+.tool-form textarea {
+  width: 100%;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: var(--ak-surface);
+  color: var(--ak-text);
+  padding: 12px 13px;
+  font: inherit;
+}
+
+.tool-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.tool-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tool-check {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 10px !important;
+  font-weight: 600 !important;
+}
+
+.tool-check input {
+  width: auto;
+}
+
+.tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.tool-alert {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ak-primary) 7%, var(--ak-surface));
+  color: var(--ak-text);
+}
+
+.tool-alert[data-type="error"] {
+  border-color: color-mix(in srgb, #ef4444 48%, var(--ak-border));
+  background: color-mix(in srgb, #ef4444 9%, var(--ak-surface));
+}
+
+.tool-alert[data-type="success"] {
+  border-color: color-mix(in srgb, #22c55e 45%, var(--ak-border));
+  background: color-mix(in srgb, #22c55e 9%, var(--ak-surface));
+}
+
+.tool-progress {
+  margin-top: 14px;
+}
+
+.tool-progress progress {
+  width: 100%;
+  height: 12px;
+  accent-color: var(--ak-primary);
+}
+
+.tool-output {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.tool-output a,
+.tool-output button {
+  justify-self: start;
+}
+
+.tool-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tool-list-item {
+  padding: 12px;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ak-bg) 70%, var(--ak-surface));
+}
+
+.tool-note {
+  color: var(--ak-muted);
+  font-size: 0.94rem;
+}
+
+.tool-privacy {
+  margin-top: 18px;
+  border-color: color-mix(in srgb, #22c55e 36%, var(--ak-border));
+  background: color-mix(in srgb, #22c55e 8%, var(--ak-surface));
+}
+
+.tool-preview {
+  max-width: 100%;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+@media (max-width: 860px) {
+  .tool-shell {
+    width: min(100% - 28px, 1180px);
+    padding-top: 30px;
+  }
+
+  .tool-layout,
+  .tool-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-card,
+  .tool-panel {
+    padding: 16px;
+  }
+}

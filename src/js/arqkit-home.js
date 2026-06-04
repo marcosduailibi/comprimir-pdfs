@@ -3,6 +3,9 @@ import { searchTools } from "./tools/search.js?v=12";
 import { createToolCard, el, iconMarkup, makeIcon, isOpenable } from "./tools/render.js?v=12";
 import { getRecent, recordOpen } from "./tools/stores.js?v=11";
 import { bindThemeToggle, initTheme } from "./theme.js?v=10";
+import { bindDonation } from "./donation.js?v=10";
+import { bindToolDetails, openToolDetails } from "./tools/details.js?v=12";
+import { bindStaticHashRoutes } from "./static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -50,7 +53,8 @@ function renderQuickActions() {
       showBadges: false,
       showAction: false,
       onOpen: openTool,
-      onUnavailable: showNotice,
+      onUnavailable: openToolDetails,
+      onDetails: openToolDetails,
     });
     root.appendChild(node);
   });
@@ -119,7 +123,8 @@ function renderTools() {
   tools.slice(0, 12).forEach((tool) => {
     root.appendChild(createToolCard(tool, {
       onOpen: openTool,
-      onUnavailable: showNotice,
+      onUnavailable: openToolDetails,
+      onDetails: openToolDetails,
     }));
   });
 }
@@ -137,7 +142,8 @@ function renderRecent() {
       showBadges: false,
       showAction: false,
       onOpen: openTool,
-      onUnavailable: showNotice,
+      onUnavailable: openToolDetails,
+      onDetails: openToolDetails,
     }));
   });
 }
@@ -154,7 +160,7 @@ function bindSearch() {
         openTool(first);
         window.location.href = first.route;
       } else {
-        showNotice(first);
+        openToolDetails(first);
       }
     }
     if (event.key === "Escape") {
@@ -195,6 +201,9 @@ function init() {
   renderTools();
   renderRecent();
   bindSearch();
+  bindDonation();
+  bindToolDetails();
+  bindStaticHashRoutes();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

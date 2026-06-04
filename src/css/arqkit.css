@@ -38,6 +38,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -46,6 +47,7 @@ body {
     radial-gradient(720px 360px at 92% 8%, color-mix(in srgb, var(--ak-primary-2) 11%, transparent), transparent 70%),
     var(--ak-bg) !important;
   color: var(--ak-text) !important;
+  overflow-x: hidden;
 }
 
 .ak-page h1,
@@ -142,23 +144,23 @@ body {
   line-height: 1;
 }
 
-.desktop-nav {
+.site-nav {
   gap: 26px !important;
   margin-left: 12px !important;
 }
 
-.desktop-nav a {
+.site-nav a {
   position: relative;
   color: var(--ak-text) !important;
   font-weight: 650 !important;
 }
 
-.desktop-nav a[aria-current="page"],
-.desktop-nav a:hover {
+.site-nav a[aria-current="page"],
+.site-nav a:hover {
   color: var(--ak-primary) !important;
 }
 
-.desktop-nav a[aria-current="page"]::after {
+.site-nav a[aria-current="page"]::after {
   content: "";
   position: absolute;
   left: 0;
@@ -189,6 +191,10 @@ body {
   color: #ffffff !important;
 }
 
+.site-header .header-actions .github-btn {
+  display: none !important;
+}
+
 .ak-shell {
   width: min(100% - 48px, 1440px);
   margin-inline: auto;
@@ -200,6 +206,13 @@ body {
   grid-template-columns: minmax(0, 1.2fr) minmax(420px, 0.8fr);
   gap: 70px;
   align-items: center;
+  min-width: 0;
+}
+
+.ak-hero > *,
+.ak-catalog-head > *,
+.ak-tool-heading > * {
+  min-width: 0;
 }
 
 .ak-kicker {
@@ -215,16 +228,18 @@ body {
 .ak-hero h1 {
   margin: 0;
   max-width: 760px;
-  font-size: clamp(3rem, 5.2vw, 5.15rem);
-  line-height: 1.02;
+  font-size: clamp(2.15rem, 3.4vw, 3.25rem);
+  line-height: 1.06;
   letter-spacing: 0;
+  overflow-wrap: break-word;
 }
 
 .ak-hero p {
   max-width: 680px;
   margin: 20px 0 0;
   color: var(--ak-muted);
-  font-size: clamp(1.1rem, 1.45vw, 1.38rem);
+  font-size: clamp(1rem, 1.15vw, 1.14rem);
+  overflow-wrap: break-word;
 }
 
 .ak-badges {
@@ -254,6 +269,89 @@ body {
   color: var(--ak-green);
 }
 
+.ak-donation-strip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  max-width: 690px;
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ak-primary) 18%, var(--ak-border));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ak-surface) 88%, transparent);
+  box-shadow: var(--ak-shadow-sm);
+}
+
+.ak-donation-strip img,
+.ak-pix-card img {
+  display: block;
+  flex: 0 0 auto;
+  border: 1px solid var(--ak-border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 5px;
+}
+
+.ak-donation-strip img {
+  width: 108px;
+  height: 108px;
+}
+
+.ak-pix-card img {
+  width: 116px;
+  height: 116px;
+}
+
+.ak-donation-strip__copy,
+.ak-pix-card > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ak-donation-strip__copy strong,
+.ak-pix-card strong {
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.ak-donation-strip__copy span,
+.ak-pix-card span {
+  color: var(--ak-muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.ak-donation-strip code,
+.ak-pix-card code {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ak-muted);
+  font: 0.74rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.ak-donation-strip__actions,
+.ak-pix-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ak-pix-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid var(--ak-border);
+  border-radius: 16px;
+  background: var(--ak-surface-soft);
+}
+
 .ak-search {
   position: relative;
   max-width: 690px;
@@ -261,13 +359,13 @@ body {
 
 .ak-search input {
   width: 100%;
-  min-height: 62px;
+  min-height: 56px;
   padding: 0 92px 0 56px;
   border: 1px solid var(--ak-border);
   border-radius: 18px;
   background: var(--ak-surface);
   color: var(--ak-text);
-  font-size: 1.05rem;
+  font-size: 1rem;
   box-shadow: var(--ak-shadow-sm);
 }
 
@@ -582,14 +680,30 @@ body {
   background: color-mix(in srgb, var(--ak-green) 14%, var(--ak-surface));
 }
 
+.ak-status.is-browser,
+.ak-status.is-mobile,
+.ak-status.is-cdn,
+.ak-status.is-wasm {
+  color: var(--ak-primary);
+  background: color-mix(in srgb, var(--ak-primary) 12%, var(--ak-surface));
+}
+
+.ak-status.is-beta,
+.ak-status.is-heavy {
+  color: var(--ak-orange);
+  background: color-mix(in srgb, var(--ak-orange) 16%, var(--ak-surface));
+}
+
 .ak-status.is-soon {
   color: var(--ak-purple);
   background: color-mix(in srgb, var(--ak-purple) 14%, var(--ak-surface));
 }
 
-.ak-status.is-desktop {
-  color: var(--ak-orange);
-  background: color-mix(in srgb, var(--ak-orange) 16%, var(--ak-surface));
+.ak-tool-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .ak-tool-card__action {
@@ -597,11 +711,108 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  margin-top: 12px;
   border: 1px solid var(--ak-primary);
   border-radius: 10px;
   color: var(--ak-primary);
+  background: var(--ak-surface);
   font-weight: 800;
+  padding: 0 12px;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+.ak-tool-card__action--ghost {
+  border-color: var(--ak-border);
+  color: var(--ak-text);
+}
+
+.ak-tool-card__action:hover {
+  background: color-mix(in srgb, var(--ak-primary) 8%, var(--ak-surface));
+}
+
+.tool-detail-modal {
+  max-width: min(720px, 100%);
+}
+
+.tool-detail-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.tool-detail-hero h3 {
+  margin: 2px 0 6px;
+  font-size: 1.45rem;
+}
+
+.tool-detail-hero p {
+  margin: 0;
+}
+
+.tool-detail-kicker {
+  color: var(--ak-primary) !important;
+  font-size: 0.82rem !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tool-detail-badges {
+  margin: 18px 0 12px;
+}
+
+.tool-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.tool-detail-row,
+.tool-detail-privacy,
+.tool-detail-limits {
+  border: 1px solid var(--ak-border);
+  border-radius: 14px;
+  background: var(--ak-surface-soft);
+  padding: 12px 14px;
+}
+
+.tool-detail-row {
+  display: grid;
+  gap: 4px;
+}
+
+.tool-detail-row span {
+  color: var(--ak-muted);
+  font-size: 0.8rem;
+  font-weight: 760;
+}
+
+.tool-detail-row strong {
+  font-size: 0.92rem;
+}
+
+.tool-detail-privacy {
+  margin: 14px 0;
+  border-color: color-mix(in srgb, var(--ak-green) 26%, var(--ak-border));
+  background: color-mix(in srgb, var(--ak-green) 8%, var(--ak-surface));
+}
+
+.tool-detail-privacy p,
+.tool-detail-limits p {
+  margin: 6px 0 0;
+}
+
+.tool-detail-limits ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: var(--ak-muted);
+}
+
+.tool-detail-actions {
+  margin-top: 16px;
 }
 
 .ak-privacy-panel {
@@ -739,6 +950,68 @@ body {
   padding: 46px 0 48px;
 }
 
+.ak-doc-shell {
+  width: min(100% - 48px, 1040px);
+  margin-inline: auto;
+  padding: 46px 0 54px;
+}
+
+.ak-doc-hero {
+  margin-bottom: 24px;
+}
+
+.ak-doc-hero h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 3vw, 3rem);
+  line-height: 1.08;
+}
+
+.ak-doc-hero p {
+  max-width: 760px;
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+}
+
+.ak-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ak-doc-card {
+  padding: 22px;
+  border: 1px solid var(--ak-border);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ak-surface) 94%, transparent);
+  box-shadow: var(--ak-shadow-sm);
+}
+
+.ak-doc-card h2 {
+  margin: 0 0 10px;
+  font-size: 1.12rem;
+}
+
+.ak-doc-card p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.ak-doc-card ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ak-muted);
+  line-height: 1.65;
+}
+
+.ak-doc-card .btn {
+  margin-top: 16px;
+}
+
+.ak-doc-card--soft {
+  border-color: color-mix(in srgb, var(--ak-primary) 22%, var(--ak-border));
+  background: color-mix(in srgb, var(--ak-primary) 7%, var(--ak-surface));
+}
+
 .ak-catalog-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 620px);
@@ -749,7 +1022,7 @@ body {
 
 .ak-catalog-head h1 {
   margin: 0 0 6px;
-  font-size: clamp(2.25rem, 3.5vw, 3.35rem);
+  font-size: clamp(2rem, 2.8vw, 2.8rem);
   line-height: 1.05;
 }
 
@@ -841,14 +1114,14 @@ body {
 
 .ak-tool-heading h1 {
   margin: 0;
-  font-size: clamp(2.4rem, 4.2vw, 4rem);
+  font-size: clamp(2.1rem, 3.25vw, 3.15rem);
   line-height: 1.05;
 }
 
 .ak-tool-heading p {
   margin: 12px 0 0;
   max-width: 780px;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .ak-tool-page .hero-section {
@@ -928,7 +1201,7 @@ body {
     min-height: 76px !important;
   }
 
-  .desktop-nav {
+  .site-nav {
     position: fixed !important;
     top: 76px !important;
     left: 14px !important;
@@ -945,20 +1218,20 @@ body {
     z-index: 70 !important;
   }
 
-  .desktop-nav.is-open {
+  .site-nav.is-open {
     transform: translateY(0) !important;
   }
 
-  .desktop-nav a {
+  .site-nav a {
     padding: 14px 0 !important;
     border-bottom: 1px solid var(--ak-border);
   }
 
-  .desktop-nav a:last-child {
+  .site-nav a:last-child {
     border-bottom: 0;
   }
 
-  .desktop-nav a[aria-current="page"]::after {
+  .site-nav a[aria-current="page"]::after {
     display: none;
   }
 
@@ -980,11 +1253,11 @@ body {
   }
 
   .ak-hero h1 {
-    font-size: clamp(2.7rem, 10vw, 4.1rem);
+    font-size: clamp(2rem, 7.8vw, 2.65rem);
   }
 
   .ak-hero p {
-    font-size: 1.14rem;
+    font-size: 1rem;
   }
 
   .ak-quick-grid {
@@ -1000,6 +1273,10 @@ body {
     gap: 22px;
   }
 
+  .ak-doc-grid {
+    grid-template-columns: 1fr;
+  }
+
   .ak-catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1007,15 +1284,25 @@ body {
   .ak-support-faq {
     grid-template-columns: 1fr;
   }
+
+  .ak-donation-strip {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ak-donation-strip__actions {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 560px) {
   .header-inner,
   .ak-shell,
   .ak-catalog,
+  .ak-doc-shell,
   .footer-inner,
   .ak-tool-page .page-shell {
     width: min(100% - 22px, 1440px) !important;
+    max-width: 23rem !important;
   }
 
   .header-actions .btn--support {
@@ -1029,7 +1316,15 @@ body {
   }
 
   .ak-hero h1 {
-    font-size: clamp(2.45rem, 11vw, 3.45rem);
+    max-width: 24rem;
+    font-size: clamp(1.68rem, 6.1vw, 1.9rem);
+    line-height: 1.12;
+  }
+
+  .ak-hero p,
+  .ak-donation-strip,
+  .ak-search {
+    max-width: 24rem;
   }
 
   .ak-badges {
@@ -1046,6 +1341,46 @@ body {
     min-height: 56px;
     padding-left: 48px;
     padding-right: 78px;
+  }
+
+  .ak-donation-strip,
+  .ak-pix-card {
+    align-items: flex-start;
+  }
+
+  .ak-donation-strip {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 9px;
+  }
+
+  .ak-donation-strip img {
+    width: 96px;
+    height: 96px;
+  }
+
+  .ak-donation-strip__actions .btn,
+  .ak-pix-actions .btn {
+    flex: 1 1 140px;
+  }
+
+  .ak-pix-card {
+    flex-direction: column;
+  }
+
+  .tool-detail-hero {
+    flex-direction: column;
+  }
+
+  .tool-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ak-tool-card__actions {
+    width: 100%;
+  }
+
+  .ak-tool-card__action {
+    flex: 1 1 120px;
   }
 
   .ak-quick-panel {
@@ -1106,7 +1441,7 @@ body {
   .ak-tool-card,
   .ak-catalog-card,
   .ak-mini-tool,
-  .desktop-nav {
+  .site-nav {
     transition: none !important;
   }
 }

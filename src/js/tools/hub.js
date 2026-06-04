@@ -1,6 +1,7 @@
 import { TOOLS, CATEGORIES, toolsInCategory } from "./registry.js?v=12";
 import { searchTools } from "./search.js?v=12";
 import { createToolCard, el, iconMarkup, isOpenable, makeIcon } from "./render.js?v=12";
+import { bindToolDetails, openToolDetails } from "./details.js?v=12";
 import {
   getFavorites,
   isFavorite,
@@ -9,10 +10,11 @@ import {
   recordOpen,
 } from "./stores.js?v=10";
 import { bindThemeToggle, initTheme } from "../theme.js?v=10";
+import { bindStaticHashRoutes } from "../static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
-const SECTION_ORDER = ["popular", "pdf", "images", "video", "documents", "security", "ocr", "audio", "soon"];
+const SECTION_ORDER = ["popular", "pdf", "images", "video", "documents", "security", "ocr", "audio"];
 let state = { query: "", category: "all" };
 
 function showNotice(tool) {
@@ -48,7 +50,8 @@ function card(tool) {
   const node = createToolCard(tool, {
     className: "ak-catalog-card",
     onOpen: openTool,
-    onUnavailable: showNotice,
+    onUnavailable: openToolDetails,
+    onDetails: openToolDetails,
   });
   node.appendChild(favoriteButton(tool));
   return node;
@@ -114,7 +117,8 @@ function renderRecent() {
       showBadges: false,
       showAction: false,
       onOpen: openTool,
-      onUnavailable: showNotice,
+      onUnavailable: openToolDetails,
+      onDetails: openToolDetails,
     }));
   });
 }
@@ -183,7 +187,7 @@ function bindSearch() {
         openTool(first);
         window.location.href = first.route;
       } else {
-        showNotice(first);
+        openToolDetails(first);
       }
     }
     if (event.key === "Escape") {
@@ -222,6 +226,8 @@ function init() {
   renderRecent();
   render();
   bindSearch();
+  bindToolDetails();
+  bindStaticHashRoutes();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

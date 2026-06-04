@@ -132,11 +132,11 @@ const lowMemory = DEVICE_MEMORY != null && DEVICE_MEMORY <= 2;
 // Zona "confortável" para a engine atual (carrega o PDF em memória). Acima
 // disso a operação é permitida, mas avisamos que pode demorar/usar muita memória.
 const COMFORT_BASE = {
-  desktop: { total: 250 * MB, perFile: 150 * MB, files: 25, pages: 2000 },
+  computer: { total: 250 * MB, perFile: 150 * MB, files: 25, pages: 2000 },
   mobile:  { total: 80 * MB,  perFile: 60 * MB,  files: 12, pages: 700 },
 };
 function comfortFor(device) {
-  const base = COMFORT_BASE[device] || COMFORT_BASE.desktop;
+  const base = COMFORT_BASE[device] || COMFORT_BASE.computer;
   if (!lowMemory) return base;
   return { total: base.total / 2, perFile: base.perFile / 2, files: base.files, pages: base.pages / 2 };
 }
@@ -165,7 +165,7 @@ export function validateSelection(files, device = appState.device) {
   const c = comfortFor(device);
   if (total > c.total || maxFile > c.perFile || count > c.files || totalPages > c.pages) {
     return { level: "warn", messages: [
-      "Arquivos grandes: o processamento acontece na memória do seu navegador e pode demorar ou usar bastante memória. Em dispositivos com pouca memória pode falhar — prefira um navegador desktop e mantenha a aba aberta até concluir.",
+      "Arquivos grandes: o processamento acontece na memória do seu navegador e pode demorar ou usar bastante memória. Em dispositivos com pouca memória pode falhar — tente em um navegador de computador com mais memória e mantenha a aba aberta até concluir.",
     ] };
   }
   return { level: "ok", messages: [] };

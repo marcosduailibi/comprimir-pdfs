@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Comprimir imagem | ArqKit</title>
+    <meta name="description" content="Comprima JPG, PNG, WebP, AVIF, GIF e BMP no navegador, sem enviar imagens para servidor." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://arqkit.com.br/comprimir-imagem.html" />
+    <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          var old = localStorage.getItem("comprimirpdf-theme");
+          if (!t && (old === "dark" || old === "light")) {
+            t = old;
+            localStorage.setItem("pdfTools.theme.v1", old);
+            localStorage.removeItem("comprimirpdf-theme");
+          }
+          if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="./src/css/style.css?v=10" />
+    <link rel="stylesheet" href="./src/css/tools.css?v=10" />
+    <link rel="stylesheet" href="./src/css/arqkit.css?v=12" />
+    <link rel="stylesheet" href="./src/css/image-tools.css?v=1" />
+  </head>
+  <body class="ak-page ak-tool-page image-tool-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - inicio">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="site-nav" id="siteNav" aria-label="Navegacao principal">
+          <a href="./">Inicio</a>
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./comprimir-pdf.html">PDF</a>
+          <a href="./ferramentas.html#images" aria-current="page">Imagens</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <div class="header-actions">
+          <a class="btn btn--support" href="./#apoie"><span aria-hidden="true">$</span> Apoiar</a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
+            <span class="theme-icon theme-icon--dark">☾</span>
+            <span class="theme-icon theme-icon--light">☀</span>
+          </button>
+          <button id="navToggle" class="mobile-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="image-tool-shell">
+      <nav class="ak-breadcrumb" aria-label="Breadcrumb">
+        <a href="./ferramentas.html">Ferramentas</a>
+        <span aria-hidden="true">›</span>
+        <span>Comprimir imagem</span>
+      </nav>
+
+      <section class="image-tool-hero" aria-labelledby="imageToolTitle">
+        <div>
+          <p class="ak-kicker">Local no navegador</p>
+          <h1 id="imageToolTitle">Comprimir imagem</h1>
+          <p>Reduza o tamanho de imagens no navegador, sem enviar arquivos para servidor.</p>
+          <div class="image-tool-badges" aria-label="Recursos">
+            <span>Local</span>
+            <span>JPG, PNG, WebP</span>
+            <span>Fila segura</span>
+            <span>ZIP para varias imagens</span>
+          </div>
+          <p class="image-privacy-note">Suas imagens continuam no seu dispositivo. O processamento acontece no navegador.</p>
+        </div>
+      </section>
+
+      <section class="image-upload-card" aria-labelledby="uploadTitle">
+        <div>
+          <h2 id="uploadTitle">1. Adicione imagens</h2>
+          <p>JPG, PNG, WebP, AVIF, GIF e BMP, conforme suporte do navegador. Ate 500 imagens ou 1 GB no total.</p>
+        </div>
+        <div id="imageDropzone" class="image-dropzone" role="button" tabindex="0" aria-label="Arraste imagens aqui ou clique para selecionar">
+          <div class="image-dropzone__icon" aria-hidden="true">IMG</div>
+          <strong>Arraste e solte suas imagens aqui</strong>
+          <span>ou clique para selecionar</span>
+          <button id="pickImages" class="btn btn--primary" type="button">Selecionar imagens</button>
+          <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/bmp" multiple hidden />
+        </div>
+        <p id="imageInputError" class="image-alert" role="alert" hidden></p>
+      </section>
+
+      <section class="image-tool-grid">
+        <aside class="image-settings-card" aria-labelledby="settingsTitle">
+          <h2 id="settingsTitle">2. Ajustes</h2>
+
+          <label class="field-label" for="compressionPreset">Nivel de compressao</label>
+          <select id="compressionPreset" class="split-select">
+            <option value="light">Leve</option>
+            <option value="balanced">Equilibrado</option>
+            <option value="strong">Forte</option>
+            <option value="maximum">Maxima</option>
+            <option value="custom">Personalizado</option>
+          </select>
+
+          <label class="field-label" for="outputFormat">Formato de saida</label>
+          <select id="outputFormat" class="split-select"></select>
+          <p id="formatHint" class="image-hint"></p>
+
+          <label class="field-label" for="qualityRange">Qualidade</label>
+          <div class="image-range-row">
+            <input id="qualityRange" type="range" min="1" max="100" value="72" />
+            <output id="qualityValue" for="qualityRange">72%</output>
+          </div>
+
+          <label class="field-label" for="resizeMode">Redimensionamento</label>
+          <select id="resizeMode" class="split-select">
+            <option value="none">Nao redimensionar</option>
+            <option value="width">Largura maxima</option>
+            <option value="height">Altura maxima</option>
+            <option value="long-edge">Lado maior maximo</option>
+            <option value="percent">Percentual</option>
+            <option value="preset-web">Preset para web</option>
+            <option value="preset-email">Preset para WhatsApp/e-mail</option>
+            <option value="thumbnail">Preset miniatura</option>
+            <option value="custom">Largura e altura maximas</option>
+          </select>
+
+          <div class="image-number-grid">
+            <label>
+              <span class="field-label">Largura</span>
+              <input id="maxWidth" class="split-input" type="number" min="1" inputmode="numeric" placeholder="ex. 1920" />
+            </label>
+            <label>
+              <span class="field-label">Altura</span>
+              <input id="maxHeight" class="split-input" type="number" min="1" inputmode="numeric" placeholder="ex. 1080" />
+            </label>
+            <label>
+              <span class="field-label">Lado maior</span>
+              <input id="longEdge" class="split-input" type="number" min="1" inputmode="numeric" value="2200" />
+            </label>
+            <label>
+              <span class="field-label">Percentual</span>
+              <input id="scalePercent" class="split-input" type="number" min="1" max="100" inputmode="numeric" value="100" />
+            </label>
+          </div>
+
+          <label class="field-label" for="backgroundColor">Fundo para JPG</label>
+          <input id="backgroundColor" class="image-color-input" type="color" value="#ffffff" />
+          <p id="transparencyWarning" class="image-warning" hidden>JPG nao suporta transparencia. Areas transparentes serao preenchidas com a cor de fundo escolhida.</p>
+
+          <label class="image-check">
+            <input id="removeMetadata" type="checkbox" checked />
+            <span>Remover metadados quando possivel</span>
+          </label>
+          <p class="image-hint">Ao reprocessar no canvas, metadados como EXIF, localizacao e camera geralmente sao removidos.</p>
+
+          <label class="image-check">
+            <input id="preventLarger" type="checkbox" checked />
+            <span>Nao aumentar arquivos</span>
+          </label>
+
+          <div class="image-actions">
+            <button id="compressImages" class="btn btn--primary btn--lg" type="button" disabled>Selecione imagens para continuar</button>
+            <button id="cancelCompression" class="btn btn--ghost" type="button" hidden>Cancelar</button>
+            <button id="clearImages" class="btn btn--ghost" type="button" disabled>Limpar tudo</button>
+          </div>
+        </aside>
+
+        <section class="image-files-card" aria-labelledby="filesTitle">
+          <div class="image-card-head">
+            <div>
+              <h2 id="filesTitle">Imagens selecionadas</h2>
+              <p id="fileCountLabel">Nenhuma imagem adicionada.</p>
+            </div>
+          </div>
+          <div id="imageList" class="image-list"></div>
+          <p id="imageLive" class="sr-only" aria-live="polite"></p>
+        </section>
+      </section>
+
+      <section class="image-preview-card" aria-labelledby="previewTitle">
+        <div class="image-card-head">
+          <div>
+            <h2 id="previewTitle">Previa</h2>
+            <p id="previewMeta">Selecione uma imagem para comparar original e resultado.</p>
+          </div>
+          <button id="togglePreview" class="btn btn--ghost btn--sm" type="button" disabled>Alternar original/resultado</button>
+        </div>
+        <div class="image-preview-grid">
+          <figure>
+            <figcaption>Original</figcaption>
+            <img id="originalPreview" alt="" />
+          </figure>
+          <figure>
+            <figcaption>Resultado</figcaption>
+            <img id="resultPreview" alt="" />
+          </figure>
+        </div>
+      </section>
+
+      <section id="imageProgressCard" class="image-progress-card" hidden aria-labelledby="progressTitle">
+        <h2 id="progressTitle">Processamento</h2>
+        <progress id="imageProgress" max="100" value="0"></progress>
+        <p id="progressText">Aguardando imagens.</p>
+      </section>
+
+      <section id="imageResults" class="image-results-card" hidden aria-labelledby="resultsTitle">
+        <h2 id="resultsTitle">Resultado final</h2>
+        <div id="resultSummary" class="image-summary-grid"></div>
+        <div class="image-actions">
+          <button id="downloadAll" class="btn btn--primary" type="button" hidden>Baixar tudo em ZIP</button>
+          <button id="downloadSingle" class="btn btn--primary" type="button" hidden>Baixar imagem</button>
+          <button id="compressAgain" class="btn btn--ghost" type="button">Comprimir novamente</button>
+        </div>
+      </section>
+
+      <section class="image-privacy-card">
+        <strong>Processamento local</strong>
+        <p>Esta ferramenta le as imagens escolhidas por voce e processa tudo no navegador. Miniaturas e resultados temporarios ficam apenas na memoria da aba e sao limpos ao remover arquivos, limpar tudo ou fechar a pagina.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - inicio">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="footer-links" aria-label="Links do rodape">
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="./termos.html">Termos</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <p class="footer-copy">ArqKit - caixa de ferramentas para PDF, imagens, videos e arquivos no navegador.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/js/tools/image-compress-tool.js?v=1"></script>
+  </body>
+</html>
+

@@ -98,9 +98,9 @@ img { max-width: 100%; }
 .brand-logo .accent-stroke { stroke: #f2292f; }
 [data-theme="dark"] .brand-logo .ink-stroke { stroke: #ffffff; }
 [data-theme="dark"] .brand-logo .ink-fill { fill: #ffffff; }
-.desktop-nav { display: flex; gap: 22px; margin-left: 12px; }
-.desktop-nav a { color: var(--muted); text-decoration: none; font-size: 0.92rem; font-weight: 600; }
-.desktop-nav a:hover { color: var(--primary); }
+.site-nav { display: flex; gap: 22px; margin-left: 12px; }
+.site-nav a { color: var(--muted); text-decoration: none; font-size: 0.92rem; font-weight: 600; }
+.site-nav a:hover { color: var(--primary); }
 .header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .header-actions .ico { vertical-align: -2px; }
 .theme-toggle { width: 42px; height: 42px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 1.05rem; display: grid; place-items: center; box-shadow: var(--shadow-sm); }
@@ -456,9 +456,9 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 @media (max-width: 768px) {
   .header-inner, .page-shell, .footer-inner { width: min(100% - 20px, 1120px); }
   .page-shell { padding: 28px 0; }
-  .desktop-nav { position: fixed; top: 72px; left: 0; right: 0; flex-direction: column; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 20px 14px; transform: translateY(-130%); transition: transform 0.22s ease; box-shadow: var(--shadow); margin-left: 0; }
-  .desktop-nav.is-open { transform: translateY(0); }
-  .desktop-nav a { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .site-nav { position: fixed; top: 72px; left: 0; right: 0; flex-direction: column; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 20px 14px; transform: translateY(-130%); transition: transform 0.22s ease; box-shadow: var(--shadow); margin-left: 0; }
+  .site-nav.is-open { transform: translateY(0); }
+  .site-nav a { padding: 12px 0; border-bottom: 1px solid var(--border); }
   .mobile-menu-button { display: grid; }
   .github-btn { display: none; }
   .hide-sm { display: none; }

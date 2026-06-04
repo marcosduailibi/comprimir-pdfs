@@ -200,7 +200,7 @@ async function startProcessing() {
   const totalBytes = appState.files.reduce((s, f) => s + f.size, 0);
   const cap = await estimateCapacity(totalBytes);
   if (!cap.ok) {
-    UI.showBanner("error", "Seu navegador indicou pouco armazenamento local disponível para processar esta quantidade de dados com segurança. Reduza o tamanho ou a quantidade de PDFs, ou use um navegador desktop. Nenhum arquivo foi enviado para servidores.");
+    UI.showBanner("error", "Seu navegador indicou pouco armazenamento local disponível para processar esta quantidade de dados com segurança. Reduza o tamanho ou a quantidade de PDFs, ou tente em um navegador de computador com mais memória. Nenhum arquivo foi enviado para servidores.");
     return;
   }
 

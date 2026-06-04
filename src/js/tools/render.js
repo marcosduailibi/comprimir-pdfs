@@ -1,6 +1,6 @@
 import { STATUS_META } from "./registry.js";
 
-export const OPENABLE_STATUSES = new Set(["ready"]);
+export const OPENABLE_STATUSES = new Set(["ready", "beta"]);
 
 const PATHS = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -69,6 +69,20 @@ export function statusBadge(tool, extraClass = "") {
   });
 }
 
+export function getStatusBadges(tool) {
+  const badges = [];
+  if (tool.isLocalFirst) badges.push({ label: "Local", className: "is-local" });
+  if (tool.browser !== false) badges.push({ label: "Navegador", className: "is-browser" });
+  if (tool.status === "ready") badges.push({ label: "Pronta", className: "is-ready" });
+  if (tool.mobileOnly) badges.push({ label: "Mobile", className: "is-mobile" });
+  if (tool.status === "beta") badges.push({ label: "Beta", className: "is-beta" });
+  if (tool.status === "coming-soon") badges.push({ label: "Em breve", className: "is-soon" });
+  if (tool.heavy) badges.push({ label: "Pesada", className: "is-heavy" });
+  if (tool.usesCdn) badges.push({ label: "CDN", className: "is-cdn" });
+  if (tool.usesWasm) badges.push({ label: "WASM", className: "is-wasm" });
+  return badges;
+}
+
 export function createToolCard(tool, options = {}) {
   const {
     className = "ak-tool-card",
@@ -77,25 +91,48 @@ export function createToolCard(tool, options = {}) {
     showAction = true,
     onOpen = null,
     onUnavailable = null,
+    onDetails = null,
     favorite = false,
     onFavorite = null,
   } = options;
   const openable = isOpenable(tool);
-  const tag = openable ? "a" : "button";
+  const cardIsAction = !showAction;
+  const tag = cardIsAction ? (openable ? "a" : "button") : "article";
+  const openToolRoute = () => {
+    if (onOpen) onOpen(tool);
+    if (!cardIsAction && openable) window.location.href = tool.route;
+  };
   const node = el(tag, {
     class: `${className}${compact ? " is-compact" : ""}${openable ? "" : " is-disabled"}`,
-    href: openable ? tool.route : null,
-    type: openable ? null : "button",
-    "aria-disabled": openable ? null : "true",
-    onclick: (event) => {
+    href: cardIsAction && openable ? tool.route : null,
+    type: cardIsAction && !openable ? "button" : null,
+    title: tool.tooltip || tool.description,
+    role: !cardIsAction && openable ? "link" : null,
+    tabindex: !cardIsAction && openable ? "0" : null,
+    "aria-disabled": !openable && cardIsAction ? "true" : null,
+    onclick: cardIsAction ? ((event) => {
       if (openable) {
-        if (onOpen) onOpen(tool);
+        openToolRoute();
         return;
       }
       event.preventDefault();
-      if (onUnavailable) onUnavailable(tool);
-    },
+      if (onDetails) onDetails(tool);
+      else if (onUnavailable) onUnavailable(tool);
+    }) : null,
   });
+
+  if (!cardIsAction && openable) {
+    node.addEventListener("click", (event) => {
+      if (event.target.closest("a, button, input, select, textarea, label")) return;
+      openToolRoute();
+    });
+    node.addEventListener("keydown", (event) => {
+      if (event.target !== node) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openToolRoute();
+    });
+  }
 
   const content = el("span", { class: "ak-tool-card__content" }, [
     makeIcon(tool),
@@ -107,14 +144,35 @@ export function createToolCard(tool, options = {}) {
   node.appendChild(content);
 
   if (showBadges) {
-    node.appendChild(el("span", { class: "ak-tool-card__badges" }, [
-      tool.isLocalFirst ? el("span", { class: "ak-status is-local", text: "Local" }) : null,
-      statusBadge(tool),
-    ]));
+    node.appendChild(el("span", { class: "ak-tool-card__badges" },
+      getStatusBadges(tool).map((badge) => el("span", { class: `ak-status ${badge.className}`, text: badge.label }))
+    ));
   }
 
   if (showAction) {
-    node.appendChild(el("span", { class: "ak-tool-card__action", text: openable ? "Abrir" : "Detalhes" }));
+    const actions = el("span", { class: "ak-tool-card__actions" });
+    if (openable) {
+      actions.appendChild(el("a", {
+        class: "ak-tool-card__action",
+        href: tool.route,
+        title: `Usar ${tool.name}`,
+        onclick: () => { if (onOpen) onOpen(tool); },
+        text: compact ? "Usar" : "Usar ferramenta",
+      }));
+    }
+    actions.appendChild(el("button", {
+      class: "ak-tool-card__action ak-tool-card__action--ghost",
+      type: "button",
+      title: "Veja formatos aceitos, limites e como a ferramenta funciona.",
+      onclick: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (onDetails) onDetails(tool);
+        else if (!openable && onUnavailable) onUnavailable(tool);
+      },
+      text: "Detalhes",
+    }));
+    node.appendChild(actions);
   }
 
   if (onFavorite) {

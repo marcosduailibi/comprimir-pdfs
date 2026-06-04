@@ -12,7 +12,7 @@ test("stopCameraStream para todas as tracks", () => {
 });
 
 test("isLikelyMobile considera viewport estreito como mobile", () => {
-  const nav = { userAgent: "Desktop" };
+  const nav = { userAgent: "Mozilla/5.0" };
   const win = { innerWidth: 390, matchMedia: () => ({ matches: false }) };
   assert.equal(isLikelyMobile(nav, win), true);
 });

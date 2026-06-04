@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Termos de uso | ArqKit</title>
+    <meta name="description" content="Termos de uso do ArqKit: ferramentas locais no navegador, limites, beta, responsabilidade do usuario e apoio opcional." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://arqkit.com.br/termos.html" />
+    <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="./src/css/style.css?v=10" />
+    <link rel="stylesheet" href="./src/css/arqkit.css?v=12" />
+  </head>
+  <body class="ak-page ak-doc-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - inicio">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="site-nav" id="siteNav" aria-label="Navegacao principal">
+          <a href="./">Inicio</a>
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./comprimir-pdf.html">PDF</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="./termos.html" aria-current="page">Termos</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <div class="header-actions">
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
+            <span class="theme-icon theme-icon--dark">☾</span>
+            <span class="theme-icon theme-icon--light">☀</span>
+          </button>
+          <button id="navToggle" class="mobile-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="ak-doc-shell">
+      <nav class="ak-breadcrumb" aria-label="Breadcrumb">
+        <a href="./">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span>Termos</span>
+      </nav>
+
+      <section class="ak-doc-hero" aria-labelledby="termsTitle">
+        <p class="ak-kicker">Uso do ArqKit</p>
+        <h1 id="termsTitle">Termos de uso</h1>
+        <p>Condicoes simples para usar ferramentas locais no navegador com responsabilidade e transparencia.</p>
+      </section>
+
+      <section class="ak-doc-grid" aria-label="Termos de uso">
+        <article class="ak-doc-card">
+          <h2>Uso gratuito</h2>
+          <p>O ArqKit oferece ferramentas gratuitas para trabalhar com arquivos no navegador. O apoio via Pix e opcional e nao desbloqueia nem bloqueia nenhuma funcionalidade.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Ferramentas em beta</h2>
+          <p>Ferramentas marcadas como Beta podem ter limitacoes, falhas ou resultados incompletos. Confira sempre o arquivo final antes de usar em documentos importantes.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Ferramentas em breve</h2>
+          <p>Ferramentas marcadas como Em breve ainda nao aceitam arquivos e nao simulam processamento. Elas aparecem no catalogo apenas para indicar o roadmap.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Sem garantia de resultado perfeito</h2>
+          <p>Conversoes, compressoes e edicoes dependem da estrutura do arquivo, do navegador e da memoria disponivel. O usuario deve conferir o resultado final antes de compartilhar ou arquivar.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Uso adequado</h2>
+          <p>Nao use o ArqKit para violar senhas, direitos autorais, privacidade de terceiros ou qualquer regra aplicavel. Use apenas arquivos que voce tem permissao para processar.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Processamento local</h2>
+          <p>As ferramentas prontas processam arquivos na aba do navegador. Isso reduz exposicao dos arquivos, mas ainda exige um dispositivo confiavel, navegador atualizado e atencao aos resultados gerados.</p>
+        </article>
+        <article class="ak-doc-card">
+          <h2>Limitacoes do navegador</h2>
+          <p>Arquivos grandes podem consumir memoria, travar a aba ou demorar. Algumas ferramentas pesadas podem carregar bibliotecas maiores, como WASM, e funcionar melhor em dispositivos com mais memoria.</p>
+        </article>
+        <article class="ak-doc-card ak-doc-card--soft">
+          <h2>Apoio opcional</h2>
+          <p>O cafezinho simbolico e voluntario. Ele ajuda a manter o projeto, mas nunca muda as garantias, limites ou acesso as ferramentas.</p>
+          <a class="btn btn--support" href="./#apoie">Apoiar projeto</a>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - inicio">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="footer-links" aria-label="Links do rodape">
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="./termos.html">Termos</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <p class="footer-copy">ArqKit - caixa de ferramentas para PDF, imagens, videos e arquivos no navegador.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/js/static-page.js?v=12"></script>
+  </body>
+</html>

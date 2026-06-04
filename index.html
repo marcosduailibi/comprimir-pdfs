@@ -55,13 +55,13 @@
           <span class="ak-logo" aria-hidden="true"></span>
           <span class="ak-brand-text">ArqKit</span>
         </a>
-        <nav class="desktop-nav" id="siteNav" aria-label="Navegacao principal">
+        <nav class="site-nav" id="siteNav" aria-label="Navegacao principal">
           <a href="./" aria-current="page">Início</a>
           <a href="./ferramentas.html">Ferramentas</a>
           <a href="./comprimir-pdf.html">PDF</a>
           <a href="./ferramentas.html#images">Imagens</a>
           <a href="./ferramentas.html#video">Vídeo</a>
-          <a href="#privacidade">Privacidade</a>
+          <a href="./privacidade.html">Privacidade</a>
           <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
         <div class="header-actions">
@@ -95,6 +95,18 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
               Privacidade
             </span>
+          </div>
+          <div class="ak-donation-strip" aria-label="Apoio voluntario via Pix">
+            <img id="pixQrMini" src="https://i.ibb.co/YFRDbTm9/qrcode.png" alt="QR Code Pix para apoiar o ArqKit" width="108" height="108" loading="lazy" />
+            <div class="ak-donation-strip__copy">
+              <strong>ArqKit gratis. Pix opcional.</strong>
+              <span>Qualquer valor ajuda a manter o projeto. Se puder, ate R$ 1 ja faz diferenca.</span>
+              <code data-pix-key></code>
+            </div>
+            <div class="ak-donation-strip__actions">
+              <button class="btn btn--support btn--sm" type="button" data-open-pix>Mostrar Pix</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-copy-pix-key>Copiar chave</button>
+            </div>
           </div>
           <label class="ak-search" for="homeSearch">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -158,23 +170,51 @@
       <section class="ak-support-faq">
         <article class="ak-info-panel" id="apoie">
           <h2>Apoie o projeto</h2>
-          <p>O ArqKit é gratuito e tem código aberto para transparência, já que as funcionalidades são processadas no navegador.</p>
-          <a class="btn btn--support" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Apoiar no GitHub</a>
+          <p>O ArqKit e gratuito. Se ele te economizou tempo, voce pode doar qualquer valor via Pix, sem compromisso.</p>
+          <div class="ak-pix-card">
+            <img id="pixQr" src="https://i.ibb.co/YFRDbTm9/qrcode.png" alt="QR Code Pix para apoiar o ArqKit" width="116" height="116" loading="lazy" />
+            <div>
+              <strong>Pix voluntario</strong>
+              <span>Qualquer valor ajuda na manutencao do projeto. Ate R$ 1 ja faz diferenca.</span>
+              <code data-pix-key></code>
+            </div>
+          </div>
+          <p id="pixQrError" class="control__warn small" hidden>Nao foi possivel carregar o QR Code. Use a chave Pix acima.</p>
+          <div class="ak-pix-actions">
+            <button class="btn btn--support" type="button" data-open-pix>Mostrar dados do Pix</button>
+            <button class="btn btn--ghost" type="button" data-copy-pix-key>Copiar chave</button>
+          </div>
         </article>
         <article class="ak-info-panel">
           <h2>Perguntas frequentes</h2>
           <div class="ak-faq-list">
             <details open>
-              <summary>Meus arquivos são enviados para algum servidor?</summary>
-              <p>Não. As ferramentas prontas processam os arquivos no navegador. O ArqKit não envia seus PDFs ou imagens para backend.</p>
+              <summary>Meus arquivos sao enviados para algum servidor?</summary>
+              <p>Nao. As ferramentas prontas do ArqKit processam seus arquivos localmente no navegador, usando JavaScript e APIs do proprio navegador. Algumas bibliotecas podem ser carregadas por CDN, mas os arquivos escolhidos continuam na aba do navegador.</p>
             </details>
             <details>
-              <summary>As ferramentas de vídeo e imagem já funcionam?</summary>
-              <p>Somente as rotas marcadas como Pronto abrem fluxos reais. O que ainda está em preparo aparece como Em breve.</p>
+              <summary>As ferramentas de video e imagem ja funcionam?</summary>
+              <p>Algumas ferramentas estao prontas, outras aparecem como Beta ou Em breve. Cada card mostra o status real. Uma ferramenta nao deve aparecer como pronta se ainda nao tiver fluxo funcional no navegador.</p>
             </details>
             <details>
               <summary>Preciso instalar algo?</summary>
-              <p>Não. O ArqKit roda como site estático no navegador.</p>
+              <p>Nao para as ferramentas prontas. O ArqKit funciona no navegador. Algumas ferramentas pesadas podem demorar para carregar bibliotecas maiores, mas continuam rodando no navegador.</p>
+            </details>
+            <details>
+              <summary>O que fica salvo no meu navegador?</summary>
+              <p>Somente preferencias simples, como tema, favoritos, ferramentas usadas por ultimo e frequencia de uso. Arquivos, nomes de arquivos, thumbnails, texto extraido e senhas nao devem ser salvos.</p>
+            </details>
+            <details>
+              <summary>O que significa ferramenta local?</summary>
+              <p>Significa que o processamento acontece na aba do navegador. O arquivo e escolhido por voce, lido localmente e processado com JavaScript, Canvas, Web Workers, WASM ou bibliotecas carregadas no navegador.</p>
+            </details>
+            <details>
+              <summary>Por que algumas ferramentas aparecem como Beta ou Em breve?</summary>
+              <p>Porque algumas conversoes sao complexas e precisam ser testadas com seguranca. Se uma ferramenta ainda nao estiver pronta, ela nao aceita arquivos nem finge processamento.</p>
+            </details>
+            <details>
+              <summary>Camera para PDF funciona no computador?</summary>
+              <p>A ferramenta e focada em mobile porque usa a camera do celular para fotografar documentos. Em navegadores de computador, pode haver importacao de imagens ou uso de webcam quando disponivel.</p>
             </details>
           </div>
         </article>
@@ -189,12 +229,44 @@
         </a>
         <nav class="footer-links" aria-label="Links do rodape">
           <a href="./ferramentas.html">Ferramentas</a>
-          <a href="#privacidade">Privacidade</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="./termos.html">Termos</a>
           <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
-        <p class="footer-copy">ArqKit - ferramentas locais para trabalhar com arquivos no navegador.</p>
+        <p class="footer-copy">ArqKit - caixa de ferramentas para PDF, imagens, videos e arquivos no navegador.</p>
       </div>
     </footer>
+
+    <div class="modal-overlay" id="modalDonation" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="donationTitle">
+        <div class="modal__head">
+          <h2 id="donationTitle">Apoie o projeto</h2>
+          <button class="modal__close" type="button" aria-label="Fechar">x</button>
+        </div>
+        <div class="modal__body">
+          <p>O ArqKit e gratuito e funciona direto no navegador. Se ele te ajudou, qualquer contribuicao via Pix ajuda a manter e melhorar o projeto.</p>
+          <div class="modal-qr">
+            <img id="pixQrModal" class="qr-img" width="200" height="200" alt="QR Code Pix para apoiar o ArqKit" />
+            <p id="pixQrModalError" class="control__warn small" hidden>Nao foi possivel carregar a imagem do QR Code. Use a chave Pix ou o Pix Copia e Cola abaixo.</p>
+            <p class="small muted">Escaneie no app do banco e escolha o valor.</p>
+          </div>
+          <div class="confere">
+            <strong>Confira antes de doar</strong>
+            <ul>
+              <li>Nome: <b id="pixName">Marcos Guimaraes Duailibi Filho</b></li>
+              <li>Instituicao: <b id="pixBank">Nubank</b></li>
+              <li>Tipo de chave: <b id="pixKeyType">Chave aleatoria</b></li>
+              <li>Chave Pix: <code data-pix-key></code></li>
+            </ul>
+            <p class="small">Antes de concluir o Pix, confira se o nome e a chave estao corretos no app do banco.</p>
+          </div>
+          <div class="result__actions">
+            <button class="btn btn--ghost" id="copyPixKeyBtn" type="button">Copiar chave Pix</button>
+            <button class="btn btn--support" id="copyPixPayloadBtn" type="button">Copiar Pix Copia e Cola</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="./src/js/arqkit-home.js?v=12"></script>
   </body>

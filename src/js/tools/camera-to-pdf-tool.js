@@ -235,7 +235,7 @@ function bind() {
   try { recordOpen("camera-to-pdf"); } catch { /* optional */ }
   bindThemeToggle($("themeToggle"));
 
-  if (!isLikelyMobile()) $("desktopNotice").hidden = false;
+  if (!isLikelyMobile()) $("computerNotice").hidden = false;
 
   IMAGE_PRESETS.forEach((preset) => {
     const opt = document.createElement("option");

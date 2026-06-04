@@ -73,7 +73,10 @@ export function searchTools(query, tools) {
 
   scored.sort((a, b) => {
     const statusBias = (b.tool.status === "ready") - (a.tool.status === "ready");
-    return b.total - a.total || statusBias || a.tool.name.localeCompare(b.tool.name, "pt-BR");
+    return b.total - a.total
+      || statusBias
+      || normalize(a.tool.name).length - normalize(b.tool.name).length
+      || a.tool.name.localeCompare(b.tool.name, "pt-BR");
   });
   return scored.map((item) => item.tool);
 }

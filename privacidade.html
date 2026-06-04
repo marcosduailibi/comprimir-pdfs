@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacidade no ArqKit</title>
+    <meta name="description" content="Entenda como o ArqKit processa arquivos localmente no navegador e quais preferencias podem ficar salvas no dispositivo." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://arqkit.com.br/privacidade.html" />
+    <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("pdfTools.theme.v1");
+          if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="./src/css/style.css?v=10" />
+    <link rel="stylesheet" href="./src/css/arqkit.css?v=12" />
+  </head>
+  <body class="ak-page ak-doc-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - inicio">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="site-nav" id="siteNav" aria-label="Navegacao principal">
+          <a href="./">Inicio</a>
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./comprimir-pdf.html">PDF</a>
+          <a href="./ferramentas.html#images">Imagens</a>
+          <a href="./ferramentas.html#video">Video</a>
+          <a href="./privacidade.html" aria-current="page">Privacidade</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <div class="header-actions">
+          <a class="btn btn--support" href="./#apoie"><span aria-hidden="true">$</span> Apoiar</a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
+            <span class="theme-icon theme-icon--dark">☾</span>
+            <span class="theme-icon theme-icon--light">☀</span>
+          </button>
+          <button id="navToggle" class="mobile-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="ak-doc-shell">
+      <nav class="ak-breadcrumb" aria-label="Breadcrumb">
+        <a href="./">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span>Privacidade</span>
+      </nav>
+
+      <section class="ak-doc-hero" aria-labelledby="privacyTitle">
+        <p class="ak-kicker">Processamento local</p>
+        <h1 id="privacyTitle">Privacidade no ArqKit</h1>
+        <p>Entenda como seus arquivos sao processados no navegador e quais dados ficam no seu dispositivo.</p>
+      </section>
+
+      <section class="ak-doc-grid" aria-label="Politica de privacidade">
+        <article class="ak-doc-card">
+          <h2>Resumo rapido</h2>
+          <p>O ArqKit foi projetado para funcionar localmente no navegador. Nas ferramentas prontas, seus arquivos sao selecionados no seu dispositivo e processados com JavaScript e APIs do proprio navegador. O ArqKit nao envia seus PDFs, imagens, videos, audios ou documentos para servidores proprios.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>O que significa processamento local</h2>
+          <p>Processamento local significa que o arquivo e lido no navegador apos voce seleciona-lo. A ferramenta usa APIs como File API, Canvas, Web Workers e bibliotecas JavaScript carregadas no navegador para gerar o resultado final. O arquivo final e disponibilizado para download no proprio dispositivo.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Seus arquivos sao enviados?</h2>
+          <p>Nao nas ferramentas prontas do ArqKit. Os arquivos nao sao enviados para backend do ArqKit. Eles sao processados na aba do navegador. Se alguma ferramenta futura exigir servidor, ela devera ser claramente marcada antes do uso, com aviso especifico. Nenhuma ferramenta deve enviar arquivos de forma silenciosa.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Bibliotecas por CDN</h2>
+          <p>Algumas bibliotecas podem ser carregadas por CDN para executar funcoes no navegador, como manipular PDFs, imagens, videos ou QR Codes. Carregar uma biblioteca por CDN nao significa enviar seus arquivos para essa CDN. A biblioteca e baixada pelo navegador e executada localmente.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>O que pode ficar salvo</h2>
+          <p>O ArqKit pode salvar apenas preferencias simples, como tema claro/escuro, favoritos, ferramentas usadas por ultimo, frequencia de uso e preferencias visuais. Esses dados podem ser armazenados em localStorage.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>O que nao deve ser salvo</h2>
+          <ul>
+            <li>PDFs enviados pelo usuario;</li>
+            <li>imagens de documentos;</li>
+            <li>videos e audios;</li>
+            <li>nomes de arquivos e metadados;</li>
+            <li>thumbnails;</li>
+            <li>texto extraido por OCR;</li>
+            <li>senhas;</li>
+            <li>conteudo de formularios ou documentos.</li>
+          </ul>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Arquivos temporarios</h2>
+          <p>Algumas ferramentas podem usar memoria do navegador, Object URLs, IndexedDB ou OPFS para processar arquivos grandes. Esses dados devem ser temporarios e devem ser limpos ao concluir, cancelar, fechar a ferramenta ou clicar em "Limpar tudo".</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Camera para PDF</h2>
+          <p>A ferramenta Camera para PDF pede permissao antes de acessar a camera. Ela funciona principalmente em dispositivos moveis, mas continua sendo uma ferramenta de navegador. As fotos capturadas sao processadas localmente para gerar PDF e nao sao enviadas para servidor. A camera deve ser desligada ao sair da ferramenta.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Ferramentas em beta ou em breve</h2>
+          <p>Ferramentas marcadas como Beta podem ter limitacoes. Ferramentas marcadas como Em breve ainda nao aceitam arquivos nem simulam processamento. O ArqKit deve ser transparente sobre o que ja funciona e o que ainda esta em desenvolvimento.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Video, imagem e audio</h2>
+          <p>As ferramentas de imagem, video e audio podem usar Canvas, WebCodecs, FFmpeg/WASM ou outras bibliotecas carregadas no navegador. Ferramentas pesadas devem ser marcadas como Beta ou Pesada e podem demorar para carregar em dispositivos mais simples.</p>
+        </article>
+
+        <article class="ak-doc-card">
+          <h2>Transparencia do codigo</h2>
+          <p>Quando disponivel, o codigo pode ser consultado no GitHub para verificar como as ferramentas funcionam. O objetivo e manter o processamento transparente, local e auditavel.</p>
+          <a class="btn btn--ghost" href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">Abrir GitHub</a>
+        </article>
+
+        <article class="ak-doc-card ak-doc-card--soft">
+          <h2>Cafezinho opcional</h2>
+          <p>Se o ArqKit te ajudou, voce pode apoiar o projeto com um cafezinho simbolico. Isso e opcional e nunca bloqueia nenhuma ferramenta.</p>
+          <a class="btn btn--support" href="./#apoie">Apoiar projeto</a>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="./" class="brand ak-brand" aria-label="ArqKit - inicio">
+          <span class="ak-logo" aria-hidden="true"></span>
+          <span class="ak-brand-text">ArqKit</span>
+        </a>
+        <nav class="footer-links" aria-label="Links do rodape">
+          <a href="./ferramentas.html">Ferramentas</a>
+          <a href="./privacidade.html">Privacidade</a>
+          <a href="./termos.html">Termos</a>
+          <a href="https://github.com/marcosduailibi/comprimir-pdfs" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+        <p class="footer-copy">ArqKit - caixa de ferramentas para PDF, imagens, videos e arquivos no navegador.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/js/static-page.js?v=12"></script>
+  </body>
+</html>
