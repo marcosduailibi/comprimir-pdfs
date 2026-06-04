@@ -1,5 +1,12 @@
-import { createFFmpegLoadOptions, loadFFmpegKit } from "../cdn-loader.js";
-import { runWasmTask } from "../wasm-runner-client.js";
+import { createFFmpegLoadOptions, loadFFmpegKit } from "../cdn-loader.js?v=2";
+import { friendlyProgressMessage, parseFfmpegLog, percentFromStats } from "../video/ffmpeg-progress.js?v=1";
+import {
+  PROCESSING_MODES,
+  detectBrowserCapabilities,
+  processingArgsFor,
+  processingSummary,
+} from "../video/video-processing-options.js?v=1";
+import { runWasmTask } from "../wasm-runner-client.js?v=2";
 import {
   $,
   baseName,
@@ -9,7 +16,6 @@ import {
   fileExt,
   formatBytes,
   setAlert,
-  setProgress,
   setText,
 } from "./tool-page.js";
 import { recordComplete, recordOpen } from "./stores.js?v=10";
@@ -45,6 +51,8 @@ let currentToolId = "compress-video";
 let currentFile = null;
 let ffmpeg = null;
 let cancelled = false;
+let currentDuration = 0;
+let progressLog = [];
 
 function getToolFromHash() {
   const id = (window.location.hash || "").replace(/^#\/?/, "");
@@ -76,11 +84,43 @@ function uploadMarkup() {
     <div id="fileInfo" class="tool-list"></div>
     <video id="videoPreview" class="tool-preview" controls hidden></video>
     <p id="toolAlert" class="tool-alert" role="alert" hidden></p>
-    <div id="toolProgress" class="tool-progress" hidden>
-      <progress max="100" value="0"></progress>
+    <div id="toolProgress" class="tool-progress tool-progress--rich" hidden aria-live="polite">
+      <div class="tool-progress__head">
+        <div>
+          <strong data-progress-title>Processamento local</strong>
+          <span data-progress-subtitle>Nada sera enviado para servidores do ArqKit.</span>
+        </div>
+        <strong data-progress-percent>0%</strong>
+      </div>
+      <progress max="100" value="0" aria-hidden="true"></progress>
+      <div class="tool-progress__track" aria-hidden="true"><span data-progress-fill></span></div>
       <p data-progress-text>Preparando.</p>
+      <div class="tool-progress__stats" aria-label="Metricas do processamento">
+        <span><strong data-stat-time>--</strong><small>Tempo processado</small></span>
+        <span><strong data-stat-speed>--</strong><small>Velocidade</small></span>
+        <span><strong data-stat-bitrate>--</strong><small>Bitrate</small></span>
+        <span><strong data-stat-size>--</strong><small>Tamanho parcial</small></span>
+      </div>
+      <details class="tool-progress__log">
+        <summary>Detalhes tecnicos</summary>
+        <code data-progress-raw>Sem logs ainda.</code>
+      </details>
     </div>
     <div id="toolOutput" class="tool-output"></div>
+  `;
+}
+
+function processingControlMarkup() {
+  return `
+    <label>Ritmo de processamento
+      <select id="processingMode">
+        <option value="auto" selected>Automatico recomendado</option>
+        <option value="gentle">Mais leve para o navegador</option>
+        <option value="balanced">Equilibrado</option>
+        <option value="fast">Mais rapido</option>
+        <option value="quality">Mais qualidade, mais lento</option>
+      </select>
+    </label>
   `;
 }
 
@@ -104,6 +144,7 @@ function controlsMarkup() {
           <input id="audioBitrate" type="text" value="128k" />
         </label>
       </div>
+      ${processingControlMarkup()}
       <label class="tool-check"><input id="removeAudio" type="checkbox" /> Remover audio</label>
     `;
   }
@@ -118,6 +159,7 @@ function controlsMarkup() {
           <input id="fps" type="number" min="1" max="60" value="30" />
         </label>
       </div>
+      ${processingControlMarkup()}
       <label class="tool-check"><input id="removeAudio" type="checkbox" /> Remover audio</label>
     `;
   }
@@ -139,6 +181,7 @@ function controlsMarkup() {
       <label>Modo
         <select id="cutMode"><option value="fast" selected>Corte rapido</option><option value="precise">Corte preciso</option></select>
       </label>
+      ${processingControlMarkup()}
       <p class="tool-note">Corte rapido pode ser menos preciso por causa dos keyframes. Corte preciso pode demorar mais.</p>
     `;
   }
@@ -152,14 +195,19 @@ function controlsMarkup() {
         <select id="audioBitrate"><option value="128k">128k</option><option value="192k" selected>192k</option><option value="320k">320k</option></select>
       </label>
     </div>
+    ${processingControlMarkup()}
   `;
 }
 
 function renderWorkspace() {
+  currentFile = null;
+  currentDuration = 0;
+  progressLog = [];
   $("#toolWorkspace").innerHTML = `
     ${uploadMarkup()}
     <form id="toolForm" class="tool-form">
       ${controlsMarkup()}
+      <div class="tool-processing-summary" id="processingSummary" aria-live="polite"></div>
       <div class="tool-actions">
         <button class="btn btn--primary" type="button" data-run-tool>Carregar ferramenta</button>
         <button class="btn btn--ghost" type="button" data-cancel-tool hidden>Cancelar</button>
@@ -169,7 +217,7 @@ function renderWorkspace() {
   `;
   bindUpload();
   bindControls();
-  currentFile = null;
+  updateProcessingSummary();
 }
 
 function renderFileInfo() {
@@ -194,7 +242,11 @@ function renderFileInfo() {
     const url = URL.createObjectURL(currentFile);
     preview.src = url;
     preview.hidden = false;
-    preview.onloadedmetadata = () => setAlert("#toolAlert", `Video recebido. Duracao aproximada: ${formatTime(preview.duration)}.`, "info");
+    preview.onloadedmetadata = () => {
+      currentDuration = Number.isFinite(preview.duration) ? preview.duration : 0;
+      setAlert("#toolAlert", `Video recebido. Duracao aproximada: ${formatTime(currentDuration)}.`, "info");
+      updateProcessingSummary();
+    };
     preview.onemptied = () => URL.revokeObjectURL(url);
   }
 }
@@ -207,6 +259,7 @@ function bindUpload() {
     currentFile = Array.from(files || [])[0] || null;
     $("#toolOutput").innerHTML = "";
     renderFileInfo();
+    updateProcessingSummary();
     if (currentFile) setAlert("#toolAlert", "Arquivo recebido. O processamento acontece localmente no navegador.");
   };
   pick.addEventListener("click", (event) => {
@@ -240,6 +293,10 @@ function bindControls() {
   $("#useEnd")?.addEventListener("click", () => {
     $("#endTime").value = formatTime($("#videoPreview")?.currentTime || 0);
   });
+  ["profile", "outputFormat", "audioFormat", "processingMode", "videoBitrate", "audioBitrate", "removeAudio", "cutMode"].forEach((id) => {
+    $(`#${id}`)?.addEventListener("change", updateProcessingSummary);
+    $(`#${id}`)?.addEventListener("input", updateProcessingSummary);
+  });
   document.querySelector("[data-run-tool]").addEventListener("click", runCurrentTool);
   document.querySelector("[data-cancel-tool]").addEventListener("click", cancelTool);
   document.querySelector("[data-clear-tool]").addEventListener("click", clearTool);
@@ -255,8 +312,11 @@ function clearTool() {
   $("#primaryFile").value = "";
   $("#toolOutput").innerHTML = "";
   $("#toolProgress").hidden = true;
+  currentDuration = 0;
+  progressLog = [];
   setAlert("#toolAlert", "Temporarios limpos.");
   renderFileInfo();
+  updateProcessingSummary();
 }
 
 function cancelTool() {
@@ -264,6 +324,7 @@ function cancelTool() {
   try { ffmpeg?.terminate?.(); } catch {}
   ffmpeg = null;
   setAlert("#toolAlert", "Processamento cancelado. A engine sera recarregada se voce tentar novamente.");
+  updateVideoProgress(null, "Processamento cancelado. Temporarios limpos.", null);
   setBusy(false);
 }
 
@@ -275,18 +336,107 @@ function formatTime(value) {
   return [h, m, s].map((part) => String(part).padStart(2, "0")).join(":");
 }
 
+function processingContext() {
+  return {
+    capabilities: detectBrowserCapabilities(),
+    fileSize: currentFile?.size || 0,
+    durationSeconds: currentDuration || 0,
+  };
+}
+
+function selectedProcessingMode() {
+  return $("#processingMode")?.value || "auto";
+}
+
+function updateProcessingSummary() {
+  const root = $("#processingSummary");
+  if (!root) return;
+  const context = processingContext();
+  const summary = processingSummary(selectedProcessingMode(), context);
+  const qualityOption = $("#processingMode option[value='quality']");
+  if (qualityOption) {
+    qualityOption.disabled = summary.lowPower || summary.largeJob;
+    if (qualityOption.disabled && selectedProcessingMode() === "quality") $("#processingMode").value = "auto";
+  }
+  const effective = processingSummary(selectedProcessingMode(), context);
+  const memory = effective.memory ? `${effective.memory} GB RAM aprox.` : "memoria nao informada";
+  const recommendation = effective.selected === "auto"
+    ? `Automatico escolheu ${effective.label.toLowerCase()}.`
+    : `Modo escolhido: ${effective.label.toLowerCase()}.`;
+  const warning = effective.qualityBlocked
+    ? "Modo de qualidade alta foi evitado neste navegador/arquivo para reduzir risco de travamento."
+    : effective.lowPower || effective.largeJob
+      ? "Recomendacao conservadora para manter a aba responsiva."
+      : "Configuracao adequada para este navegador.";
+
+  root.innerHTML = `
+    <div>
+      <strong>${escapeHtml(recommendation)}</strong>
+      <span>${escapeHtml(warning)}</span>
+    </div>
+    <ul>
+      <li><b>${effective.cores}</b><span>nucleos detectados</span></li>
+      <li><b>${escapeHtml(memory)}</b><span>capacidade</span></li>
+      <li><b>${effective.threads}</b><span>threads alvo</span></li>
+      <li><b>${escapeHtml(PROCESSING_MODES[effective.resolved].label)}</b><span>ritmo efetivo</span></li>
+    </ul>
+  `;
+}
+
+function updateVideoProgress(value, message = "", stats = null) {
+  const root = $("#toolProgress");
+  if (!root) return;
+  root.hidden = false;
+  const numeric = Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Number(value))) : null;
+  const progress = root.querySelector("progress");
+  const fill = root.querySelector("[data-progress-fill]");
+  const percent = root.querySelector("[data-progress-percent]");
+  const text = root.querySelector("[data-progress-text]");
+  if (numeric !== null) {
+    if (progress) progress.value = numeric;
+    if (fill) fill.style.width = `${numeric}%`;
+    if (percent) percent.textContent = `${Math.round(numeric)}%`;
+  }
+  if (text && message) text.textContent = message;
+  if (stats) {
+    root.querySelector("[data-stat-time]").textContent = stats.time || "--";
+    root.querySelector("[data-stat-speed]").textContent = stats.speed || "--";
+    root.querySelector("[data-stat-bitrate]").textContent = stats.bitrate && stats.bitrate !== "N/A" ? stats.bitrate : "--";
+    root.querySelector("[data-stat-size]").textContent = stats.size || "--";
+    if (stats.raw) {
+      progressLog.push(stats.raw);
+      progressLog = progressLog.slice(-8);
+      root.querySelector("[data-progress-raw]").textContent = progressLog.join("\n");
+    }
+  }
+}
+
+function updateProgressFromMessage(message, value = null) {
+  if (/^Executando ffmpeg\b/i.test(String(message || ""))) {
+    progressLog.push(String(message).slice(0, 260));
+    progressLog = progressLog.slice(-8);
+    updateVideoProgress(value, "Executando processamento local no runner isolado.", null);
+    const raw = $("#toolProgress")?.querySelector("[data-progress-raw]");
+    if (raw) raw.textContent = progressLog.join("\n");
+    return;
+  }
+  const stats = parseFfmpegLog(message);
+  const computed = value ?? percentFromStats(stats, currentDuration);
+  updateVideoProgress(computed, friendlyProgressMessage(stats, message || "Processando localmente."), stats);
+}
+
 async function getFFmpeg() {
   if (ffmpeg) return ffmpeg;
   const { FFmpeg, util } = await loadFFmpegKit();
   ffmpeg = new FFmpeg();
   ffmpeg.on("progress", ({ progress }) => {
     const pct = Math.max(1, Math.min(99, Math.round((progress || 0) * 100)));
-    setProgress("#toolProgress", pct, "Processando com ffmpeg.wasm.");
+    updateVideoProgress(pct, "Processando com ffmpeg.wasm no navegador.");
   });
   ffmpeg.on("log", ({ message }) => {
-    if (message) setProgress("#toolProgress", undefined, message.slice(0, 180));
+    if (message) updateProgressFromMessage(message);
   });
-  setProgress("#toolProgress", 5, "Carregando ffmpeg.wasm. O primeiro carregamento pode demorar.");
+  updateVideoProgress(5, "Carregando ffmpeg.wasm. O primeiro carregamento pode demorar.");
   await ffmpeg.load(await createFFmpegLoadOptions(util));
   return ffmpeg;
 }
@@ -336,9 +486,10 @@ function mimeForOutput(ext) {
 }
 
 function codecArgs(format) {
-  if (format === "webm") return ["-c:v", "libvpx-vp9", "-c:a", "libopus"];
+  const speedArgs = processingArgsFor(format, selectedProcessingMode(), processingContext());
+  if (format === "webm") return ["-c:v", "libvpx-vp9", "-c:a", "libopus", ...speedArgs];
   if (format === "gif") return ["-vf", `fps=${$("#fps")?.value || 12},scale=640:-1:flags=lanczos`];
-  return ["-c:v", "libx264", "-c:a", "aac"];
+  return ["-c:v", "libx264", "-c:a", "aac", ...speedArgs, "-movflags", "+faststart"];
 }
 
 function audioArgs(format) {
@@ -378,7 +529,9 @@ async function runCurrentTool() {
   cancelled = false;
   setBusy(true);
   $("#toolOutput").innerHTML = "";
+  progressLog = [];
   setAlert("#toolAlert", "Carregando engine local. Nada sera enviado para servidor.");
+  updateProcessingSummary();
   try {
     try { recordOpen(currentToolId); } catch {}
     const input = inputName(currentFile);
@@ -388,7 +541,7 @@ async function runCurrentTool() {
     const downloadName = `${baseName(currentFile.name)}-${currentToolId.replace(/-/g, "-")}.${ext}`;
     let blob = null;
     try {
-      setProgress("#toolProgress", 8, "Enviando tarefa para wasm-runner.html.");
+      updateVideoProgress(8, "Preparando runner isolado. Nada sera enviado para servidores do ArqKit.");
       const result = await runWasmTask({
         engine: "ffmpeg",
         action: currentToolId,
@@ -400,7 +553,7 @@ async function runCurrentTool() {
           outputType: mimeForOutput(ext),
           downloadName,
         },
-        onProgress: (event) => setProgress("#toolProgress", event.value ?? undefined, event.message || "Processando no runner WASM."),
+        onProgress: (event) => updateProgressFromMessage(event.message || "Processando no runner WASM.", event.value ?? null),
       });
       blob = result.blob;
     } catch (runnerError) {
@@ -408,7 +561,7 @@ async function runCurrentTool() {
       const { util } = await loadFFmpegKit();
       const engine = await getFFmpeg();
       await engine.writeFile(input, await util.fetchFile(currentFile));
-      setProgress("#toolProgress", 10, `Executando: ffmpeg ${command.join(" ")}`);
+      updateVideoProgress(10, "Executando compressao local no modo compativel.");
       await engine.exec(command);
       if (cancelled) throw new Error("Processamento cancelado.");
       const data = await engine.readFile(output);
@@ -416,7 +569,7 @@ async function runCurrentTool() {
       try { await engine.deleteFile(input); } catch {}
       try { await engine.deleteFile(output); } catch {}
     }
-    setProgress("#toolProgress", 100, "Resultado pronto.");
+    updateVideoProgress(100, "Resultado pronto para download.");
     resultButton(blob, downloadName);
     try { recordComplete(currentToolId); } catch {}
     setAlert("#toolAlert", "Pronto. Download preparado.", "success");

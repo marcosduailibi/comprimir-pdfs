@@ -5,7 +5,7 @@
 import { appState, PRESETS, presetFromValues, validateSelection, modeAllowsMultiple, modeNeedsCompression, estimateCapacity, resolveDpiValue } from "./state.js?v=10";
 import * as UI from "./ui.js?v=10";
 import { buildFinalName, clamp, showToast } from "./utils.js?v=10";
-import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=10";
+import { bindDonation, showDownloadDonationPrompt } from "./donation.js?v=11";
 import { recordOpen, recordComplete } from "./tools/stores.js?v=10";
 
 let idSeq = 0;

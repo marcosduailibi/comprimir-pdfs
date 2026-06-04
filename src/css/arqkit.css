@@ -5,7 +5,7 @@
   --ak-surface: #ffffff;
   --ak-surface-soft: #f4f8ff;
   --ak-text: #0b1329;
-  --ak-muted: #60708f;
+  --ak-muted: #52617c;
   --ak-border: #dbe6f5;
   --ak-primary: #1769ff;
   --ak-primary-2: #38bdf8;
@@ -274,7 +274,7 @@ body {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  max-width: 690px;
+  max-width: 780px;
   margin: 0 0 18px;
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--ak-primary) 18%, var(--ak-border));
@@ -290,17 +290,19 @@ body {
   border: 1px solid var(--ak-border);
   border-radius: 12px;
   background: #ffffff;
-  padding: 5px;
+  padding: 10px;
+  image-rendering: crisp-edges;
+  object-fit: contain;
 }
 
 .ak-donation-strip img {
-  width: 108px;
-  height: 108px;
+  width: clamp(148px, 12vw, 168px);
+  height: clamp(148px, 12vw, 168px);
 }
 
 .ak-pix-card img {
-  width: 116px;
-  height: 116px;
+  width: clamp(148px, 15vw, 180px);
+  height: clamp(148px, 15vw, 180px);
 }
 
 .ak-donation-strip__copy,
@@ -1354,8 +1356,8 @@ body {
   }
 
   .ak-donation-strip img {
-    width: 96px;
-    height: 96px;
+    width: clamp(148px, 44vw, 176px);
+    height: clamp(148px, 44vw, 176px);
   }
 
   .ak-donation-strip__actions .btn,

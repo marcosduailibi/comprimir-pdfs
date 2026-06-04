@@ -1,5 +1,5 @@
-import { CDN, LOCAL_VENDOR, createFFmpegLoadOptions, isReachable, localOrCdn, vendorUrl } from "./cdn-loader.js";
-import { runCompatibilityDiagnostics } from "./capabilities/feature-detection.js";
+import { CDN, LOCAL_VENDOR, createFFmpegLoadOptions, isReachable, localOrCdn, vendorUrl } from "./cdn-loader.js?v=2";
+import { runCompatibilityDiagnostics } from "./capabilities/feature-detection.js?v=1";
 
 const RUNNER_SOURCE = "arqkit-wasm-runner";
 const APP_SOURCE = "arqkit";

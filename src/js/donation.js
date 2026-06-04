@@ -82,7 +82,7 @@ export function bindDonation() {
     const qr = document.getElementById(imgId);
     if (!qr) continue;
     qr.src = PIX.qrUrl;
-    qr.alt = "QR Code Pix para apoiar o projeto Comprimir PDF";
+    qr.alt = "QR Code Pix para apoiar o projeto ArqKit";
     qr.addEventListener("error", () => {
       const warn = document.getElementById(errId);
       if (warn) warn.hidden = false;

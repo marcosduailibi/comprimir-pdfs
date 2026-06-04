@@ -3,7 +3,7 @@ import { searchTools } from "./tools/search.js?v=12";
 import { createToolCard, el, iconMarkup, makeIcon, isOpenable } from "./tools/render.js?v=12";
 import { getRecent, recordOpen } from "./tools/stores.js?v=11";
 import { bindThemeToggle, initTheme } from "./theme.js?v=10";
-import { bindDonation } from "./donation.js?v=10";
+import { bindDonation } from "./donation.js?v=11";
 import { bindToolDetails, openToolDetails } from "./tools/details.js?v=12";
 import { bindStaticHashRoutes } from "./static-routes.js?v=12";
 
