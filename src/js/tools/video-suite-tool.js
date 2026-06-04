@@ -1,4 +1,4 @@
-import { CDN, loadFFmpegKit } from "../cdn-loader.js";
+import { createFFmpegLoadOptions, loadFFmpegKit } from "../cdn-loader.js";
 import { runWasmTask } from "../wasm-runner-client.js";
 import {
   $,
@@ -287,11 +287,7 @@ async function getFFmpeg() {
     if (message) setProgress("#toolProgress", undefined, message.slice(0, 180));
   });
   setProgress("#toolProgress", 5, "Carregando ffmpeg.wasm. O primeiro carregamento pode demorar.");
-  await ffmpeg.load({
-    coreURL: await util.toBlobURL(CDN.ffmpegCore, "text/javascript"),
-    wasmURL: await util.toBlobURL(CDN.ffmpegCoreWasm, "application/wasm"),
-    workerURL: await util.toBlobURL(CDN.ffmpegCoreWorker, "text/javascript"),
-  });
+  await ffmpeg.load(await createFFmpegLoadOptions(util));
   return ffmpeg;
 }
 

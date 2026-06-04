@@ -8,13 +8,45 @@ export const CDN = {
   tesseract: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js",
   mammoth: "https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js",
   ffmpeg: "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js",
+  ffmpegClassWorker: "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js",
   ffmpegUtil: "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js",
   ffmpegCore: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.js",
   ffmpegCoreWasm: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.wasm",
-  ffmpegCoreWorker: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.worker.js",
+  ffmpegCoreMt: "https://cdn.jsdelivr.net/npm/@ffmpeg/core-mt@0.12.10/dist/umd/ffmpeg-core.js",
+  ffmpegCoreMtWasm: "https://cdn.jsdelivr.net/npm/@ffmpeg/core-mt@0.12.10/dist/umd/ffmpeg-core.wasm",
+  ffmpegCoreMtWorker: "https://cdn.jsdelivr.net/npm/@ffmpeg/core-mt@0.12.10/dist/umd/ffmpeg-core.worker.js",
   qpdf: "https://cdn.jsdelivr.net/npm/qpdf-wasm@0.1.0/qpdf.js",
   qpdfWasm: "https://cdn.jsdelivr.net/npm/qpdf-wasm@0.1.0/qpdf.wasm",
 };
+
+export const LOCAL_VENDOR = {
+  ffmpeg: "../../assets/vendor/ffmpeg/ffmpeg.js",
+  ffmpegClassWorker: "../../assets/vendor/ffmpeg/814.ffmpeg.js",
+  ffmpegUtil: "../../assets/vendor/ffmpeg/util/index.js",
+  ffmpegCore: "../../assets/vendor/ffmpeg/ffmpeg-core.js",
+  ffmpegCoreWasm: "../../assets/vendor/ffmpeg/ffmpeg-core.wasm",
+  ffmpegCoreWorker: "../../assets/vendor/ffmpeg/ffmpeg-core.worker.js",
+  qpdf: "../../assets/vendor/qpdf/qpdf.js",
+  qpdfWasm: "../../assets/vendor/qpdf/qpdf.wasm",
+};
+
+export function vendorUrl(path) {
+  return new URL(path, import.meta.url).href;
+}
+
+export async function isReachable(url) {
+  try {
+    const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function localOrCdn(localPath, cdnUrl) {
+  const localUrl = vendorUrl(localPath);
+  return await isReachable(localUrl) ? localUrl : cdnUrl;
+}
 
 export function loadScript(src, { globalName, test } = {}) {
   if (typeof test === "function" && test()) return Promise.resolve(globalName ? window[globalName] : true);
@@ -69,12 +101,32 @@ export async function loadMammoth() {
 }
 
 export async function loadFFmpegKit() {
-  await loadScript(CDN.ffmpeg, { globalName: "FFmpegWASM" });
-  await loadScript(CDN.ffmpegUtil, { globalName: "FFmpegUtil" });
+  const ffmpegUrl = await localOrCdn(LOCAL_VENDOR.ffmpeg, CDN.ffmpeg);
+  const utilUrl = await localOrCdn(LOCAL_VENDOR.ffmpegUtil, CDN.ffmpegUtil);
+  await loadScript(ffmpegUrl, { globalName: "FFmpegWASM" });
+  await loadScript(utilUrl, { globalName: "FFmpegUtil" });
   if (!window.FFmpegWASM?.FFmpeg || !window.FFmpegUtil?.fetchFile) {
     throw new Error("ffmpeg.wasm indisponivel.");
   }
   return { FFmpeg: window.FFmpegWASM.FFmpeg, util: window.FFmpegUtil };
+}
+
+export async function createFFmpegLoadOptions(util, { multiThread = false } = {}) {
+  if (!util?.toBlobURL) throw new Error("Utilitario toBlobURL do ffmpeg.wasm indisponivel.");
+
+  const coreURL = await localOrCdn(LOCAL_VENDOR.ffmpegCore, multiThread ? CDN.ffmpegCoreMt : CDN.ffmpegCore);
+  const wasmURL = await localOrCdn(LOCAL_VENDOR.ffmpegCoreWasm, multiThread ? CDN.ffmpegCoreMtWasm : CDN.ffmpegCoreWasm);
+  const options = {
+    coreURL: await util.toBlobURL(coreURL, "text/javascript"),
+    wasmURL: await util.toBlobURL(wasmURL, "application/wasm"),
+  };
+
+  if (multiThread) {
+    const workerURL = await localOrCdn(LOCAL_VENDOR.ffmpegCoreWorker, CDN.ffmpegCoreMtWorker);
+    options.workerURL = await util.toBlobURL(workerURL, "text/javascript");
+  }
+
+  return options;
 }
 
 export async function loadQpdf() {
