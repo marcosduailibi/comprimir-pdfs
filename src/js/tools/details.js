@@ -1,57 +1,65 @@
-import { STATUS_META, getTool } from "./registry.js?v=13";
-import { el, getStatusBadges, iconMarkup, isOpenable } from "./render.js?v=12";
+import { CATEGORIES, getTool } from "./registry.js?v=14";
+import { el, getStatusBadges, iconMarkup, isOpenable } from "./render.js?v=13";
 
 let overlay = null;
 let activeToolId = null;
 
 const GITHUB_URL = "https://github.com/marcosduailibi/comprimir-pdfs";
 
-function textList(values, fallback = "Nao informado") {
+function textList(values, fallback = "Não informado") {
   return values && values.length ? values.map((item) => String(item).toUpperCase()).join(", ") : fallback;
 }
 
-function processingText(tool) {
-  if (tool.mobileOnly) return "Navegador mobile, com alternativa por importacao quando disponivel.";
-  if (tool.isLocalFirst) return "Local no navegador.";
-  return "Navegador.";
+function categoryNames(tool) {
+  const names = (tool.categoryIds || [])
+    .map((id) => CATEGORIES.find((category) => category.id === id)?.name)
+    .filter(Boolean);
+  return names.length ? names.join(" · ") : "Ferramenta";
 }
 
-function statusText(tool) {
-  if (tool.status === "ready") return "Pronta para uso.";
-  if (tool.status === "beta") return "Beta. Confira o resultado antes de usar em documentos importantes.";
-  return "Em breve. Esta ferramenta ainda nao aceita arquivos nesta versao.";
+function processingText(tool) {
+  if (tool.mobileOnly) return "Navegador mobile, com importação quando disponível";
+  if (tool.isLocalFirst) return "100% no navegador";
+  return "Navegador";
+}
+
+function availabilityText(tool) {
+  if (tool.status === "ready") return "Pronta para usar";
+  if (tool.status === "beta") return "Beta";
+  return "Em desenvolvimento";
 }
 
 function limitText(tool) {
-  if (tool.maxTotalSizeBytes) return "Ate 1 GB no total, conforme memoria disponivel no navegador.";
+  if (tool.status === "coming-soon") return "Em desenvolvimento. Ainda não aceita arquivos nesta versão.";
+  if (tool.maxTotalSizeBytes) return "Até 1 GB no total, conforme memória disponível no navegador.";
   if (tool.categoryIds?.includes("video") || tool.categoryIds?.includes("audio")) {
-    return "Arquivos grandes podem demorar e exigir mais memoria.";
+    return "Arquivos grandes podem demorar e exigir mais memória.";
   }
-  if (tool.categoryIds?.includes("pdf")) return "Ate 1 GB quando o fluxo estiver disponivel, processando por partes quando necessario.";
-  return "Depende do formato e da memoria disponivel no navegador.";
+  if (tool.categoryIds?.includes("pdf")) return "Sem limite fixo; arquivos grandes usam mais memória da aba.";
+  return "Depende do formato e da memória disponível no navegador.";
 }
 
 function privacyText(tool) {
   if (tool.status === "coming-soon") {
-    return "Esta ferramenta ainda esta em desenvolvimento e nao aceita arquivos nesta versao.";
+    return "Quando pronta, será local por padrão. Hoje não aceita arquivos.";
   }
-  return "Os arquivos escolhidos ficam na aba do navegador e nao sao enviados para servidores do ArqKit.";
+  return "Os arquivos escolhidos ficam na aba do navegador e não são enviados para servidores do ArqKit.";
 }
 
 function knownLimits(tool) {
   const limits = [];
-  if (tool.status === "coming-soon") limits.push("Ainda nao ha fluxo de upload ou processamento para esta ferramenta.");
+  if (tool.status === "coming-soon") limits.push("Ainda não há fluxo de upload ou processamento para esta ferramenta.");
   if (tool.status === "beta") limits.push("Ferramenta em beta: valide o arquivo final antes de usar oficialmente.");
-  if (tool.heavy) limits.push("Pode carregar bibliotecas maiores ou usar WASM/Web Workers, exigindo mais memoria.");
-  if (tool.requiresCamera) limits.push("Acesso a camera exige HTTPS e permissao do navegador.");
-  if (tool.requiresPassword) limits.push("Use apenas em arquivos para os quais voce tem permissao e conhece a senha.");
+  if (tool.heavy) limits.push("Pode carregar bibliotecas maiores ou usar WASM/Web Workers, exigindo mais memória.");
+  if (tool.requiresCamera) limits.push("Acesso à câmera exige HTTPS e permissão do navegador.");
+  if (tool.requiresPassword) limits.push("Use apenas em arquivos para os quais você tem permissão e conhece a senha.");
   if (tool.notes?.length) limits.push(...tool.notes);
   return limits;
 }
 
 function primaryActionText(tool) {
   if (tool.heavy || tool.usesWasm) return "Carregar ferramenta";
-  if (tool.status === "beta") return "Usar versao beta";
+  if (tool.status === "beta") return "Usar versão beta";
   return "Usar ferramenta";
 }
 
@@ -60,8 +68,13 @@ function ensureModal() {
   overlay = el("div", { class: "modal-overlay tool-detail-overlay", id: "toolDetailModal", hidden: true }, [
     el("div", { class: "modal tool-detail-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "toolDetailTitle" }, [
       el("div", { class: "modal__head" }, [
-        el("h2", { id: "toolDetailTitle", text: "Detalhes da ferramenta" }),
-        el("button", { class: "modal__close", type: "button", "aria-label": "Fechar detalhes", text: "x" }),
+        el("span", { class: "ak-tool-icon", id: "toolDetailIcon", "aria-hidden": "true" }),
+        el("div", { class: "modal__title" }, [
+          el("p", { class: "modal__kicker", id: "toolDetailKicker" }),
+          el("h2", { id: "toolDetailTitle", text: "Detalhes da ferramenta" }),
+          el("p", { id: "toolDetailDesc" }),
+        ]),
+        el("button", { class: "modal__close", type: "button", "aria-label": "Fechar detalhes", html: iconMarkup("x") }),
       ]),
       el("div", { class: "modal__body", id: "toolDetailBody" }),
     ]),
@@ -77,61 +90,53 @@ function ensureModal() {
   return overlay;
 }
 
-function row(label, value) {
+function spec(label, value) {
   return el("div", { class: "tool-detail-row" }, [
     el("span", { text: label }),
     el("strong", { text: value }),
   ]);
 }
 
+function callout(kind, icon, title, text) {
+  return el("div", { class: `ak-callout ak-callout--${kind}` }, [
+    el("span", { html: iconMarkup(icon), "aria-hidden": "true" }),
+    el("div", {}, [
+      el("b", { text: title }),
+      el("p", { text: text }),
+    ]),
+  ]);
+}
+
 function renderBody(tool) {
-  const meta = STATUS_META[tool.status] || STATUS_META["coming-soon"];
   const badges = getStatusBadges(tool).map((badge) =>
     el("span", { class: `ak-status ${badge.className}`, text: badge.label })
   );
   const limits = knownLimits(tool);
 
   return [
-    el("div", { class: "tool-detail-hero" }, [
-      el("span", {
-        class: `ak-tool-icon ak-tool-icon--${tool.color || "blue"}`,
-        html: iconMarkup(tool.icon),
-        "aria-hidden": "true",
-      }),
-      el("div", {}, [
-        el("p", { class: "tool-detail-kicker", text: meta.label }),
-        el("h3", { text: tool.name }),
-        el("p", { text: tool.tooltip || tool.description }),
-      ]),
-    ]),
-    el("div", { class: "ak-tool-card__badges tool-detail-badges" }, badges),
+    el("div", { class: "tool-detail-badges" }, badges),
     el("div", { class: "tool-detail-grid" }, [
-      row("Processamento", processingText(tool)),
-      row("Entrada", textList(tool.inputExtensions)),
-      row("Saida", textList(tool.outputExtensions)),
-      row("Limite", limitText(tool)),
-      row("Web Worker", tool.usesWorker ? "Usado quando disponivel" : tool.heavy || tool.categoryIds?.includes("pdf") ? "Quando necessario" : "Nao necessario"),
-      row("WASM", tool.usesWasm || tool.heavy ? "Pode usar" : "Nao necessario para o fluxo principal"),
-      row("CDN", tool.usesCdn ? "Pode carregar biblioteca externa" : "Nao necessario para o fluxo principal"),
+      spec("Entrada", textList(tool.inputExtensions)),
+      spec("Saída", textList(tool.outputExtensions)),
+      spec("Processamento", processingText(tool)),
+      spec("Disponibilidade", availabilityText(tool)),
     ]),
-    el("div", { class: "tool-detail-privacy" }, [
-      el("strong", { text: "Privacidade" }),
-      el("p", { text: privacyText(tool) }),
-    ]),
+    callout("ok", "shield", "Privacidade", privacyText(tool)),
+    callout("warn", "eye", "Limites", limitText(tool)),
     limits.length ? el("div", { class: "tool-detail-limits" }, [
-      el("strong", { text: "Limitacoes conhecidas" }),
+      el("strong", { text: "Limitações conhecidas" }),
       el("ul", {}, limits.map((item) => el("li", { text: item }))),
     ]) : null,
     el("div", { class: "result__actions tool-detail-actions" }, [
       isOpenable(tool)
-        ? el("a", { class: "btn btn--primary", href: tool.route, text: primaryActionText(tool) })
-        : el("button", { class: "btn btn--primary", type: "button", disabled: true, text: "Ainda em desenvolvimento" }),
+        ? el("a", { class: "btn btn--primary", href: tool.route, html: `${iconMarkup("arrow-right")}<span>${primaryActionText(tool)}</span>` })
+        : el("button", { class: "btn btn--soft", type: "button", disabled: true, text: "Em desenvolvimento" }),
       el("a", {
         class: "btn btn--ghost",
         href: GITHUB_URL,
         target: "_blank",
         rel: "noopener noreferrer",
-        text: "Ver codigo no GitHub",
+        html: `${iconMarkup("github")}<span>Ver código</span>`,
       }),
     ]),
   ];
@@ -142,9 +147,13 @@ export function openToolDetails(toolOrId, options = {}) {
   if (!tool) return;
   ensureModal();
   activeToolId = tool.id;
-  const title = overlay.querySelector("#toolDetailTitle");
+  const icon = overlay.querySelector("#toolDetailIcon");
+  icon.className = `ak-tool-icon ak-tool-icon--${tool.color || "blue"}`;
+  icon.innerHTML = iconMarkup(tool.icon);
+  overlay.querySelector("#toolDetailKicker").textContent = categoryNames(tool);
+  overlay.querySelector("#toolDetailTitle").textContent = tool.name;
+  overlay.querySelector("#toolDetailDesc").textContent = tool.tooltip || tool.description;
   const body = overlay.querySelector("#toolDetailBody");
-  title.textContent = `Detalhes: ${tool.name}`;
   body.innerHTML = "";
   renderBody(tool).forEach((node) => { if (node) body.appendChild(node); });
   overlay.hidden = false;

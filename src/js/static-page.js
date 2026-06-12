@@ -1,4 +1,4 @@
-import { bindThemeToggle, initTheme } from "./theme.js?v=13";
+import { bindThemeToggle, initTheme } from "./theme.js?v=14";
 import { bindStaticHashRoutes } from "./static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);

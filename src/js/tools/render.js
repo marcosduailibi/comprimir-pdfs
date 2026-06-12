@@ -27,6 +27,12 @@ const PATHS = {
   jpg: '<path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 17h1.5a1.5 1.5 0 0 0 0-3H8v5"/><path d="M13 14v5"/><path d="M16 14h2v5h-2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/>',
   scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9"/><path d="m14 14 6 6"/><path d="M8.1 8.1 12 12"/>',
   stamp: '<path d="M7 21h10"/><path d="M5 17h14"/><path d="M9 17v-2.5A3.5 3.5 0 0 1 12.5 11h0a3.5 3.5 0 0 1 3.5 3.5V17"/><path d="M9 5a3 3 0 0 1 6 0c0 2-3 6-3 6S9 7 9 5Z"/>',
+  "arrow-right": '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+  "check-circle": '<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  github: '<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 4.8a4.9 4.9 0 0 0-.1-3.6s-1.1-.3-3.7 1.4a12.6 12.6 0 0 0-6.6 0C7 .9 5.9 1.2 5.9 1.2A4.9 4.9 0 0 0 5.8 4.8 5.2 5.2 0 0 0 4.4 8.5c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>',
+  heart: '<path d="M19 14c1.5-1.5 3-3.2 3-5.5A4.5 4.5 0 0 0 12 5 4.5 4.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/>',
 };
 
 export function el(tag, props = {}, kids = []) {
@@ -71,9 +77,9 @@ export function statusBadge(tool, extraClass = "") {
 
 export function getStatusBadges(tool) {
   const badges = [];
-  if (tool.isLocalFirst) badges.push({ label: "Local", className: "is-local" });
-  if (tool.browser !== false) badges.push({ label: "Navegador", className: "is-browser" });
   if (tool.status === "ready") badges.push({ label: "Pronta", className: "is-ready" });
+  if (tool.isLocalFirst) badges.push({ label: "Local", className: "is-local" });
+  else badges.push({ label: "Navegador", className: "is-browser" });
   if (tool.mobileOnly) badges.push({ label: "Mobile", className: "is-mobile" });
   if (tool.status === "beta") badges.push({ label: "Beta", className: "is-beta" });
   if (tool.status === "coming-soon") badges.push({ label: "Em breve", className: "is-soon" });
@@ -155,9 +161,22 @@ export function createToolCard(tool, options = {}) {
       actions.appendChild(el("a", {
         class: "ak-tool-card__action",
         href: tool.route,
-        title: `Usar ${tool.name}`,
+        title: `Abrir ${tool.name}`,
         onclick: () => { if (onOpen) onOpen(tool); },
-        text: compact ? "Usar" : "Usar ferramenta",
+        text: "Abrir",
+      }));
+    } else {
+      actions.appendChild(el("button", {
+        class: "ak-tool-card__action ak-tool-card__action--soft",
+        type: "button",
+        title: "Em desenvolvimento — veja status e limites.",
+        onclick: (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (onDetails) onDetails(tool);
+          else if (onUnavailable) onUnavailable(tool);
+        },
+        text: "Em breve",
       }));
     }
     actions.appendChild(el("button", {

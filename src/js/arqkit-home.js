@@ -1,10 +1,10 @@
-import { TOOLS, CATEGORIES, toolsInCategory } from "./tools/registry.js?v=13";
+import { TOOLS, CATEGORIES, toolsInCategory } from "./tools/registry.js?v=14";
 import { searchTools } from "./tools/search.js?v=12";
-import { createToolCard, el, iconMarkup, makeIcon, isOpenable } from "./tools/render.js?v=12";
+import { createToolCard, el, iconMarkup, makeIcon, isOpenable } from "./tools/render.js?v=13";
 import { getRecent, recordOpen } from "./tools/stores.js?v=11";
-import { bindThemeToggle, initTheme } from "./theme.js?v=13";
+import { bindThemeToggle, initTheme } from "./theme.js?v=14";
 import { bindDonation } from "./donation.js?v=11";
-import { bindToolDetails, openToolDetails } from "./tools/details.js?v=13";
+import { bindToolDetails, openToolDetails } from "./tools/details.js?v=14";
 import { bindStaticHashRoutes } from "./static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);
