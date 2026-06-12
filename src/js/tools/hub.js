@@ -1,7 +1,7 @@
-import { TOOLS, CATEGORIES, toolsInCategory } from "./registry.js?v=13";
+import { TOOLS, CATEGORIES, toolsInCategory } from "./registry.js?v=14";
 import { searchTools } from "./search.js?v=12";
-import { createToolCard, el, iconMarkup, isOpenable, makeIcon } from "./render.js?v=12";
-import { bindToolDetails, openToolDetails } from "./details.js?v=13";
+import { createToolCard, el, iconMarkup, isOpenable, makeIcon } from "./render.js?v=13";
+import { bindToolDetails, openToolDetails } from "./details.js?v=14";
 import {
   getFavorites,
   isFavorite,
@@ -9,12 +9,11 @@ import {
   getRecent,
   recordOpen,
 } from "./stores.js?v=10";
-import { bindThemeToggle, initTheme } from "../theme.js?v=13";
+import { bindThemeToggle, initTheme } from "../theme.js?v=14";
 import { bindStaticHashRoutes } from "../static-routes.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
-const SECTION_ORDER = ["popular", "pdf", "images", "video", "documents", "security", "ocr", "audio"];
 let state = { query: "", category: "all" };
 
 function showNotice(tool) {
@@ -63,14 +62,13 @@ function grid(tools) {
   return node;
 }
 
-function section(categoryId, tools) {
-  const category = CATEGORIES.find((item) => item.id === categoryId);
-  if (!category || !tools.length) return null;
-  return el("section", { class: "ak-catalog-section", id: category.id }, [
+function group(title, icon, tools, id) {
+  if (!tools.length) return null;
+  return el("section", { class: "ak-catalog-section", id: id || null }, [
     el("div", { class: "ak-section-title" }, [
-      el("span", { html: iconMarkup(category.icon) }),
-      el("h2", { text: category.name }),
-      el("small", { text: `${tools.length} ferramenta(s)` }),
+      el("span", { html: iconMarkup(icon) }),
+      el("h2", { text: title }),
+      el("small", { text: String(tools.length) }),
     ]),
     grid(tools),
   ]);
@@ -96,6 +94,7 @@ function renderChips() {
     }, [
       el("span", { html: iconMarkup(category.icon) }),
       el("span", { text: category.name }),
+      el("span", { class: "count", text: String(toolsInCategory(category.id, TOOLS).length) }),
     ]);
     root.appendChild(chip);
   });
@@ -123,25 +122,6 @@ function renderRecent() {
   });
 }
 
-function renderSearchResults(root) {
-  let tools = searchTools(state.query, TOOLS);
-  if (state.category !== "all") {
-    const allowed = new Set(toolsInCategory(state.category, TOOLS).map((tool) => tool.id));
-    tools = tools.filter((tool) => allowed.has(tool.id));
-  }
-
-  if (!tools.length) {
-    root.appendChild(el("div", { class: "ak-empty" }, [
-      el("strong", { text: "Nenhuma ferramenta encontrada" }),
-      el("span", { text: "Tente termos como PDF, imagem, vídeo, senha, OCR, JPG ou MP4." }),
-    ]));
-    return tools;
-  }
-
-  root.appendChild(section("all", tools) || grid(tools));
-  return tools;
-}
-
 function render() {
   const root = $("#hubSections");
   if (!root) return;
@@ -149,23 +129,40 @@ function render() {
   $("#toolNotice")?.setAttribute("hidden", "");
 
   const query = state.query.trim();
-  let activeTools = [];
+  let activeTools;
 
   if (query) {
-    activeTools = renderSearchResults(root);
-  } else if (state.category !== "all") {
-    activeTools = toolsInCategory(state.category, TOOLS);
-    root.appendChild(section(state.category, activeTools) || grid(activeTools));
-  } else {
-    const favs = getFavorites().map((id) => TOOLS.find((tool) => tool.id === id)).filter(Boolean);
-    if (favs.length) root.appendChild(section("star", favs) || grid(favs));
-    for (const categoryId of SECTION_ORDER) {
-      const tools = toolsInCategory(categoryId, TOOLS);
-      const node = section(categoryId, tools);
-      if (node) root.appendChild(node);
-      activeTools = activeTools.concat(tools);
+    activeTools = searchTools(query, TOOLS);
+    if (state.category !== "all") {
+      const allowed = new Set(toolsInCategory(state.category, TOOLS).map((tool) => tool.id));
+      activeTools = activeTools.filter((tool) => allowed.has(tool.id));
     }
+  } else {
+    activeTools = toolsInCategory(state.category, TOOLS);
   }
+
+  if (!activeTools.length) {
+    root.appendChild(el("div", { class: "ak-empty" }, [
+      el("span", { html: iconMarkup("search") }),
+      el("strong", { text: "Nenhuma ferramenta encontrada" }),
+      el("span", { text: "Tente termos como PDF, imagem, vídeo, senha, OCR, JPG ou MP4." }),
+    ]));
+    currentResults = [];
+    return;
+  }
+
+  if (!query && state.category === "all") {
+    const favs = getFavorites().map((id) => TOOLS.find((tool) => tool.id === id)).filter(Boolean);
+    const favGroup = group("Favoritas", "star", favs, "favoritas");
+    if (favGroup) root.appendChild(favGroup);
+  }
+
+  const ready = activeTools.filter(isOpenable);
+  const soon = activeTools.filter((tool) => !isOpenable(tool));
+  const readyGroup = group("Prontas para usar", "check-circle", ready, "prontas");
+  const soonGroup = group("No roadmap", "clock", soon, "roadmap");
+  if (readyGroup) root.appendChild(readyGroup);
+  if (soonGroup) root.appendChild(soonGroup);
 
   currentResults = activeTools;
 }

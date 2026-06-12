@@ -6,7 +6,7 @@ import { captureFrame, createPageFromBlob, createPagesFromFiles } from "../camer
 import { IMAGE_PRESETS, normalizeRotation } from "../camera/image-editor.js?v=10";
 import { generatePdfFromImagePages } from "../camera/pdf-generator.js?v=10";
 import { formatBytes, safeImageName, setLiveStatus } from "../camera/camera-ui.js?v=10";
-import { bindThemeToggle } from "../theme.js?v=13";
+import { bindThemeToggle } from "../theme.js?v=14";
 import { recordOpen, recordComplete } from "./stores.js?v=10";
 
 const $ = (id) => document.getElementById(id);

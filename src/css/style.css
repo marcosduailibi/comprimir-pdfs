@@ -4,62 +4,131 @@
    ========================================================================= */
 
 :root {
-  --bg: #f4f8fc;
+  /* Neutros (slate) */
+  --bg: #fafbfd;
   --surface: #ffffff;
-  --surface-soft: #f7faff;
-  --text: #0f172a;
-  --muted: #526078;
-  --border: #dce5f2;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-soft: #e8f0ff;
-  --success: #16a34a;
-  --success-soft: #dcfce7;
-  --support: #f59e0b;
-  --support-soft: #fef3c7;
+  --surface-soft: #f5f7fb;
+  --surface-2: #f5f7fb;
+  --surface-3: #eef2f8;
+  --text: #0e1626;
+  --text-2: #34415a;
+  --muted: #64748b;
+  --faint: #94a3b8;
+  --border: #e7ecf3;
+  --border-2: #d7deea;
+  --line: #eef1f6;
+
+  /* Marca */
+  --brand: #1a6dff;
+  --brand-ink: #ffffff;
+  --brand-2: #21c5f0;
+  --brand-soft: #e9f1ff;
+  --brand-strong: #1457e0;
+  --primary: var(--brand);
+  --primary-hover: var(--brand-strong);
+  --primary-soft: var(--brand-soft);
+
+  /* Acentos por categoria (sóbrios) */
+  --c-red: #ef4f5b;     --c-red-bg: #fdeef0;
+  --c-green: #16a45a;   --c-green-bg: #e6f6ee;
+  --c-orange: #e08518;  --c-orange-bg: #fdf1e2;
+  --c-purple: #7c5cf0;  --c-purple-bg: #f0ecfe;
+  --c-teal: #0d9a8b;    --c-teal-bg: #e3f5f2;
+  --c-blue: #1a6dff;    --c-blue-bg: #e9f1ff;
+
+  /* Status */
+  --ok: #16a45a; --ok-bg: #e6f6ee;
+  --warn: #e08518; --warn-bg: #fdf1e2;
+  --info: #1a6dff; --info-bg: #e9f1ff;
+  --soon: #7c5cf0; --soon-bg: #f0ecfe;
+
+  --success: var(--ok);
+  --success-soft: var(--ok-bg);
+  --support: var(--warn);
+  --support-soft: var(--warn-bg);
   --support-ink: #5b3d0a;       /* texto sobre o amarelo VIVO (botão) */
-  --warn-ink: #92400e;          /* texto sobre fundo amarelo SUAVE (avisos) */
-  --danger: #dc2626;
-  --danger-soft: #fee2e2;
-  --track: #e5e9f0;
-  --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 18px rgba(15, 23, 42, 0.05);
-  --radius: 24px;
-  --radius-sm: 14px;
-  --radius-xs: 10px;
+  --warn-ink: #8a5410;          /* texto sobre fundo amarelo SUAVE (avisos) */
+  --danger: #ef4f5b;
+  --danger-soft: #fdeef0;
+  --track: #e7ecf3;
+
+  /* Forma */
+  --r-card: 16px;
+  --r-md: 12px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+  --pad-card: 18px;
+  --gap-grid: 14px;
+  --tool-min: 188px;
+  --radius: var(--r-card);
+  --radius-sm: var(--r-md);
+  --radius-xs: var(--r-sm);
+
+  --shadow-xs: 0 1px 2px rgba(16, 32, 64, .04);
+  --shadow-md: 0 10px 30px rgba(16, 32, 64, .08);
+  --shadow-lg: 0 24px 60px rgba(14, 26, 54, .16);
+  --shadow: var(--shadow-md);
+  --shadow-sm: 0 2px 6px rgba(16, 32, 64, .05), 0 1px 2px rgba(16, 32, 64, .04);
+
+  --ring: 0 0 0 3px color-mix(in srgb, var(--brand) 26%, transparent);
+
+  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 [data-theme="dark"] {
-  --bg: #07111f;
-  --surface: #0d1828;
-  --surface-soft: #111f33;
-  --text: #f8fafc;
-  --muted: #b6c2d6;
-  --border: #22324a;
-  --primary: #2563eb;
-  --primary-hover: #3b82f6;
-  --primary-soft: #16264c;
-  --success: #22c55e;
-  --success-soft: #0f3a2e;
-  --support: #f59e0b;
-  --support-soft: #3a2e0f;
+  --bg: #0a111d;
+  --surface: #111b2b;
+  --surface-soft: #0e1726;
+  --surface-2: #0e1726;
+  --surface-3: #16223a;
+  --text: #f1f5fb;
+  --text-2: #c6d2e6;
+  --muted: #92a2bd;
+  --faint: #6c7c97;
+  --border: #1f2c41;
+  --border-2: #2a3a55;
+  --line: #1a2538;
+
+  --brand: #4f8dff;
+  --brand-ink: #06122a;
+  --brand-soft: #15233f;
+  --brand-strong: #6ea0ff;
+
+  --c-red: #fb7785;     --c-red-bg: #2a151a;
+  --c-green: #3bcb7f;   --c-green-bg: #102a1f;
+  --c-orange: #f0a94a;  --c-orange-bg: #2a2010;
+  --c-purple: #a78bff;  --c-purple-bg: #1f1a36;
+  --c-teal: #2dccba;    --c-teal-bg: #0f2a28;
+  --c-blue: #4f8dff;    --c-blue-bg: #15233f;
+
+  --ok: #3bcb7f; --ok-bg: #102a1f;
+  --warn: #f0a94a; --warn-bg: #2a2010;
+  --info: #4f8dff; --info-bg: #15233f;
+  --soon: #a78bff; --soon-bg: #1f1a36;
+
   --support-ink: #2a1d04;       /* texto sobre o amarelo VIVO (botão) */
-  --warn-ink: #fcd34d;          /* texto sobre fundo amarelo SUAVE (avisos) — claro p/ dark */
-  --danger: #f87171;
-  --danger-soft: #3a1717;
-  --track: #22324a;
-  --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 26px rgba(0, 0, 0, 0.3);
+  --warn-ink: #f6ce8d;          /* texto sobre fundo amarelo SUAVE (avisos) — claro p/ dark */
+  --danger: #fb7785;
+  --danger-soft: #2a151a;
+  --track: #1f2c41;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow-md: 0 14px 34px rgba(0, 0, 0, .42);
+  --shadow-lg: 0 28px 64px rgba(0, 0, 0, .52);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .34);
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.55;
+  line-height: 1.5;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 h1, h2, h3 { color: var(--text); }
 a { color: var(--primary); }
@@ -507,258 +576,6 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
   .tool-card { padding: 20px; }
 }
 
-/* =========================================================================
-   CORREÇÃO DEFINITIVA — logomarca SVG horizontal completa
-   -------------------------------------------------------------------------
-   A logomarca original foi desenhada em um SVG largo (viewBox 0 0 2508 627).
-   Por isso, ela deve ser renderizada como SVG completo no header/rodapé.
-   Não use brand-mark quadrado, brand-icon 280x280 ou texto separado.
-   ========================================================================= */
-
-:root {
-  --logo-ink: #0f172a;
-  --logo-accent: #f2292f;
-}
-
-[data-theme="light"] {
-  --logo-ink: #0f172a;
-  --logo-accent: #f2292f;
-}
-
-[data-theme="dark"] {
-  --logo-ink: #ffffff;
-  --logo-accent: #f2292f;
-}
-
-.brand,
-.site-header .brand,
-.footer-brand .brand,
-.footer-brand .brand--footer {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0 !important;
-  min-width: 0 !important;
-  text-decoration: none !important;
-  color: inherit !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  overflow: visible !important;
-}
-
-/* Classes antigas mantidas só para impedir efeitos residuais caso apareçam no cache/HTML antigo. */
-.brand-mark,
-.brand-icon,
-.brand-text,
-.brand-name {
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-/* SVG horizontal completo. */
-.brand-logo {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  background: transparent !important;
-  overflow: visible !important;
-}
-
-.brand-logo .ink-stroke {
-  stroke: var(--logo-ink) !important;
-  fill: none !important;
-}
-
-.brand-logo .accent-stroke {
-  stroke: var(--logo-accent) !important;
-  fill: none !important;
-}
-
-.brand-logo .ink-fill {
-  fill: var(--logo-ink) !important;
-  stroke: none !important;
-}
-
-/* Header: mantém a marca horizontal e proporcional aos botões. */
-.site-header .header-inner {
-  min-height: clamp(68px, 9vw, 82px) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: clamp(0.45rem, 1.4vw, 1.15rem) !important;
-}
-
-.site-header .brand {
-  width: clamp(150px, 18vw, 230px) !important;
-  flex: 0 0 auto !important;
-  max-width: 30vw !important;
-}
-
-.site-header .brand-logo {
-  width: 100% !important;
-}
-
-.header-actions {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: clamp(0.45rem, 1.3vw, 0.75rem) !important;
-  margin-left: auto !important;
-  flex: 0 0 auto !important;
-}
-
-.theme-toggle,
-.mobile-menu-button,
-.btn--support {
-  flex: 0 0 auto !important;
-}
-
-/* Tablets e celulares: reduzir de forma controlada, sem cortar a logo. */
-@media (max-width: 768px) {
-  .header-inner,
-  .page-shell,
-  .footer-inner {
-    width: min(100% - 18px, 1120px) !important;
-  }
-
-  .site-header .header-inner {
-    min-height: 72px !important;
-    gap: 0.55rem !important;
-  }
-
-  .site-header .brand {
-    width: clamp(126px, 34vw, 150px) !important;
-    max-width: 36vw !important;
-  }
-
-  .github-btn {
-    display: none !important;
-  }
-
-  .hide-sm {
-    display: none !important;
-  }
-
-  .only-sm {
-    display: inline !important;
-  }
-
-  .btn--support {
-    min-height: 50px !important;
-    padding-inline: 0.9rem !important;
-    border-radius: 17px !important;
-    font-size: 1rem !important;
-    line-height: 1 !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 50px !important;
-    height: 50px !important;
-    min-width: 50px !important;
-    border-radius: 16px !important;
-    font-size: 1.22rem !important;
-  }
-}
-
-@media (max-width: 430px) {
-  .site-header .header-inner {
-    gap: 0.48rem !important;
-  }
-
-  .site-header .brand {
-    width: clamp(120px, 32vw, 138px) !important;
-    max-width: 34vw !important;
-  }
-
-  .btn--support {
-    min-height: 48px !important;
-    padding-inline: 0.82rem !important;
-    font-size: 0.96rem !important;
-    border-radius: 16px !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    border-radius: 15px !important;
-    font-size: 1.14rem !important;
-  }
-}
-
-@media (max-width: 390px) {
-  .header-inner,
-  .page-shell,
-  .footer-inner {
-    width: min(100% - 14px, 1120px) !important;
-  }
-
-  .site-header .header-inner {
-    gap: 0.36rem !important;
-  }
-
-  .site-header .brand {
-    width: 116px !important;
-    max-width: 33vw !important;
-  }
-
-  .btn--support {
-    min-height: 44px !important;
-    padding-inline: 0.68rem !important;
-    font-size: 0.88rem !important;
-    border-radius: 14px !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    border-radius: 13px !important;
-    font-size: 1.04rem !important;
-  }
-}
-
-/* Rodapé: a mesma logomarca, centralizada e horizontal. */
-.footer-brand .brand,
-.footer-brand .brand--footer {
-  justify-content: center !important;
-  width: clamp(170px, 32vw, 260px) !important;
-  max-width: 100% !important;
-  flex: 0 0 auto !important;
-  margin-inline: auto !important;
-}
-
-.footer-brand .brand-logo {
-  width: 100% !important;
-  height: auto !important;
-}
-
-.footer-brand p {
-  margin-top: 0.3rem !important;
-  font-size: clamp(0.92rem, 2.6vw, 1.05rem) !important;
-  line-height: 1.45 !important;
-}
-
-.footer-links,
-.footer-legal {
-  display: flex !important;
-  justify-content: center !important;
-  flex-wrap: wrap !important;
-  gap: clamp(0.7rem, 2.2vw, 1.15rem) !important;
-}
-
-.footer-links a,
-.footer-links button,
-.footer-legal button {
-  font-size: clamp(0.92rem, 2.9vw, 1.05rem) !important;
-}
 
 .ak-job-tray {
   position: fixed;
@@ -842,118 +659,6 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
   }
 }
 
-/* =========================================================================
-   AJUSTE FINAL v9 — dark mode legível + logo maior no header
-   -------------------------------------------------------------------------
-   Mantém a logomarca horizontal original em SVG completo e corrige textos
-   gerados dinamicamente que poderiam herdar preto no tema escuro.
-   ========================================================================= */
-
-/* Paleta explícita da logo horizontal completa */
-:root {
-  --logo-ink: #0f172a;
-  --logo-accent: #f2292f;
-}
-
-[data-theme="light"] {
-  --logo-ink: #0f172a;
-  --logo-accent: #f2292f;
-}
-
-[data-theme="dark"] {
-  --logo-ink: #ffffff;
-  --logo-accent: #f2292f;
-}
-
-/* A marca deve ser o SVG horizontal completo, sem bloco, sem fundo e sem recorte. */
-.brand,
-.site-header .brand,
-.footer-brand .brand,
-.footer-brand .brand--footer {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0 !important;
-  min-width: 0 !important;
-  text-decoration: none !important;
-  color: inherit !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  overflow: visible !important;
-}
-
-/* Neutraliza classes antigas caso ainda existam no HTML/cache. */
-.brand-mark,
-.brand-icon,
-.brand-text,
-.brand-name {
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-/* Se o HTML atual já usa o SVG completo, essas regras controlam seu tamanho e tema. */
-.brand-logo {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  background: transparent !important;
-  overflow: visible !important;
-}
-
-.brand-logo .ink-stroke {
-  stroke: var(--logo-ink) !important;
-  fill: none !important;
-}
-
-.brand-logo .accent-stroke {
-  stroke: var(--logo-accent) !important;
-  fill: none !important;
-}
-
-.brand-logo .ink-fill {
-  fill: var(--logo-ink) !important;
-  stroke: none !important;
-}
-
-/* Header: logo maior, mais próxima do peso visual dos botões do lado direito. */
-.site-header .header-inner {
-  min-height: clamp(74px, 8vw, 90px) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: clamp(0.55rem, 1.5vw, 1.2rem) !important;
-}
-
-.site-header .brand {
-  width: clamp(220px, 22vw, 300px) !important;
-  max-width: 34vw !important;
-  flex: 0 0 auto !important;
-}
-
-.site-header .brand-logo {
-  width: 100% !important;
-  height: auto !important;
-  max-height: 66px !important;
-}
-
-.header-actions {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: clamp(0.5rem, 1.3vw, 0.8rem) !important;
-  margin-left: auto !important;
-  flex: 0 0 auto !important;
-}
-
-.theme-toggle,
-.mobile-menu-button,
-.btn--support {
-  flex: 0 0 auto !important;
-}
 
 /* Dark mode: corrige textos pretos em cards/botões gerados pelo JS. */
 .mode,
@@ -1090,151 +795,6 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
   color: var(--primary-hover) !important;
 }
 
-/* Telas médias: o botão GitHub some antes da logo precisar encolher demais. */
-@media (max-width: 1100px) {
-  .header-actions .github-btn {
-    display: none !important;
-  }
-
-  .site-header .brand {
-    width: clamp(205px, 25vw, 270px) !important;
-    max-width: 38vw !important;
-  }
-}
-
-/* Mobile: logo maior, mas ainda cabendo com Apoiar + tema + menu. */
-@media (max-width: 768px) {
-  .header-inner,
-  .page-shell,
-  .footer-inner {
-    width: min(100% - 18px, 1120px) !important;
-  }
-
-  .site-header .header-inner {
-    min-height: 74px !important;
-    gap: 0.5rem !important;
-  }
-
-  .site-header .brand {
-    width: clamp(160px, 41vw, 195px) !important;
-    max-width: 42vw !important;
-    flex-shrink: 0 !important;
-  }
-
-  .site-header .brand-logo {
-    width: 100% !important;
-    height: auto !important;
-  }
-
-  .github-btn {
-    display: none !important;
-  }
-
-  .hide-sm {
-    display: none !important;
-  }
-
-  .only-sm {
-    display: inline !important;
-  }
-
-  .btn--support {
-    min-height: 50px !important;
-    padding-inline: 0.9rem !important;
-    border-radius: 17px !important;
-    font-size: 1rem !important;
-    line-height: 1 !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 50px !important;
-    height: 50px !important;
-    min-width: 50px !important;
-    border-radius: 16px !important;
-    font-size: 1.22rem !important;
-  }
-}
-
-@media (max-width: 430px) {
-  .site-header .header-inner {
-    gap: 0.44rem !important;
-  }
-
-  .site-header .brand {
-    width: clamp(150px, 39vw, 170px) !important;
-    max-width: 40vw !important;
-  }
-
-  .btn--support {
-    min-height: 48px !important;
-    padding-inline: 0.78rem !important;
-    font-size: 0.96rem !important;
-    border-radius: 16px !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    border-radius: 15px !important;
-    font-size: 1.14rem !important;
-  }
-}
-
-@media (max-width: 390px) {
-  .header-inner,
-  .page-shell,
-  .footer-inner {
-    width: min(100% - 14px, 1120px) !important;
-  }
-
-  .site-header .header-inner {
-    gap: 0.34rem !important;
-  }
-
-  .site-header .brand {
-    width: 144px !important;
-    max-width: 39vw !important;
-  }
-
-  .btn--support {
-    min-height: 46px !important;
-    padding-inline: 0.62rem !important;
-    font-size: 0.9rem !important;
-    border-radius: 14px !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 46px !important;
-    height: 46px !important;
-    min-width: 46px !important;
-    border-radius: 13px !important;
-    font-size: 1.04rem !important;
-  }
-}
-
-@media (max-width: 350px) {
-  .site-header .brand {
-    width: 128px !important;
-    max-width: 38vw !important;
-  }
-
-  .btn--support {
-    min-height: 44px !important;
-    padding-inline: 0.52rem !important;
-    font-size: 0.84rem !important;
-  }
-
-  .theme-toggle,
-  .mobile-menu-button {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-  }
-}
 
 @media (max-width: 520px) {
   .ak-job-tray {

@@ -7,12 +7,12 @@ export const LEGACY_THEME_KEY = "comprimirpdf-theme";
 const JOB_STORE_KEY = "arqkit.activeJobs.v1";
 
 // Ícones do header (SVG inline, herdam a cor via currentColor).
-const SUPPORT_ICON =
-  '<svg class="support-button__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 const THEME_ICON_MOON =
-  '<svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  '<svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>';
 const THEME_ICON_SUN =
-  '<svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+  '<svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MENU_ICON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
 
 export function normalizeTheme(value) {
   return value === "dark" || value === "light" ? value : null;
@@ -101,7 +101,6 @@ function normalizeGlobalUi(doc = globalThis.document) {
 function normalizeHeader(doc) {
   const header = doc.querySelector(".site-header");
   if (!header) return;
-  header.querySelectorAll(".github-btn").forEach((node) => node.remove());
   header.querySelectorAll(".site-nav a").forEach((link) => {
     const text = link.textContent.trim().toLowerCase();
     if (text === "inicio") link.textContent = "Início";
@@ -113,18 +112,9 @@ function normalizeHeader(doc) {
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
-  let support = actions.querySelector(".btn--support, .support-button");
-  if (!support) {
-    support = doc.createElement("a");
-    actions.insertBefore(support, actions.firstChild);
-  }
-  support.className = "btn btn--support support-button";
-  // Em <a> mantemos o destino (#apoie); em <button data-open-pix> preservamos o
-  // comportamento de modal — não criar expando href.
-  if (support.tagName === "A") {
-    support.href = support.getAttribute("href") || "./#apoie";
-  }
-  support.innerHTML = `${SUPPORT_ICON}<span class="support-button__label">Apoiar</span>`;
+  // O redesign trocou o pill "Apoiar" por um link na navegação; remove
+  // resquícios do botão em markup antigo/cacheado.
+  actions.querySelectorAll(".btn--support, .support-button").forEach((node) => node.remove());
 
   const themeButton = actions.querySelector("#themeToggle");
   if (themeButton) {
@@ -135,7 +125,7 @@ function normalizeHeader(doc) {
 
   const navButton = actions.querySelector("#navToggle");
   if (navButton) {
-    navButton.textContent = "Menu";
+    navButton.innerHTML = MENU_ICON;
     navButton.setAttribute("aria-label", "Abrir menu");
   }
 }
